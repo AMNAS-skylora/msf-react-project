@@ -16,7 +16,7 @@ const toDataURL = file => new Promise((resolve, reject) => {
 });
 
 const splitName = value => {
-  const name=String(value||'').trim().replace(/\\s+/g,' ');
+  const name=String(value||'').trim().replace(/\s+/g,' ');
   if(name.length<=15||!name.includes(' '))return [name,''];
   const words=name.split(' ');
   let best=1,score=Infinity;
