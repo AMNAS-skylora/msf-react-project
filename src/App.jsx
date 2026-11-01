@@ -114,10 +114,10 @@ export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
-  const [jointGroups,setJointGroups]=useState({'Vice Presidents':[],'Joint Secretaries':[]});
+  const [jointGroups,setJointGroups]=useState({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});
   const [jointReady,setJointReady]=useState(false);
   const [jointRole,setJointRole]=useState('Joint Secretaries');
-  const groupNames=['Vice Presidents','Joint Secretaries'];
+  const groupNames=['Vice Presidents','Joint Secretaries','Executive Members'];
   const changeGroup=role=>{setJointGroups(g=>({...g,[jointRole]:joint}));setJointRole(role);setJoint(jointGroups[role]||[]);setJointSelected(null);};
   const jointUploads=useRef([]);
   const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
@@ -190,7 +190,7 @@ export default function App() {
     const request=indexedDB.open('msf-poster-editor',1);
     request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft','readwrite');tx.objectStore('draft').put(people,'leadership');tx.oncomplete=()=>db.close();};
   },[people,ready]);
-  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){const groups=saved.groups||{'Vice Presidents':[], 'Joint Secretaries':[]};if(Array.isArray(saved.members))groups[saved.role==='Joint Presidents'?'Vice Presidents':(saved.role||'Joint Secretaries')]=saved.members;setJointGroups(groups);setJoint(groups['Joint Secretaries']||[]);setJointRole('Joint Secretaries');}}catch{}setJointReady(true);},[]);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){const groups=saved.groups||{'Vice Presidents':[], 'Joint Secretaries':[], 'Executive Members':[]};if(Array.isArray(saved.members))groups[saved.role==='Joint Presidents'?'Vice Presidents':(saved.role||'Joint Secretaries')]=saved.members;setJointGroups(groups);setJoint(groups['Joint Secretaries']||[]);setJointRole('Joint Secretaries');}}catch{}setJointReady(true);},[]);
   useEffect(()=>{if(!jointReady)return;const groups={...jointGroups,[jointRole]:joint};try{localStorage.setItem('msf-joint-members',JSON.stringify({groups}));}catch{}},[joint,jointRole,jointGroups,jointReady]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
@@ -270,7 +270,7 @@ export default function App() {
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
         <div className="joint-sections">
-          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className="joint-poster-section" key={role}>
+          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")} key={role}>
             <h2>{role.toUpperCase()}</h2>
             {jointRows(members.length).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
               <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
@@ -317,7 +317,7 @@ export default function App() {
           <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
           <h3>{jointRole}</h3>
           <p>{joint.length} members · Newest member appears first</p>
-          <button type="button" onClick={()=>setJoint(v=>[{name:'',photo:'',nameLayout:'auto',boldLine:'both'},...v])}>+ Add Member</button>
+          <button type="button" className="add-member-button" onClick={()=>setJoint(v=>[{name:'',photo:'',nameLayout:'auto',boldLine:'both'},...v])}>+ Add Member</button>
           {joint.map((p,i)=><div className="joint-editor-member" key={i}>
             <div className="joint-editor-heading"><strong>Member {i+1}</strong><div className="joint-order-actions"><button type="button" disabled={i===0} onClick={()=>moveJoint(i,i-1)} aria-label="Move member left">←</button><button type="button" disabled={i===joint.length-1} onClick={()=>moveJoint(i,i+1)} aria-label="Move member right">→</button><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null);setMessage('Member removed.')}}>Remove</button></div></div>
             <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt="Uploaded member portrait"/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
