@@ -151,3 +151,13 @@
 .joint-sections .joint-member-name span{font-size:clamp(6px,1.35vw,14px);font-weight:800;color:#0b394c;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .joint-sections .joint-crop-button{right:0;top:0}
 @media(max-width:600px){.joint-sections{top:11%;left:7%;right:7%;gap:7px}.joint-sections .joint-poster-section{gap:5px}.joint-sections .joint-poster-section h2{font-size:clamp(7px,2.1vw,12px)}.joint-sections .joint-poster-section h2::before,.joint-sections .joint-poster-section h2::after{height:2px}.joint-sections .joint-poster-row{gap:2.5%}.joint-sections .joint-poster-member{flex-basis:18%;max-width:18%}.joint-sections .joint-member-name span{font-size:clamp(5px,1.7vw,9px)}}
+
+/* Executive Members: compact rows like the supplied reference, and yellow Add Member action. */
+.joint-group-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.joint-group-tabs button{min-width:0;overflow-wrap:anywhere}
+.joint-editor .add-member-button{background:#f6c847;border:1px solid #d9a925;color:#2b2919;font-weight:800}
+.joint-editor .add-member-button:hover{background:#f4d36d}
+.joint-sections .executive-poster-section .joint-poster-row{gap:1.8%}
+.joint-sections .executive-poster-section .joint-poster-member{flex:0 1 18%;max-width:18%}
+.joint-sections .executive-poster-section .joint-square{border-radius:3px}
+@media(max-width:600px){.joint-group-tabs{grid-template-columns:1fr 1fr}.joint-group-tabs button{font-size:11px}}
