@@ -260,3 +260,12 @@
 .poster-malayalam-title .line-1{font-size:clamp(13px,3.3vw,38px);color:#116d74}
 .poster-malayalam-title .line-2{font-size:clamp(16px,4.1vw,46px);color:#07854b}
 @media(max-width:600px){.poster-msf-heading{top:.8%;left:15%;right:3%;height:9.8%;gap:1%}.poster-msf-logo{font-size:clamp(31px,10vw,64px)}.poster-malayalam-title .line-1{font-size:clamp(11px,3.25vw,22px)}.poster-malayalam-title .line-2{font-size:clamp(14px,4vw,27px)}}
+
+/* Stronger Malayalam title with intentional separation from the MSF logo. */
+.poster-msf-heading{left:13%;right:3%;gap:4%;align-items:center}
+.poster-msf-logo{flex:0 0 auto;margin-right:2%;font-size:clamp(32px,10vw,108px)}
+.poster-malayalam-title{min-width:0;flex:1;font-family:'Noto Sans Malayalam','Nirmala UI',sans-serif;font-weight:900;line-height:1.04;letter-spacing:-.035em;-webkit-text-stroke:.35px currentColor}
+.poster-malayalam-title .malayalam-heading-line{font-weight:900;line-height:1.12;text-shadow:.35px 0 currentColor,-.35px 0 currentColor}
+.poster-malayalam-title .line-1{font-size:clamp(15px,3.7vw,42px)}
+.poster-malayalam-title .line-2{font-size:clamp(18px,4.6vw,52px)}
+@media(max-width:600px){.poster-msf-heading{left:13%;right:2%;gap:3%}.poster-msf-logo{font-size:clamp(31px,9.5vw,60px);margin-right:2%}.poster-malayalam-title .line-1{font-size:clamp(12px,3.5vw,24px)}.poster-malayalam-title .line-2{font-size:clamp(15px,4.4vw,30px)}}
