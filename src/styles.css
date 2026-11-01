@@ -245,3 +245,9 @@
 .joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{flex:1 1 auto;width:3px;min-height:6px;background:#087e36}
 .joint-sections .executive-poster-section > h2 .committee-heading-pill{box-sizing:border-box;max-height:calc(100% - 12px);padding:10px 5px;border:2px solid #fff;border-radius:999px;background:#078c35;box-shadow:0 2px 4px #064a2840;font-family:Arial,sans-serif;font-size:clamp(8px,1.55vw,17px);font-weight:900;line-height:1.15;letter-spacing:0;writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
 @media(max-width:600px){.joint-sections .executive-poster-section{padding-left:9%}.joint-sections .executive-poster-section > h2{width:7.5%}.joint-sections .executive-poster-section > h2 .committee-heading-pill{font-size:clamp(7px,1.6vw,11px);padding:7px 3px;border-width:1px}}
+
+/* Keep the entire EXECUTIVE MEMBERS label inside the green pill, with green line above and below. */
+.joint-sections .executive-poster-section > h2{overflow:visible;min-height:0;gap:0}
+.joint-sections .executive-poster-section > h2 .committee-heading-pill{flex:0 1 auto;box-sizing:border-box;max-height:100%;min-height:0;overflow:hidden;padding:6px 3px;font-size:clamp(6px,.9vw,10px);line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{flex:1 1 0;min-height:5px;width:3px}
+@media(max-width:600px){.joint-sections .executive-poster-section > h2 .committee-heading-pill{font-size:6px;padding:5px 2px;letter-spacing:-.035em}.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{min-height:4px}}
