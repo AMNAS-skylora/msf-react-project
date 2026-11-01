@@ -65,3 +65,26 @@
 .name-lines .is-bold{font-weight:800}
 .name-lines .is-regular{font-weight:400}
 @media(max-width:850px){.name-lines span{font-size:clamp(7px,2.5vw,20px)}}
+
+/* Joint committee: fixed square portraits, no free dragging */
+.joint-poster-section{position:absolute;left:4%;right:4%;top:16%;z-index:4;text-align:center;pointer-events:auto}
+.joint-poster-section h2{font-size:clamp(12px,2.5vw,26px);font-weight:900;color:#086a38;margin:0 0 2%;letter-spacing:.035em}
+.joint-poster-row{display:flex;justify-content:center;gap:2%;margin-bottom:2%}
+.joint-poster-member{flex:0 1 18%;min-width:0;position:relative}
+.joint-square{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e1f1e6;border:2px solid #0b713c;border-radius:5px;padding:0;color:#086a38;touch-action:manipulation}
+.joint-square img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.joint-crop-button{position:absolute;right:0;top:0;display:flex;align-items:center;gap:3px;border:0;border-radius:5px;background:white;color:#086a38;font-size:11px;padding:5px;z-index:5}
+.joint-member-name{display:flex;flex-direction:column;line-height:1.1;align-items:center;margin-top:4px;min-width:0}
+.joint-member-name span{font-size:clamp(6px,1.25vw,13px);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.joint-editor{border-top:2px solid #dce9df;padding-top:20px;margin-top:18px}
+.joint-editor h2{font-size:19px}
+.joint-editor>label,.joint-editor-member label{display:grid;gap:6px;font-size:13px;font-weight:600;margin:10px 0}
+.joint-editor select,.joint-editor-member select{width:100%;padding:10px;border:1px solid #cbdcd0;border-radius:8px;background:white}
+.joint-editor>button{border:1px solid #0b713c;background:#eaf5ed;color:#0b713c;border-radius:8px;padding:10px 14px}
+.joint-editor>button:disabled{opacity:.5}
+.joint-editor-member{border-top:1px solid #e1eae4;padding:12px 0}
+.joint-editor-heading{display:flex;justify-content:space-between;align-items:center}
+.joint-editor-heading button{background:transparent;border:0;color:#a22}
+.touch-crop.square-crop{aspect-ratio:1/1;height:auto;max-height:min(60dvh,340px)}
+.square-crop .crop-selection{border-radius:0}
+@media(max-width:600px){.joint-poster-section h2{font-size:clamp(9px,3vw,18px)}.joint-member-name span{font-size:clamp(5px,1.6vw,10px)}}
