@@ -3,6 +3,7 @@ import { ArrowUpRight, Menu, X } from 'lucide-react';
 
 const links = [
   { href: '#home', title: 'Home' },
+  { href: '#poster', title: 'Poster' },
   { href: '#leadership', title: 'Leadership' },
   { href: '#committee', title: 'Committee' },
   { href: '#about', title: 'About' },

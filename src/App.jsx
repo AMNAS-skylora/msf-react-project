@@ -5,6 +5,7 @@ import Hero from './components/Hero.jsx';
 import SectionHeading from './components/SectionHeading.jsx';
 import MemberCard from './components/MemberCard.jsx';
 import Footer from './components/Footer.jsx';
+import PosterBackground from './components/PosterBackground.jsx';
 import { GROUPS, MEMBERS, imageUrl } from './data/committee.js';
 import { useStoredPhotos } from './hooks/useStoredPhotos.js';
 import { blobToDataUrl, downloadPhoto, fileToOptimizedDataUrl } from './utils/photos.js';
@@ -96,6 +97,7 @@ export default function App() {
       <Header />
       <main>
         <Hero totalMembers={MEMBERS.length} />
+        <PosterBackground />
         <section className="section" id="leadership" aria-label="Unit leadership">
           <div className="container">
             <SectionHeading number="01" eyebrow="OFFICE BEARERS" title="Our" emphasis="Leadership" subtitle="Meet the elected office bearers of the unit committee." />

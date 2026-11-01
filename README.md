@@ -51,3 +51,9 @@ Only delete npm proxy config when the network does not require a proxy.
 
 ## Publishing notes
 Portraits were cropped from a supplied poster. Confirm names, titles, and photo permissions. This project has no authentication/backend. Client-side photo edits are not shared with visitors.
+
+## Reusable clean poster background
+- `public/assets/msf-poster-background.webp` is an **empty** green background asset (no people, MSF logo, names, or writing).
+- The home hero uses the same visual theme.
+- The **Poster** section displays a clean portrait canvas and offers a download of just the background image, ready for future member lists or other posters.
+- To use a different background, replace that file and keep the filename, or update the URL in `src/components/PosterBackground.jsx` and `src/styles.css`.
