@@ -5,12 +5,18 @@ import './styles.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
-  if(text.includes('\n')) {const parts=text.split('\n');return [parts[0].trim(),parts.slice(1).join(' ').trim()];}
+  if(text.includes('\n')) {
+    const [first,...rest]=text.split('\n');
+    return [first.trim(),rest.join(' ').trim()];
+  }
   const words=text.split(/\s+/).filter(Boolean);
   if(words.length<2)return [text,''];
-  const last=words.slice(-2).join(' ');
-  const first=words.slice(0,-2).join(' ');
-  return first?[first,last]:[words[0],words.slice(1).join(' ')];
+  let split=1,difference=Infinity;
+  for(let i=1;i<words.length;i++){
+    const delta=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);
+    if(delta<difference){difference=delta;split=i;}
+  }
+  return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
 const INITIAL = [
   { role: 'President', member: MEMBERS.find(m => m.role === 'President') },
@@ -236,7 +242,7 @@ export default function App() {
       const bg=await loadImage(`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`);
       ctx.drawImage(bg,0,0,1050,1472);
       ctx.textAlign='left';ctx.fillStyle='#07577d';ctx.font='bold 134px Georgia';ctx.fillText('msf',175,133);
-      const headingLines=splitMalayalamHeading(headerText);ctx.fillStyle='#087d48';ctx.textAlign='left';for(let h=0;h<headingLines.length;h++){const line=headingLines[h];fitText(ctx,line,585,h===1?59:47,'900');ctx.font=ctx.font.replace('Arial','"Noto Sans Malayalam",sans-serif');ctx.fillText(line,438,65+h*62,585);}
+      const headingLines=splitMalayalamHeading(headerText);ctx.fillStyle='#087d48';ctx.textAlign='center';for(let h=0;h<headingLines.length;h++){const line=headingLines[h];fitText(ctx,line,620,56,'900');ctx.font=ctx.font.replace('Arial','"Noto Sans Malayalam",sans-serif');ctx.fillText(line,718,65+h*62,620);}
       for(let i=0;i<3;i++){
         const p=people[i],pos=position(p,i);
         try{
