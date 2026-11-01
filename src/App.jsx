@@ -117,7 +117,7 @@ export default function App() {
   const [jointRole,setJointRole]=useState('Joint Secretaries');
   const jointUploads=useRef([]);
   const [jointSelected,setJointSelected]=useState(null);
-  const jointRows=n=>n<=5?[n]:[Math.ceil(n/2),Math.floor(n/2)];
+  const jointRows=n=>n<=5?[n]:[5,n-5];
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
 
