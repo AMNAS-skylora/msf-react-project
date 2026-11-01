@@ -87,8 +87,29 @@ function CropDialog({ src, onSave, onClose }) {
   </div>;
 }
 export default function App() {
-  const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false})));
+  const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [ready,setReady]=useState(false);
+  const [selected,setSelected]=useState(null);
+  const [clipboard,setClipboard]=useState(null);
+  const drag=useRef(null);
+  const frameRef=useRef(null);
+  const position=(p,i)=>({x:p.x??(8+i*30),y:p.y??63,w:p.w??27});
+  function dragStart(e,i){
+    if(!people[i].photo)return;
+    e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);
+    setSelected(i);
+    drag.current={id:e.pointerId,i,startX:e.clientX,startY:e.clientY,...position(people[i],i)};
+  }
+  function dragMove(e){
+    const d=drag.current;if(!d||d.id!==e.pointerId)return;
+    const bounds=frameRef.current?.getBoundingClientRect();if(!bounds)return;
+    const dx=(e.clientX-d.startX)/bounds.width*100,dy=(e.clientY-d.startY)/bounds.height*100;
+    update(d.i,{x:Math.max(0,Math.min(100-d.w,d.x+dx)),y:Math.max(0,Math.min(90,d.y+dy))});
+  }
+  function dragEnd(e){if(drag.current?.id===e.pointerId)drag.current=null;}
+  function copyPhoto(i){const p=people[i];setClipboard({photo:p.photo,w:position(p,i).w});setMessage('Photo copied. Select a person and tap Paste.');}
+  function pastePhoto(i){if(!clipboard)return;update(i,{photo:clipboard.photo,w:clipboard.w});setSelected(i);setMessage('Photo pasted.');}
+
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
@@ -114,7 +135,7 @@ export default function App() {
   },[people,ready]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
-    setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false})));
+    setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
     setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
@@ -144,17 +165,17 @@ export default function App() {
       const bg=await loadImage(`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`);
       ctx.drawImage(bg,0,0,1050,1472);
       for(let i=0;i<3;i++){
-        const p=people[i], x=90+i*305, y=930;
-        try {
+        const p=people[i],pos=position(p,i);
+        try{
           const img=await loadImage(p.photo);
-          const scale=Math.min(280/img.width,420/img.height);
-          const w=img.width*scale,h=img.height*scale;
-          ctx.drawImage(img,x+(280-w)/2,y+420-h,w,h);
+          const w=pos.w*10.5,h=w*img.height/img.width;
+          ctx.drawImage(img,pos.x*10.5,pos.y*14.72,w,h);
         }catch{}
+        const x=90+i*305;
         ctx.fillStyle='#08763c';ctx.fillRect(x-8,1350,296,88);
         ctx.textAlign='center';ctx.fillStyle='white';
-        ctx.font='bold 21px Arial';ctx.fillText(p.role.toUpperCase(),x+140,1380);
-        ctx.font='bold 32px Arial';ctx.fillText(p.name.toUpperCase(),x+140,1417,280);
+        ctx.font='bold 16px Arial';ctx.fillText(p.role.toUpperCase(),x+140,1375);
+        ctx.font='bold 38px Arial';ctx.fillText(p.name.toUpperCase(),x+140,1418,280);
       }
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
       if(!blob)throw new Error('Export failed');
@@ -166,18 +187,29 @@ export default function App() {
   return <main className="app-shell">
     <div className="editor-bar"><div><strong>MSF Poster Creator</strong><span>Step 1 · Leadership portraits</span></div><button onClick={download}><Download size={17}/> Download PNG</button></div>
     <div className="workspace">
-      <section className="frame" aria-label="MSF poster frame">
+      <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
-        <div className="portrait-row">{people.map((p,i)=><div className="poster-person" key={p.role}>
-          <div className="poster-photo">{p.photo&&<img src={p.photo} alt={p.name}/>}</div>
-          <div className="poster-name"><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>
-        </div>)}</div>
+        {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
+          style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%'}}
+          onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd}>
+          <img src={p.photo} alt={p.name} draggable={false}/>
+          {selected===i&&<span className="photo-selection-handle" aria-hidden="true"/>}
+        </div>})}
+        <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>)}</div>
       </section>
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <label>Name<input value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
+          <div className="position-controls">
+            <label>Size <input type="range" min="10" max="60" value={position(p,i).w} onChange={e=>update(i,{w:Number(e.target.value)})}/></label>
+            <label>Horizontal <input type="range" min="0" max="90" value={position(p,i).x} onChange={e=>update(i,{x:Number(e.target.value)})}/></label>
+            <label>Vertical <input type="range" min="0" max="90" value={position(p,i).y} onChange={e=>update(i,{y:Number(e.target.value)})}/></label>
+          </div>
           <div className="actions">
+            <button type="button" onClick={()=>copyPhoto(i)} disabled={!p.photo}>Copy</button>
+            <button type="button" onClick={()=>pastePhoto(i)} disabled={!clipboard}>Paste</button>
+            <button type="button" onClick={()=>setSelected(selected===i?null:i)}>{selected===i?'Done':'Position'}</button>
             <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload</button>
             <button onClick={()=>setCrop({i,src:p.photo})} disabled={!p.photo}><Scissors size={16}/> Crop</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
