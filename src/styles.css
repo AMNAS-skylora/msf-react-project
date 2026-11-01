@@ -45,3 +45,7 @@
 .crop-handle{pointer-events:none}
 .crop-actions{position:relative;z-index:20;background:#fff}
 @media(max-width:600px){.touch-crop{width:min(100%,340px);max-height:calc(100dvh - 220px);flex:1 1 auto}.crop-dialog{overflow:hidden}}
+
+.photo-toolbar{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);display:flex;gap:4px;background:white;padding:5px;border-radius:10px;box-shadow:0 4px 15px #0003;z-index:20;white-space:nowrap;line-height:normal;touch-action:manipulation}
+.photo-toolbar button{border:0;background:transparent;color:#153b2a;padding:9px;font-size:12px;font-weight:700;min-height:36px;border-radius:7px;touch-action:manipulation}
+.photo-toolbar button:focus-visible{outline:2px solid #087b3d}
