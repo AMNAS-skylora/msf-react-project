@@ -97,7 +97,7 @@ export default function App() {
       <Header />
       <main>
         <Hero totalMembers={MEMBERS.length} />
-        <PosterBackground />
+        <PosterBackground photos={photos} />
         <section className="section" id="leadership" aria-label="Unit leadership">
           <div className="container">
             <SectionHeading number="01" eyebrow="OFFICE BEARERS" title="Our" emphasis="Leadership" subtitle="Meet the elected office bearers of the unit committee." />
