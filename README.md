@@ -37,6 +37,9 @@ Click **Edit photos** in the Committee section, then use card actions to upload,
 
 Modify `src/data/members.json` to edit names and roles (`leadership`, `vice`, `joint`, `executive`). Image paths are relative to `public/`.
 
+## Fix missing ONNX Runtime dependency
+The `@imgly/background-removal` library requires `onnxruntime-web@1.21.0` as a peer dependency. It is now declared in `package.json`. The old `package-lock.json` used Vite 7 and did not contain ONNX Runtime, so it was removed. Running `npm install` generates a fresh lockfile; commit the regenerated lockfile after verifying installation. Do not use `npm ci` until a new lockfile exists.
+
 ## ECONNRESET
 `npm install` may fail because the connection to registry.npmjs.org resets. Check internet connectivity, then try:
 ```bash
