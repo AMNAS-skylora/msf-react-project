@@ -23,17 +23,20 @@ function CropDialog({ src, onSave, onClose }) {
   const [offset, setOffset] = useState({x:0,y:0});
   const [busy, setBusy] = useState(false);
   function pointerDown(e) {
+    e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const rect=e.currentTarget.getBoundingClientRect();
     const px=(e.clientX-rect.left)/rect.width*100,py=(e.clientY-rect.top)/rect.height*100;
-    const threshold=7;
+    const threshold=9;
     const edgeX=Math.abs(px-box.x)<threshold?'left':Math.abs(px-box.x-box.w)<threshold?'right':null;
     const edgeY=Math.abs(py-box.y)<threshold?'top':Math.abs(py-box.y-box.h)<threshold?'bottom':null;
-    gesture.current={startX:e.clientX,startY:e.clientY,box:{...box},offset:{...offset},zoom,edgeX,edgeY,mode:edgeX||edgeY?'resize':'move'};
+    const inside=px>=box.x&&px<=box.x+box.w&&py>=box.y&&py<=box.y+box.h;
+    gesture.current={startX:e.clientX,startY:e.clientY,box:{...box},offset:{...offset},zoom,edgeX,edgeY,mode:edgeX||edgeY?'resize':inside?'move-photo':'move-photo'};
   }
   function pointerMove(e) {
     if(!pointers.current.has(e.pointerId)||!gesture.current)return;
+    e.preventDefault();
     pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const rect=e.currentTarget.getBoundingClientRect();
     const g=gesture.current;
@@ -41,7 +44,7 @@ function CropDialog({ src, onSave, onClose }) {
       const pts=[...pointers.current.values()];
       const distance=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
       if(!g.pinchDistance){g.pinchDistance=distance;g.pinchZoom=zoom;}
-      setZoom(Math.max(1,Math.min(4,g.pinchZoom*distance/g.pinchDistance)));
+      setZoom(Math.max(1,Math.min(5,g.pinchZoom*distance/g.pinchDistance)));
       return;
     }
     const dx=(e.clientX-g.startX)/rect.width*100,dy=(e.clientY-g.startY)/rect.height*100;
@@ -60,15 +63,17 @@ function CropDialog({ src, onSave, onClose }) {
     try{
       const img=await loadImage(src);
       const stage=canvasRef.current;
-      const width=stage.clientWidth,height=stage.clientHeight;
+      const {width,height}=stage.getBoundingClientRect();
+      if(!width||!height)throw new Error("Crop preview unavailable");
       const output=document.createElement('canvas');
-      output.width=700;output.height=Math.round(700*(box.h*height)/(box.w*width));
+      output.width=900;output.height=Math.max(1,Math.round(900*(box.h*height)/(box.w*width)));
       const ctx=output.getContext('2d');
       const base=Math.max(width/img.width,height/img.height)*zoom;
       const iw=img.width*base,ih=img.height*base;
       const left=(width-iw)/2+offset.x*width/100,top=(height-ih)/2+offset.y*height/100;
       const cropX=box.x*width/100,cropY=box.y*height/100;
       const scale=output.width/(box.w*width/100);
+      ctx.clearRect(0,0,output.width,output.height);
       ctx.drawImage(img,(left-cropX)*scale,(top-cropY)*scale,iw*scale,ih*scale);
       onSave(output.toDataURL('image/png'));
     }catch{alert('Unable to crop this image.');}finally{setBusy(false);}
@@ -81,7 +86,7 @@ function CropDialog({ src, onSave, onClose }) {
           <div className="crop-grid"/>{['tl','tr','bl','br'].map(k=><span key={k} className={'crop-handle '+k}/>)}
         </div>
       </div>
-      <label>Zoom <input type="range" min="1" max="4" step=".05" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/></label>
+      <label>Zoom <input type="range" min="1" max="5" step=".05" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/></label>
       <div className="crop-actions"><button type="button" onClick={onClose}>Cancel</button><button type="button" className="crop-apply" disabled={busy} onClick={save}>{busy?'Cropping…' :'Done'}</button></div>
     </div>
   </div>;
