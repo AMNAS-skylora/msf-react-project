@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Download, WandSparkles } from 'lucide-react';
+import { Camera, Copy, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import './styles.css';
 
@@ -222,9 +222,9 @@ export default function App() {
           <img src={p.photo} alt={p.name} draggable={false}/>
           {selected===i&&<>
             <div className="photo-toolbar" onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}>
-              <button type="button" onClick={e=>{e.stopPropagation();copyPhoto(i)}}>Copy</button>
-              <button type="button" onClick={e=>{e.stopPropagation();setCrop({i,src:p.photo})}}>Crop</button>
-              <button type="button" onClick={e=>{e.stopPropagation();editName(i)}}>Name</button>
+              <button type="button" onClick={e=>{e.stopPropagation();copyPhoto(i)}} aria-label="Copy photo" title="Copy"><Copy size={17}/></button>
+              <button type="button" onClick={e=>{e.stopPropagation();setCrop({i,src:p.photo})}} aria-label="Crop photo" title="Crop"><Crop size={17}/></button>
+              <button type="button" onClick={e=>{e.stopPropagation();editName(i)}} aria-label="Edit name" title="Edit name"><Pencil size={17}/></button>
               <button type="button" aria-label="Close photo tools" onClick={e=>{e.stopPropagation();setSelected(null)}}>×</button>
             </div>
             <span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>
