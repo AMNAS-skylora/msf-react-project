@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Download, Scissors, WandSparkles } from 'lucide-react';
+import { Camera, Download, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import './styles.css';
 
@@ -86,7 +86,6 @@ function CropDialog({ src, onSave, onClose }) {
           <div className="crop-grid"/>{['tl','tr','bl','br'].map(k=><span key={k} className={'crop-handle '+k}/>)}
         </div>
       </div>
-      <label>Zoom <input type="range" min="1" max="5" step=".05" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/></label>
       <div className="crop-actions"><button type="button" onClick={onClose}>Cancel</button><button type="button" className="crop-apply" disabled={busy} onClick={save}>{busy?'Cropping…' :'Done'}</button></div>
     </div>
   </div>;
@@ -211,7 +210,7 @@ export default function App() {
     }catch(error){setMessage(error.message||'Could not export PNG.');}
   }
   return <main className="app-shell">
-    <div className="editor-bar"><div><strong>MSF Poster Creator</strong><span>Step 1 · Leadership portraits</span></div><button onClick={download}><Download size={17}/> Download PNG</button></div>
+    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><button onClick={download}><Download size={17}/> Download PNG</button></div>
     <div className="workspace">
       <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
@@ -227,17 +226,10 @@ export default function App() {
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <label>Name<input value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
-          <div className="position-controls">
-            <label>Size <input type="range" min="10" max="60" value={position(p,i).w} onChange={e=>update(i,{w:Number(e.target.value)})}/></label>
-            <label>Horizontal <input type="range" min="0" max="90" value={position(p,i).x} onChange={e=>update(i,{x:Number(e.target.value)})}/></label>
-            <label>Vertical <input type="range" min="0" max="90" value={position(p,i).y} onChange={e=>update(i,{y:Number(e.target.value)})}/></label>
-          </div>
           <div className="actions">
             <button type="button" onClick={()=>copyPhoto(i)} disabled={!p.photo}>Copy</button>
             <button type="button" onClick={()=>pastePhoto(i)} disabled={!clipboard}>Paste</button>
-            <button type="button" onClick={()=>setSelected(selected===i?null:i)}>{selected===i?'Done':'Position'}</button>
             <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload Image</button>
-            <button onClick={()=>setCrop({i,src:p.photo})} disabled={!p.photo}><Scissors size={16}/> Crop / Zoom</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
           </div>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
