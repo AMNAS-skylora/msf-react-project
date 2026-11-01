@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, Copy, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
+import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import './styles.css';
 
@@ -14,6 +14,26 @@ const loadImage = src => new Promise((resolve, reject) => {
 const toDataURL = file => new Promise((resolve, reject) => {
   const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file);
 });
+
+const splitName = value => {
+  const name=String(value||'').trim().replace(/\\s+/g,' ');
+  if(name.length<=15||!name.includes(' '))return [name,''];
+  const words=name.split(' ');
+  let best=1,score=Infinity;
+  for(let i=1;i<words.length;i++){
+    const top=words.slice(0,i).join(' '),bottom=words.slice(i).join(' ');
+    const current=Math.max(top.length,bottom.length)*2+Math.abs(top.length-bottom.length);
+    if(current<score){score=current;best=i;}
+  }
+  return [words.slice(0,best).join(' '),words.slice(best).join(' ')];
+};
+const nameLines = p => p.nameLayout==='manual' ? [p.line1||'',p.line2||''] : splitName(p.name);
+function fitText(ctx,text,maxWidth,baseSize,weight){
+  let size=baseSize;
+  do {ctx.font=`${weight} ${size}px Arial`;if(ctx.measureText(text).width<=maxWidth)break;size--;}while(size>12);
+  return size;
+}
+
 function CropDialog({ src, onSave, onClose }) {
   const canvasRef = useRef(null);
   const pointers = useRef(new Map());
@@ -94,7 +114,6 @@ export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [ready,setReady]=useState(false);
   const [selected,setSelected]=useState(null);
-  const [clipboard,setClipboard]=useState(null);
   const drag=useRef(null);
   const touches=useRef(new Map());
   const frameRef=useRef(null);
@@ -132,9 +151,7 @@ export default function App() {
     const p=position(people[i],i);
     update(i,{w:Math.max(8,Math.min(85,p.w-(e.deltaY>0?2:-2)))});
   }
-  function copyPhoto(i){const p=people[i];setClipboard({photo:p.photo,w:position(p,i).w});setMessage('Photo copied.');}
   function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
-  function pastePhoto(i){if(!clipboard)return;update(i,{photo:clipboard.photo,w:clipboard.w});setSelected(i);setMessage('Photo pasted.');}
 
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
@@ -202,7 +219,14 @@ export default function App() {
         ctx.fillStyle='#08763c';ctx.fillRect(x-8,1350,296,88);
         ctx.textAlign='center';ctx.fillStyle='white';
         ctx.font='bold 16px Arial';ctx.fillText(p.role.toUpperCase(),x+140,1375);
-        ctx.font='bold 38px Arial';ctx.fillText(p.name.toUpperCase(),x+140,1418,280);
+        const lines=nameLines(p).filter(Boolean);
+        const bold=p.boldLine||'both';
+        const lineY=lines.length===2?[1400,1426]:[1413];
+        for(let j=0;j<lines.length;j++){
+          const weight=bold==='both'||bold===(j===0?'top':'bottom')?'bold':'normal';
+          fitText(ctx,lines[j].toUpperCase(),276,lines.length===2?30:38,weight);
+          ctx.fillText(lines[j].toUpperCase(),x+140,lineY[j]);
+        }
       }
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
       if(!blob)throw new Error('Export failed');
@@ -222,7 +246,6 @@ export default function App() {
           <img src={p.photo} alt={p.name} draggable={false}/>
           {selected===i&&<>
             <div className="photo-toolbar" onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}>
-              <button type="button" onClick={e=>{e.stopPropagation();copyPhoto(i)}} aria-label="Copy photo" title="Copy"><Copy size={17}/></button>
               <button type="button" onClick={e=>{e.stopPropagation();setCrop({i,src:p.photo})}} aria-label="Crop photo" title="Crop"><Crop size={17}/></button>
               <button type="button" onClick={e=>{e.stopPropagation();editName(i)}} aria-label="Edit name" title="Edit name"><Pencil size={17}/></button>
               <button type="button" aria-label="Close photo tools" onClick={e=>{e.stopPropagation();setSelected(null)}}>×</button>
@@ -230,15 +253,35 @@ export default function App() {
             <span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>
           </>}
         </div>})}
-        <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>)}</div>
+        <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
       </section>
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
-          <label>Name<input ref={el=>nameInputs.current[i]=el} value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
+          <label>Name<input ref={el=>nameInputs.current[i]=el} value={p.name} onChange={e=>update(i,{name:e.target.value,nameLayout:'auto'})} maxLength={40}/></label>
+          <div className="name-layout-settings">
+            <label>Lines
+              <select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{
+                if(e.target.value==='manual'){const [line1,line2]=nameLines(p);update(i,{nameLayout:'manual',line1,line2});}
+                else update(i,{nameLayout:'auto'});
+              }}>
+                <option value="auto">Auto (maximum 2 lines)</option>
+                <option value="manual">Custom 2 lines</option>
+              </select>
+            </label>
+            {p.nameLayout==='manual'&&<div className="name-line-inputs">
+              <label>Top line<input value={p.line1||''} maxLength={40} onChange={e=>update(i,{line1:e.target.value})}/></label>
+              <label>Bottom line<input value={p.line2||''} maxLength={40} onChange={e=>update(i,{line2:e.target.value})}/></label>
+            </div>}
+            <label>Bold line
+              <select value={p.boldLine||'both'} onChange={e=>update(i,{boldLine:e.target.value})}>
+                <option value="both">Both</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+              </select>
+            </label>
+          </div>
           <div className="actions">
-            <button type="button" onClick={()=>copyPhoto(i)} disabled={!p.photo}>Copy</button>
-            <button type="button" onClick={()=>pastePhoto(i)} disabled={!clipboard}>Paste</button>
             <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload Image</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
           </div>
