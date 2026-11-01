@@ -299,3 +299,10 @@
 .poster-malayalam-title .line-1{font-size:4.15cqw;line-height:1.12;font-weight:900}
 .poster-malayalam-title .line-2{font-size:5.35cqw;line-height:1.12;font-weight:900}
 @media(max-width:600px){.poster-msf-heading{left:13%;right:2%;gap:2%;height:10.2%}.poster-msf-logo{font-size:11cqw}.poster-malayalam-title .line-1{font-size:4.15cqw}.poster-malayalam-title .line-2{font-size:5.35cqw}}
+
+/* Equal-sized Malayalam lines, centered in the header's available space. */
+.poster-msf-heading{top:1%;left:13%;right:3%;height:10%;gap:4%;display:flex;align-items:center;justify-content:space-between}
+.poster-msf-logo{flex:0 0 auto;font-size:11cqw;margin:0}
+.poster-malayalam-title{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;text-align:center;font-family:'Noto Sans Malayalam','Nirmala UI',sans-serif;font-weight:900}
+.poster-malayalam-title .malayalam-heading-line,.poster-malayalam-title .line-1,.poster-malayalam-title .line-2{display:block;width:100%;font-size:4.5cqw;font-weight:900;line-height:1.17;text-align:center;text-shadow:.45px 0 currentColor,-.45px 0 currentColor;overflow-wrap:anywhere}
+@media(max-width:600px){.poster-msf-heading{left:13%;right:3%;gap:4%;height:10%}.poster-malayalam-title .malayalam-heading-line,.poster-malayalam-title .line-1,.poster-malayalam-title .line-2{font-size:4.5cqw}}
