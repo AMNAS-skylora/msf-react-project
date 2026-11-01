@@ -269,14 +269,16 @@ export default function App() {
           </>}
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
-        {joint.length>0&&<div className="joint-poster-section">
-          <h2>{jointRole.toUpperCase()}</h2>
-          {(()=>{let start=0;return jointRows(joint.length).map((count,row)=>{const members=joint.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{members.map((p,k)=><div className="joint-poster-member" key={row+'-'+k}>
-            <button type="button" className="joint-square" onClick={()=>{const index=joint.indexOf(p);setJointSelected(index);if(!p.photo)jointUploads.current[index]?.click();}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
-            {jointSelected===joint.indexOf(p)&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:joint.indexOf(p),src:p.photo,square:true}):jointUploads.current[joint.indexOf(p)]?.click()}><Crop size={13}/> Crop</button>}
-            <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
-          </div>)}</div>})})()}
-        </div>}
+        <div className="joint-sections">
+          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className="joint-poster-section" key={role}>
+            <h2>{role.toUpperCase()}</h2>
+            {jointRows(members.length).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
+              <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
+              {jointRole===role&&jointSelected===index&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:index,src:p.photo,square:true}):jointUploads.current[index]?.click()}><Crop size={13}/> Crop</button>}
+              <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
+            </div>})}</div>})}
+          </section>})}
+        </div>
       </section>
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
@@ -311,8 +313,9 @@ export default function App() {
           </div>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
-        <section className="joint-editor"><h2>Joint Committee</h2>
-          <label>Heading<select value={jointRole} onChange={e=>changeGroup(e.target.value)}><option>Joint Secretaries</option><option>Vice Presidents</option></select></label>
+        <section className="joint-editor"><h2>Committee Sections</h2>
+          <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
+          <h3>{jointRole}</h3>
           <p>{joint.length} members · New members appear first</p>
           <button type="button" onClick={()=>setJoint(v=>[{name:'',photo:'',nameLayout:'auto',boldLine:'both'},...v])}>+ Add Member</button>
           {joint.map((p,i)=><div className="joint-editor-member" key={i}>
