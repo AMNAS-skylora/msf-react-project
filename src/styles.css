@@ -332,3 +332,27 @@
 .poster-export-actions button:last-child{background:#0c5d42}
 .poster-export-actions button:disabled{opacity:.6;cursor:wait}
 @media(max-width:600px){.editor-bar{align-items:flex-start;gap:10px}.poster-export-actions{max-width:65%;gap:6px}.poster-export-actions button{font-size:12px;padding:9px 10px}}
+
+/* Executive section: match the left and right breathing room.
+   Keep the existing seven-member rows, vertical badge and other sections untouched. */
+.joint-sections .executive-poster-section{
+  padding-left:12%;
+  padding-right:5%;
+  padding-top:1.5%;
+  padding-bottom:2%;
+}
+.joint-sections .executive-poster-section .joint-poster-row{
+  box-sizing:border-box;
+  width:100%;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  column-gap:2.4%;
+  margin-bottom:3.5%;
+}
+.joint-sections .executive-poster-section .joint-poster-member{
+  min-width:0;
+  max-width:100%;
+}
+@media(max-width:600px){
+  .joint-sections .executive-poster-section{padding-left:12%;padding-right:5%;padding-top:1.5%;padding-bottom:2%}
+  .joint-sections .executive-poster-section .joint-poster-row{column-gap:2.4%;margin-bottom:3.5%}
+}
