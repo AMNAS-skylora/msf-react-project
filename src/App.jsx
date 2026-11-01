@@ -55,7 +55,10 @@ export default function App() {
     setNotice('Removing background… the first request may download an AI model.');
     try {
       const { removeBackground } = await import('@imgly/background-removal');
-      const output = await removeBackground(editedUrl(member));
+      const response = await fetch(editedUrl(member));
+      if (!response.ok) throw new Error('Failed to load the photo');
+      const sourceBlob = await response.blob();
+      const output = await removeBackground(sourceBlob);
       replace(member.id, await blobToDataUrl(output));
       alertMessage('Background removed for ' + member.name + '. Saved in this browser.');
     } catch (error) {
