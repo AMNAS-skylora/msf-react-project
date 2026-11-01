@@ -122,7 +122,7 @@ export default function App() {
   const jointUploads=useRef([]);
   const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
   const [jointSelected,setJointSelected]=useState(null);
-  const jointRows=n=>Array.from({length:Math.ceil(n/5)},(_,i)=>Math.min(5,n-i*5));
+  const jointRows=(n,columns=5)=>Array.from({length:Math.ceil(n/columns)},(_,i)=>Math.min(columns,n-i*columns));
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
 
@@ -270,9 +270,9 @@ export default function App() {
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
         <div className="joint-sections">
-          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")} key={role}>
+          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")} style={{'--rows':jointRows(members.length,role==='Executive Members'?7:5).length}} key={role}>
             <h2>{role.toUpperCase()}</h2>
-            {jointRows(members.length).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
+            {jointRows(members.length,role==='Executive Members'?7:5).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
               <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
               {jointRole===role&&jointSelected===index&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:index,src:p.photo,square:true}):jointUploads.current[index]?.click()}><Crop size={13}/> Crop</button>}
               <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
