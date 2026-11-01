@@ -1,20 +1,50 @@
-# MSF Committee React Website
+# MSF Mambadumoola Unit Committee — React Website
 
-React 19 + Vite mobile-first website. 28 portraits cropped from the user-provided poster.
+A complete mobile-first React 19 + Vite 6 website with 28 members, MSF-inspired green-and-white styling, search and filtering, and browser-based photo editing.
 
-## Run
+## Requirements
+- Node.js 18+ (Node 20 LTS recommended)
+- npm and internet access for first installation
+
+## Run locally
 ```bash
+git clone https://github.com/amnas-cubixmet/msf-react-project.git
+cd msf-react-project
 npm install
 npm run dev
 ```
-Open the localhost URL shown by Vite. Build with `npm run build`; deploy `dist/` to Netlify, or import the repo in Vercel (framework Vite).
+Open the address printed by Vite, usually http://localhost:5173. Production:
+```bash
+npm run build
+npm run preview
+```
 
-## Features
-- Responsive leadership and committee sections, member search and role filters
-- Hide/show photos
-- Photo upload, restore, download, and AI background removal (Edit photos)
-- Edited photos saved in browser localStorage only (not shared across visitors or devices)
-- Original images live in `public/assets`; names/roles in `src/members.json`
+Deploy to Vercel as **Vite**, build command **npm run build**, output directory **dist**. No environment variables are needed for this static site.
 
-## Important
-AI background removal is downloaded on demand and requires internet; large models may be slow on phones. Confirm names, roles, image rights and publication permission before public deployment. No backend, account system or shared admin storage is included.
+## Structure
+- `public/assets/`: 28 original cropped portraits
+- `src/components/`: Header, Hero, MemberCard, SectionHeading, Footer
+- `src/data/members.json`: Names, roles, image locations
+- `src/data/committee.js`: Role groups and stable IDs
+- `src/hooks/useStoredPhotos.js`: Browser-local photo persistence
+- `src/utils/photos.js`: Upload optimization, downloads
+- `src/App.jsx`: Main pages and actions
+- `src/styles.css`: Responsive site styles
+- `.gitignore`: Excludes dependencies, build output, local secrets
+
+## Editing
+Click **Edit photos** in the Committee section, then use card actions to upload, remove background, restore, or download. Background removal uses `@imgly/background-removal` and requires model download and modern browser memory. Edits are saved in this browser's localStorage only. To publish changes for everyone, replace images in `public/assets/`, commit, and redeploy.
+
+Modify `src/data/members.json` to edit names and roles (`leadership`, `vice`, `joint`, `executive`). Image paths are relative to `public/`.
+
+## ECONNRESET
+`npm install` may fail because the connection to registry.npmjs.org resets. Check internet connectivity, then try:
+```bash
+npm config set registry https://registry.npmjs.org/
+npm cache verify
+npm install --fetch-retries=5 --fetch-retry-mintimeout=20000
+```
+Only delete npm proxy config when the network does not require a proxy.
+
+## Publishing notes
+Portraits were cropped from a supplied poster. Confirm names, titles, and photo permissions. This project has no authentication/backend. Client-side photo edits are not shared with visitors.

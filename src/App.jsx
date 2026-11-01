@@ -1,22 +1,146 @@
-import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {Menu,X,Search,Camera,RotateCcw,Download,Eye,EyeOff,Upload,Settings,ArrowUpRight,Users,ShieldCheck} from 'lucide-react';
-import members from './members.json';
-const groups=[['leadership','Core Leadership'],['vice','Vice Presidents'],['joint','Joint Secretaries'],['executive','Executive Members']];
-const labels={leadership:'നേതൃത്വം',vice:'വൈസ് പ്രസിഡന്റുമാർ',joint:'ജോയിന്റ് സെക്രട്ടറിമാർ',executive:'എക്സിക്യൂട്ടീവ് അംഗങ്ങൾ'};
-const imageOf=(m)=>'/'+m.image;
-export default function App(){
- const [query,setQuery]=useState(''),[group,setGroup]=useState('all'),[showPhotos,setShowPhotos]=useState(true),[editor,setEditor]=useState(false),[mobile,setMobile]=useState(false),[overrides,setOverrides]=useState(()=>{try{return JSON.parse(localStorage.getItem('msf-photos')||'{}')}catch{return {}}});
- const [busy,setBusy]=useState(''); const fileInput=useRef(null);const [target,setTarget]=useState(null);
- useEffect(()=>{try{localStorage.setItem('msf-photos',JSON.stringify(overrides))}catch{alert('Photo storage is full. Try a smaller image.')}},[overrides]);
- const list=useMemo(()=>members.map((m,i)=>({...m,id:i})).filter(m=>(group==='all'||m.group===group)&&(`${m.name} ${m.role}`.toLowerCase().includes(query.toLowerCase()))),[query,group]);
- function pick(m){setTarget(m);fileInput.current?.click()}
- function upload(e){const f=e.target.files?.[0];if(!f||!target)return;if(!f.type.startsWith('image/'))return alert('Please select an image');if(f.size>3e6)return alert('Use a photo smaller than 3 MB');const r=new FileReader();r.onload=()=>setOverrides(p=>({...p,[target.id]:r.result}));r.readAsDataURL(f);e.target.value=''}
- function reset(m){setOverrides(p=>{const n={...p};delete n[m.id];return n})}
- function save(m){const a=document.createElement('a');a.href=overrides[m.id]||imageOf(m);a.download=`msf-${m.name.toLowerCase()}-photo.png`;a.click()}
- async function removeBg(m){setBusy(String(m.id));try{const mod=await import('@imgly/background-removal');const url=overrides[m.id]||imageOf(m);const blob=await mod.removeBackground(url);const reader=new FileReader();reader.onload=()=>setOverrides(p=>({...p,[m.id]:reader.result}));reader.readAsDataURL(blob)}catch(e){alert('Background removal failed. Check internet connection or try a smaller photo.')}finally{setBusy('')}}
- function card(m){return <article className={'person '+(m.group==='leadership'?'featured':'')} key={m.id}><div className="portrait">{showPhotos?<img src={overrides[m.id]||imageOf(m)} alt={`${m.name} — ${m.role}`} loading="lazy"/>:<div className="initial">{m.name[0]}</div>}</div><div className="person-info"><span className="role">{m.role}</span><h3>{m.name}</h3></div>{editor&&<div className="actions"><button onClick={()=>pick(m)} title="Change photo"><Camera size={16}/></button><button onClick={()=>removeBg(m)} disabled={busy===String(m.id)} title="Remove background">{busy===String(m.id)?'...':'BG'}</button><button onClick={()=>reset(m)} title="Restore original"><RotateCcw size={16}/></button><button onClick={()=>save(m)} title="Download"><Download size={16}/></button></div>}</article>}
- return <><header className="header"><a href="#home" className="brand"><span className="brandmark">msf</span><span className="brand-sub">മമ്പാടുമൂല<br/>യൂണിറ്റ് കമ്മിറ്റി</span></a><nav className={mobile?'nav open':'nav'}><a href="#home" onClick={()=>setMobile(false)}>Home</a><a href="#leadership" onClick={()=>setMobile(false)}>Leadership</a><a href="#committee" onClick={()=>setMobile(false)}>Committee</a><a href="#about" onClick={()=>setMobile(false)}>About</a></nav><button className="menu-btn" onClick={()=>setMobile(!mobile)} aria-label="Toggle menu">{mobile?<X/>:<Menu/>}</button></header>
- <main><section className="hero" id="home"><div className="hero-glow"/><div className="hero-content"><span className="eyebrow"><span className="dot"/> OFFICIAL UNIT COMMITTEE</span><h1>പുതിയ <em>നേതൃത്വം</em><br/>പുതിയ പ്രതീക്ഷകൾ</h1><p>MSF മമ്പാടുമൂല യൂണിറ്റ് കമ്മിറ്റി — നേതൃത്വത്തെയും കമ്മിറ്റി അംഗങ്ങളെയും പരിചയപ്പെടാം.</p><div className="hero-actions"><a className="primary" href="#leadership">Meet the leadership <ArrowUpRight size={18}/></a><a className="secondary" href="#committee">View committee</a></div><div className="hero-stats"><div><strong>{members.length}</strong><span>Committee members</span></div><div><strong>4</strong><span>Leadership groups</span></div></div></div><div className="hero-art"><div className="hero-circle"><span>msf</span><small>UNIT COMMITTEE</small></div></div></section>
- <section className="section" id="leadership"><div className="section-top"><div><span className="kicker">01 / LEADERSHIP</span><h2>Our <span>Leadership</span></h2><p>Meet the office bearers of the unit committee.</p></div></div><div className="people leadership-grid">{members.map((m,id)=>({...m,id})).filter(m=>m.group==='leadership').map(card)}</div></section>
- <section className="section committee" id="committee"><div className="section-top"><div><span className="kicker">02 / THE TEAM</span><h2>Committee <span>Members</span></h2><p>All committee members, organized by role.</p></div><button className="editor-btn" onClick={()=>setEditor(!editor)}><Settings size={17}/>{editor?'Close editor':'Edit photos'}</button></div><div className="toolbar"><div className="search"><Search size={18}/><input aria-label="Search members" placeholder="Search members..." value={query} onChange={e=>setQuery(e.target.value)}/></div><button className="toggle" onClick={()=>setShowPhotos(!showPhotos)}>{showPhotos?<EyeOff size={17}/>:<Eye size={17}/>} {showPhotos?'Hide photos':'Show photos'}</button></div><div className="filters">{[['all','All members'],...groups].map(([id,label])=><button key={id} className={group===id?'active':''} onClick={()=>setGroup(id)}>{label}</button>)}</div>{groups.map(([id,label])=>{const subset=list.filter(m=>m.group===id);return subset.length?<div className="member-section" key={id}><div className="group-heading"><h3>{label}</h3><span>{subset.length} members</span></div><div className={'people '+(id==='leadership'?'compact-leaders':'member-grid')}>{subset.map(card)}</div></div>:null})}{!list.length&&<div className="empty">No matching members found.</div>}{editor&&<p className="editor-note">Photo changes are saved only in this browser. Background removal downloads an AI model on first use and requires internet. For permanent public changes, replace images in public/assets and redeploy.</p>}</section>
- <section className="about" id="about"><div><span className="kicker">03 / ABOUT US</span><h2>One team.<br/><span>Shared purpose.</span></h2></div><div><p>MSF മമ്പാടുമൂല യൂണിറ്റ് കമ്മിറ്റിയുടെ അംഗങ്ങളെ പരിചയപ്പെടുത്തുന്നതിനായി തയ്യാറാക്കിയ ഔദ്യോഗിക മാതൃകാ വെബ്സൈറ്റ്.</p><div className="about-note"><ShieldCheck size={22}/><span>Verify names, portraits and publication permissions before making the site public.</span></div></div></section></main><footer><span className="footer-brand">msf</span><span>മമ്പാടുമൂല യൂണിറ്റ് കമ്മിറ്റി</span><a href="#home">Back to top ↑</a></footer><input ref={fileInput} type="file" accept="image/*" hidden onChange={upload}/></>}
+import { useMemo, useRef, useState } from 'react';
+import { Camera, Eye, EyeOff, Search, Settings2, ShieldCheck, X } from 'lucide-react';
+import Header from './components/Header.jsx';
+import Hero from './components/Hero.jsx';
+import SectionHeading from './components/SectionHeading.jsx';
+import MemberCard from './components/MemberCard.jsx';
+import Footer from './components/Footer.jsx';
+import { GROUPS, MEMBERS, imageUrl } from './data/committee.js';
+import { useStoredPhotos } from './hooks/useStoredPhotos.js';
+import { blobToDataUrl, downloadPhoto, fileToOptimizedDataUrl } from './utils/photos.js';
+
+export default function App() {
+  const [search, setSearch] = useState('');
+  const [role, setRole] = useState('all');
+  const [showPhotos, setShowPhotos] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [workingId, setWorkingId] = useState(null);
+  const [notice, setNotice] = useState('');
+  const uploadInput = useRef(null);
+  const uploadTarget = useRef(null);
+  const { photos, replace, restore, saveError } = useStoredPhotos();
+
+  const filteredMembers = useMemo(() => {
+    const needle = search.trim().toLocaleLowerCase();
+    return MEMBERS.filter((member) =>
+      (role === 'all' || member.group === role) &&
+      (member.name + ' ' + member.role).toLocaleLowerCase().includes(needle),
+    );
+  }, [search, role]);
+
+  const leadership = MEMBERS.filter((member) => member.group === 'leadership');
+  const editedUrl = (member) => photos[member.id] || imageUrl(member);
+  const alertMessage = (message) => setNotice(message);
+
+  function openPhotoPicker(member) {
+    uploadTarget.current = member;
+    uploadInput.current?.click();
+  }
+
+  async function onFileChange(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !uploadTarget.current) return;
+    try {
+      const optimized = await fileToOptimizedDataUrl(file);
+      replace(uploadTarget.current.id, optimized);
+      alertMessage(uploadTarget.current.name + "'s photo updated in this browser.");
+    } catch (error) {
+      alertMessage(error.message || 'Unable to upload photo.');
+    }
+  }
+
+  async function removeBg(member) {
+    setWorkingId(member.id);
+    setNotice('Removing background… the first request may download an AI model.');
+    try {
+      const { removeBackground } = await import('@imgly/background-removal');
+      const output = await removeBackground(editedUrl(member));
+      replace(member.id, await blobToDataUrl(output));
+      alertMessage('Background removed for ' + member.name + '. Saved in this browser.');
+    } catch (error) {
+      console.error('Background removal error:', error);
+      alertMessage('Could not remove background. Check your connection and try again.');
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  function renderCard(member) {
+    return (
+      <MemberCard
+        key={member.id}
+        member={member}
+        image={editedUrl(member)}
+        showPhotos={showPhotos}
+        editing={editing}
+        busy={workingId === member.id}
+        onUpload={openPhotoPicker}
+        onRemoveBg={removeBg}
+        onReset={(item) => {
+          restore(item.id);
+          alertMessage('Original photo restored for ' + item.name + '.');
+        }}
+        onDownload={(item) =>
+          downloadPhoto(editedUrl(item), 'msf-' + item.id + '.' + (photos[item.id] ? 'png' : 'webp'))
+        }
+      />
+    );
+  }
+
+  return (
+    <>
+      <Header />
+      <main>
+        <Hero totalMembers={MEMBERS.length} />
+        <section className="section" id="leadership" aria-label="Unit leadership">
+          <div className="container">
+            <SectionHeading number="01" eyebrow="OFFICE BEARERS" title="Our" emphasis="Leadership" subtitle="Meet the elected office bearers of the unit committee." />
+            <div className="member-grid leadership-grid">{leadership.map(renderCard)}</div>
+          </div>
+        </section>
+        <section className="section committee-section" id="committee" aria-label="Committee members">
+          <div className="container">
+            <SectionHeading number="02" eyebrow="MEET THE TEAM" title="Committee" emphasis="Members" subtitle="Explore members by responsibility and role.">
+              <button
+                className={'tool-button ' + (editing ? 'tool-button-active' : '')}
+                type="button"
+                onClick={() => { setEditing((current) => !current); setNotice(''); }}
+              ><Settings2 size={17} />{editing ? 'Close photo editor' : 'Edit photos'}</button>
+            </SectionHeading>
+            <div className="member-toolbar">
+              <label className="search-box">
+                <Search size={18}/>
+                <span className="sr-only">Search committee members</span>
+                <input placeholder="Search members by name or role…" value={search} onChange={(event) => setSearch(event.target.value)}/>
+                {search && <button title="Clear search" aria-label="Clear search" type="button" onClick={() => setSearch('')}><X size={16}/></button>}
+              </label>
+              <button className="tool-button visibility-button" type="button" onClick={() => setShowPhotos((current) => !current)}>
+                {showPhotos ? <EyeOff size={17}/> : <Eye size={17}/>} {showPhotos ? 'Hide photos' : 'Show photos'}
+              </button>
+            </div>
+            <div className="filters" role="group" aria-label="Filter by committee role">
+              {[{ id: 'all', title: 'All members' }, ...GROUPS].map((group) =>
+                <button key={group.id} type="button" aria-pressed={role === group.id} className={role === group.id ? 'is-selected' : ''} onClick={() => setRole(group.id)}>{group.title}</button>
+              )}
+            </div>
+            {editing && <div className="editor-help"><Camera size={19}/><div><strong>Photo editing enabled</strong><p>Upload, remove background, restore or download any portrait. Edits are saved only on this device; source image files must be replaced to publish edits for everyone.</p></div></div>}
+            {(notice || saveError) && <div className="notice" role="status">{saveError || notice}<button aria-label="Dismiss notice" type="button" onClick={() => setNotice('')}><X size={15}/></button></div>}
+            {GROUPS.map((group) => {
+              const people = filteredMembers.filter((member) => member.group === group.id);
+              if (!people.length) return null;
+              return <section className="role-section" key={group.id} aria-labelledby={'group-' + group.id}>
+                <div className="role-heading"><div><h3 id={'group-' + group.id}>{group.title}</h3><span lang="ml">{group.malayalam}</span></div><span className="role-count">{people.length} {people.length === 1 ? 'member' : 'members'}</span></div>
+                <div className={'member-grid ' + (group.id === 'leadership' ? 'leadership-grid compact-leaders' : '')}>{people.map(renderCard)}</div>
+              </section>;
+            })}
+            {filteredMembers.length === 0 && <div className="no-results">No matching members found. Try another name or select All members.</div>}
+          </div>
+        </section>
+        <section className="about-section" id="about"><div className="container about-layout"><div><span className="about-eyebrow">03 / ABOUT THE COMMITTEE</span><h2>One team.<br/><span>Shared purpose.</span></h2></div><div><p>MSF മമ്പാടുമൂല യൂണിറ്റ് കമ്മിറ്റിയുടെ പുതിയ നേതൃത്വത്തെയും അംഗങ്ങളെയും പരിചയപ്പെടുത്തുന്നതിനായി തയ്യാറാക്കിയ വെബ്സൈറ്റ്.</p><div className="permission-note"><ShieldCheck size={22}/><span>Before publishing, confirm all names, responsibilities, portraits, and photo permissions.</span></div></div></div></section>
+      </main>
+      <Footer />
+      <input ref={uploadInput} className="visually-hidden-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={onFileChange} tabIndex={-1} />
+    </>
+  );
+}
