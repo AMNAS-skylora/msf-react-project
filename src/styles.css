@@ -18,3 +18,17 @@
 .crop-actions .crop-apply{background:#087b3d;color:#fff;border-color:#087b3d}
 .crop-actions button:disabled{opacity:.5}
 @media(max-width:600px){.crop-overlay{align-items:stretch}.crop-dialog{width:100%;height:100dvh;max-height:100dvh;border-radius:0}.touch-crop{max-height:calc(100dvh - 250px)}}
+
+.canvas-photo{position:absolute;z-index:2;touch-action:none;cursor:grab;user-select:none;border:2px solid transparent;line-height:0}
+.canvas-photo:active{cursor:grabbing}
+.canvas-photo img{width:100%;height:auto;display:block;pointer-events:none;user-select:none}
+.canvas-photo.active{border:2px dashed #0c8041}
+.photo-selection-handle{position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#087b3d}
+.canvas-labels{position:absolute;bottom:2.2%;left:7%;right:7%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5%;z-index:3;pointer-events:none}
+.canvas-label{background:#087d3c;color:#fff;text-align:center;border-radius:5px;padding:5% 2%;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.canvas-label small{font-size:clamp(7px,1vw,13px);font-weight:600;letter-spacing:.08em}
+.canvas-label strong{font-size:clamp(12px,2vw,28px);font-weight:800;overflow-wrap:anywhere}
+.position-controls{display:grid;gap:7px;margin-top:12px}
+.position-controls label{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.position-controls input{width:65%;margin:0;accent-color:#087b3d}
+@media(max-width:850px){.canvas-label strong{font-size:clamp(10px,3vw,22px)}.canvas-label small{font-size:clamp(7px,1.8vw,11px)}}
