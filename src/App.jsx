@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
+import { toBlob } from 'html-to-image';
 import './styles.css';
 
 const splitMalayalamHeading = value => {
@@ -18,11 +19,7 @@ const splitMalayalamHeading = value => {
   }
   return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
-const INITIAL = [
-  { role: 'President', member: MEMBERS.find(m => m.role === 'President') },
-  { role: 'Secretary', member: MEMBERS.find(m => m.role === 'Secretary') },
-  { role: 'Treasurer', member: MEMBERS.find(m => m.role === 'Treasurer') },
-];
+const INITIAL = ['President', 'Secretary', 'Treasurer'].map(role=>({role}));
 const loadImage = src => new Promise((resolve, reject) => {
   const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
 });
@@ -126,7 +123,7 @@ function CropDialog({ src, onSave, onClose, square=false }) {
   </div>;
 }
 export default function App() {
-  const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
+  const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:'',photo:'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [headerText,setHeaderText]=useState(()=>{try{return localStorage.getItem('msf-malayalam-heading')??'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}catch{return 'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}});
   useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
   const [ready,setReady]=useState(false);
@@ -186,6 +183,8 @@ export default function App() {
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
+  const [exporting,setExporting]=useState(false);
+  const [shareOpen,setShareOpen]=useState(false);
   const uploads=useRef([]);
   const nameInputs=useRef([]);
   useEffect(()=>{
@@ -196,7 +195,7 @@ export default function App() {
       const db=request.result;
       const tx=db.transaction('draft','readonly');
       const get=tx.objectStore('draft').get('leadership');
-      get.onsuccess=()=>{if(active&&Array.isArray(get.result)&&get.result.length===3)setPeople(get.result);if(active)setReady(true);db.close();};
+      get.onsuccess=()=>{if(active&&Array.isArray(get.result)&&get.result.length===3)setPeople(get.result.map((p,i)=>{const demo=MEMBERS.find(m=>m.role===INITIAL[i].role);return {...p,name:p.name===demo?.name?'':p.name,photo:p.photo=== (demo?imageUrl(demo):null)?'':p.photo};}));if(active)setReady(true);db.close();};
       get.onerror=()=>{if(active)setReady(true);db.close();};
     };
     request.onerror=()=>{if(active)setReady(true);};
@@ -234,44 +233,54 @@ export default function App() {
     }catch(error){setMessage('Background removal failed: '+(error?.message||'Try again online.'));}
     finally{setBusy(-1);}
   }
-  async function download() {
-    try {
-      await document.fonts.ready;
-      const canvas=document.createElement('canvas');canvas.width=1050;canvas.height=1472;
-      const ctx=canvas.getContext('2d');
-      const bg=await loadImage(`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`);
-      ctx.drawImage(bg,0,0,1050,1472);
-      ctx.textAlign='left';ctx.fillStyle='#07577d';ctx.font='bold 134px Georgia';ctx.fillText('msf',175,133);
-      const headingLines=splitMalayalamHeading(headerText);ctx.fillStyle='#087d48';ctx.textAlign='center';for(let h=0;h<headingLines.length;h++){const line=headingLines[h];fitText(ctx,line,620,56,'900');ctx.font=ctx.font.replace('Arial','"Noto Sans Malayalam",sans-serif');ctx.fillText(line,718,65+h*62,620);}
-      for(let i=0;i<3;i++){
-        const p=people[i],pos=position(p,i);
-        try{
-          const img=await loadImage(p.photo);
-          const w=pos.w*10.5,h=w*img.height/img.width;
-          ctx.drawImage(img,pos.x*10.5,pos.y*14.72,w,h);
-        }catch{}
-        const x=90+i*305;
-        ctx.fillStyle='#08763c';ctx.fillRect(x-8,1350,296,88);
-        ctx.textAlign='center';ctx.fillStyle='white';
-        ctx.font='bold 16px Arial';ctx.fillText(p.role.toUpperCase(),x+140,1375);
-        const lines=nameLines(p).filter(Boolean);
-        const bold=p.boldLine||'both';
-        const lineY=lines.length===2?[1400,1426]:[1413];
-        for(let j=0;j<lines.length;j++){
-          const weight=bold==='both'||bold===(j===0?'top':'bottom')?'bold':'normal';
-          fitText(ctx,lines[j].toUpperCase(),276,lines.length===2?30:38,weight);
-          ctx.fillText(lines[j].toUpperCase(),x+140,lineY[j]);
-        }
+  async function makePosterBlob(){
+    if(!frameRef.current)throw new Error('Poster preview is not ready.');
+    await document.fonts.ready;
+    const images=[...frameRef.current.querySelectorAll('img')];
+    await Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});})));
+    const node=frameRef.current;
+    const blob=await toBlob(node,{
+      pixelRatio:Math.max(2,1050/node.getBoundingClientRect().width),
+      cacheBust:false,
+      backgroundColor:'#e5f8e8',
+      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button'].some(cls=>element.classList.contains(cls)),
+      style:{boxShadow:'none'}
+    });
+    if(!blob)throw new Error('Could not create poster image.');
+    return blob;
+  }
+  function saveBlob(blob){
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;link.download='msf-poster.png';
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  async function download(){
+    if(exporting)return;
+    setExporting(true);setMessage('');
+    try{saveBlob(await makePosterBlob());}
+    catch(error){setMessage('Download failed: '+(error?.message||'Please try again.'));}
+    finally{setExporting(false);}
+  }
+  async function sharePoster(){
+    if(exporting)return;
+    setExporting(true);setMessage('');
+    try{
+      const blob=await makePosterBlob();
+      const file=new File([blob],'msf-poster.png',{type:'image/png'});
+      if(navigator.share && navigator.canShare?.({files:[file]})){
+        await navigator.share({files:[file],title:'MSF Poster'});
+      }else{
+        saveBlob(blob);
+        setMessage('Image downloaded. Open WhatsApp or Facebook and attach the PNG to share.');
       }
-      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
-      if(!blob)throw new Error('Export failed');
-      const url=URL.createObjectURL(blob),link=document.createElement('a');
-      link.href=url;link.download='msf-leadership-poster.png';link.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-    }catch(error){setMessage(error.message||'Could not export PNG.');}
+    }catch(error){
+      if(error?.name!=='AbortError')setMessage('Share failed: '+(error?.message||'Please try again.'));
+    }finally{setExporting(false);setShareOpen(false);}
   }
   return <main className="app-shell">
-    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><button onClick={download}><Download size={17}/> Download PNG</button></div>
+    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
     <div className="workspace">
       <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
