@@ -316,10 +316,10 @@ export default function App() {
         <section className="joint-editor"><h2>Committee Sections</h2>
           <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
           <h3>{jointRole}</h3>
-          <p>{joint.length} members · New members appear first</p>
-          <button type="button" onClick={()=>setJoint(v=>[{name:'',photo:'',nameLayout:'auto',boldLine:'both'},...v])}>+ Add Member</button>
+          <p>{joint.length} members · Members appear in creation order</p>
+          <button type="button" onClick={()=>setJoint(v=>[...v,{name:'',photo:'',nameLayout:'auto',boldLine:'both'}])}>+ Add Member</button>
           {joint.map((p,i)=><div className="joint-editor-member" key={i}>
-            <div className="joint-editor-heading"><strong>Member {i+1}</strong><div className="joint-order-actions"><button type="button" disabled={i===0} onClick={()=>moveJoint(i,i-1)} aria-label="Move member left">←</button><button type="button" disabled={i===joint.length-1} onClick={()=>moveJoint(i,i+1)} aria-label="Move member right">→</button><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null)}}>Remove</button></div></div>
+            <div className="joint-editor-heading"><strong>Member {i+1}</strong><div className="joint-order-actions"><button type="button" disabled={i===0} onClick={()=>moveJoint(i,i-1)} aria-label="Move member left">←</button><button type="button" disabled={i===joint.length-1} onClick={()=>moveJoint(i,i+1)} aria-label="Move member right">→</button><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null);setMessage('Member removed.')}}>Remove</button></div></div>
             <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt="Uploaded member portrait"/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
             <label>Name<input value={p.name} maxLength={60} onChange={e=>updateJoint(i,{name:e.target.value,nameLayout:'auto'})}/></label>
             <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
