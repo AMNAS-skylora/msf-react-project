@@ -116,8 +116,9 @@ export default function App() {
   const [joint,setJoint]=useState([]);
   const [jointRole,setJointRole]=useState('Joint Secretaries');
   const jointUploads=useRef([]);
+  const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
   const [jointSelected,setJointSelected]=useState(null);
-  const jointRows=n=>n<=5?[n]:[5,n-5];
+  const jointRows=n=>Array.from({length:Math.ceil(n/5)},(_,i)=>Math.min(5,n-i*5));
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
 
@@ -185,7 +186,7 @@ export default function App() {
     const request=indexedDB.open('msf-poster-editor',1);
     request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft','readwrite');tx.objectStore('draft').put(people,'leadership');tx.oncomplete=()=>db.close();};
   },[people,ready]);
-  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){setJoint(Array.isArray(saved.members)?saved.members.slice(0,10):[]);setJointRole(saved.role||'Joint Secretaries');}}catch{}},[]);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){setJoint(Array.isArray(saved.members)?saved.members:[]);setJointRole(saved.role||'Joint Secretaries');}}catch{}},[]);
   useEffect(()=>{try{localStorage.setItem('msf-joint-members',JSON.stringify({members:joint,role:jointRole}));}catch{}},[joint,jointRole]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
@@ -307,10 +308,10 @@ export default function App() {
         </section>)}
         <section className="joint-editor"><h2>Joint Committee</h2>
           <label>Heading<select value={jointRole} onChange={e=>setJointRole(e.target.value)}><option>Joint Secretaries</option><option>Joint Presidents</option></select></label>
-          <p>{joint.length}/10 members</p>
-          <button type="button" disabled={joint.length>=10} onClick={()=>setJoint(v=>[...v,{name:'',photo:'',nameLayout:'auto',boldLine:'both'}])}>+ Add Member</button>
+          <p>{joint.length} members</p>
+          <button type="button" onClick={()=>setJoint(v=>[...v,{name:'',photo:'',nameLayout:'auto',boldLine:'both'}])}>+ Add Member</button>
           {joint.map((p,i)=><div className="joint-editor-member" key={i}>
-            <div className="joint-editor-heading"><strong>Member {i+1}</strong><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null)}}>Remove</button></div>
+            <div className="joint-editor-heading"><strong>Member {i+1}</strong><div className="joint-order-actions"><button type="button" disabled={i===0} onClick={()=>moveJoint(i,i-1)} aria-label="Move member left">←</button><button type="button" disabled={i===joint.length-1} onClick={()=>moveJoint(i,i+1)} aria-label="Move member right">→</button><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null)}}>Remove</button></div>
             <label>Name<input value={p.name} maxLength={60} onChange={e=>updateJoint(i,{name:e.target.value,nameLayout:'auto'})}/></label>
             <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
             {p.nameLayout==='manual'&&<><label>Top<input value={p.line1||''} onChange={e=>updateJoint(i,{line1:e.target.value})}/></label><label>Bottom<input value={p.line2||''} onChange={e=>updateJoint(i,{line2:e.target.value})}/></label></>}
