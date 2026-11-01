@@ -124,3 +124,13 @@
 .crop-actions{margin-top:8px}
 .crop-actions button{min-height:44px;font-size:15px}
 @media(max-width:600px){.crop-dialog{height:auto!important;padding:12px!important}.crop-overlay{padding:8px!important}.crop-topbar h2{font-size:17px}}
+
+/* Separate visible committee headings with independent member rows. */
+.joint-sections{position:absolute;top:16%;left:4%;right:4%;z-index:4;display:flex;flex-direction:column;gap:2.5%}
+.joint-sections .joint-poster-section{position:relative;top:auto;left:auto;right:auto;width:100%;margin:0}
+.joint-sections .joint-poster-section h2{margin:0 0 2%}
+.joint-sections .joint-poster-row{margin-bottom:1.5%}
+.joint-group-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.joint-group-tabs button{padding:11px 7px;border:1px solid #cadbce;background:#f5faf6;color:#17543a;border-radius:9px;font-size:12px;font-weight:700}
+.joint-group-tabs button.active{background:#087b3d;border-color:#087b3d;color:white}
+.joint-editor h3{font-size:16px;margin:14px 0 6px}
