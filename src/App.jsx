@@ -132,13 +132,15 @@ export default function App() {
     const p=position(people[i],i);
     update(i,{w:Math.max(8,Math.min(85,p.w-(e.deltaY>0?2:-2)))});
   }
-  function copyPhoto(i){const p=people[i];setClipboard({photo:p.photo,w:position(p,i).w});setMessage('Photo copied. Select a person and tap Paste.');}
+  function copyPhoto(i){const p=people[i];setClipboard({photo:p.photo,w:position(p,i).w});setMessage('Photo copied.');}
+  function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
   function pastePhoto(i){if(!clipboard)return;update(i,{photo:clipboard.photo,w:clipboard.w});setSelected(i);setMessage('Photo pasted.');}
 
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
   const uploads=useRef([]);
+  const nameInputs=useRef([]);
   useEffect(()=>{
     let active=true;
     const request=indexedDB.open('msf-poster-editor',1);
@@ -215,17 +217,25 @@ export default function App() {
       <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
         {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
-          style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%'}}
+          style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
           onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
           <img src={p.photo} alt={p.name} draggable={false}/>
-          {selected===i&&<span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>}
+          {selected===i&&<>
+            <div className="photo-toolbar" onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}>
+              <button type="button" onClick={e=>{e.stopPropagation();copyPhoto(i)}}>Copy</button>
+              <button type="button" onClick={e=>{e.stopPropagation();setCrop({i,src:p.photo})}}>Crop</button>
+              <button type="button" onClick={e=>{e.stopPropagation();editName(i)}}>Name</button>
+              <button type="button" aria-label="Close photo tools" onClick={e=>{e.stopPropagation();setSelected(null)}}>×</button>
+            </div>
+            <span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>
+          </>}
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>)}</div>
       </section>
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
-          <label>Name<input value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
+          <label>Name<input ref={el=>nameInputs.current[i]=el} value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
           <div className="actions">
             <button type="button" onClick={()=>copyPhoto(i)} disabled={!p.photo}>Copy</button>
             <button type="button" onClick={()=>pastePhoto(i)} disabled={!clipboard}>Paste</button>
