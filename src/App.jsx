@@ -34,11 +34,11 @@ function fitText(ctx,text,maxWidth,baseSize,weight){
   return size;
 }
 
-function CropDialog({ src, onSave, onClose }) {
+function CropDialog({ src, onSave, onClose, square=false }) {
   const canvasRef = useRef(null);
   const pointers = useRef(new Map());
   const gesture = useRef(null);
-  const [box, setBox] = useState({ x: 15, y: 10, w: 70, h: 80 });
+  const [box, setBox] = useState(square?{x:10,y:10,w:80,h:80}:{ x: 15, y: 10, w: 70, h: 80 });
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({x:0,y:0});
   const [busy, setBusy] = useState(false);
@@ -48,11 +48,11 @@ function CropDialog({ src, onSave, onClose }) {
     pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const rect=e.currentTarget.getBoundingClientRect();
     const px=(e.clientX-rect.left)/rect.width*100,py=(e.clientY-rect.top)/rect.height*100;
-    const threshold=9;
+    const threshold=square?0:9;
     const edgeX=Math.abs(px-box.x)<threshold?'left':Math.abs(px-box.x-box.w)<threshold?'right':null;
     const edgeY=Math.abs(py-box.y)<threshold?'top':Math.abs(py-box.y-box.h)<threshold?'bottom':null;
     const inside=px>=box.x&&px<=box.x+box.w&&py>=box.y&&py<=box.y+box.h;
-    gesture.current={startX:e.clientX,startY:e.clientY,box:{...box},offset:{...offset},zoom,edgeX,edgeY,mode:edgeX||edgeY?'resize':inside?'move-photo':'move-photo'};
+    gesture.current={startX:e.clientX,startY:e.clientY,box:{...box},offset:{...offset},zoom,edgeX,edgeY,mode:!square&&(edgeX||edgeY)?'resize':'move-photo'};
   }
   function pointerMove(e) {
     if(!pointers.current.has(e.pointerId)||!gesture.current)return;
@@ -68,7 +68,7 @@ function CropDialog({ src, onSave, onClose }) {
       return;
     }
     const dx=(e.clientX-g.startX)/rect.width*100,dy=(e.clientY-g.startY)/rect.height*100;
-    if(g.mode==='resize'){
+    if(g.mode==='resize'&&!square){
       let {x,y,w,h}=g.box;
       if(g.edgeX==='left'){const right=x+w;x=Math.max(0,Math.min(right-12,x+dx));w=right-x;}
       if(g.edgeX==='right')w=Math.max(12,Math.min(100-x,w+dx));
@@ -100,10 +100,10 @@ function CropDialog({ src, onSave, onClose }) {
   }
   return <div className="crop-overlay" role="dialog" aria-modal="true" aria-label="Crop portrait">
     <div className="crop-dialog"><div className="crop-topbar"><h2>Crop</h2><button type="button" aria-label="Close crop editor" onClick={onClose}>×</button></div>
-      <div className="touch-crop" ref={canvasRef} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
+      <div className={"touch-crop"+(square?" square-crop":"")} ref={canvasRef} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
         <img src={src} draggable={false} alt="Photo to crop" style={{transform:`translate(${offset.x}%,${offset.y}%) scale(${zoom})`}} />
         <div className="crop-selection" style={{left:box.x+'%',top:box.y+'%',width:box.w+'%',height:box.h+'%'}}>
-          <div className="crop-grid"/>{['tl','tr','bl','br'].map(k=><span key={k} className={'crop-handle '+k}/>)}
+          <div className="crop-grid"/>{!square&&['tl','tr','bl','br'].map(k=><span key={k} className={'crop-handle '+k}/>)}
         </div>
       </div>
       <div className="crop-actions"><button type="button" onClick={onClose}>Cancel</button><button type="button" className="crop-apply" disabled={busy} onClick={save}>{busy?'Cropping…' :'Done'}</button></div>
@@ -113,6 +113,14 @@ function CropDialog({ src, onSave, onClose }) {
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [ready,setReady]=useState(false);
+  const [joint,setJoint]=useState([]);
+  const [jointRole,setJointRole]=useState('Joint Secretaries');
+  const jointUploads=useRef([]);
+  const [jointSelected,setJointSelected]=useState(null);
+  const jointRows=n=>n<=5?[n]:[Math.ceil(n/2),Math.floor(n/2)];
+  const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
+  async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
+
   const [selected,setSelected]=useState(null);
   const drag=useRef(null);
   const touches=useRef(new Map());
@@ -177,10 +185,12 @@ export default function App() {
     const request=indexedDB.open('msf-poster-editor',1);
     request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft','readwrite');tx.objectStore('draft').put(people,'leadership');tx.oncomplete=()=>db.close();};
   },[people,ready]);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){setJoint(Array.isArray(saved.members)?saved.members.slice(0,10):[]);setJointRole(saved.role||'Joint Secretaries');}}catch{}},[]);
+  useEffect(()=>{try{localStorage.setItem('msf-joint-members',JSON.stringify({members:joint,role:jointRole}));}catch{}},[joint,jointRole]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-    setMessage('All changes reset.');
+    setJoint([]);setJointRole('Joint Secretaries');setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
   async function upload(i,e) {
@@ -254,6 +264,14 @@ export default function App() {
           </>}
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
+        {joint.length>0&&<div className="joint-poster-section">
+          <h2>{jointRole.toUpperCase()}</h2>
+          {(()=>{let start=0;return jointRows(joint.length).map((count,row)=>{const members=joint.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{members.map((p,k)=><div className="joint-poster-member" key={row+'-'+k}>
+            <button type="button" className="joint-square" onClick={()=>setJointSelected(joint.indexOf(p))} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
+            {jointSelected===joint.indexOf(p)&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:joint.indexOf(p),src:p.photo,square:true}):jointUploads.current[joint.indexOf(p)]?.click()}><Crop size={13}/> Crop</button>}
+            <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
+          </div>)}</div>})})()}
+        </div>}
       </section>
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
@@ -287,9 +305,23 @@ export default function App() {
           </div>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
+        <section className="joint-editor"><h2>Joint Committee</h2>
+          <label>Heading<select value={jointRole} onChange={e=>setJointRole(e.target.value)}><option>Joint Secretaries</option><option>Joint Presidents</option></select></label>
+          <p>{joint.length}/10 members</p>
+          <button type="button" disabled={joint.length>=10} onClick={()=>setJoint(v=>[...v,{name:'',photo:'',nameLayout:'auto',boldLine:'both'}])}>+ Add Member</button>
+          {joint.map((p,i)=><div className="joint-editor-member" key={i}>
+            <div className="joint-editor-heading"><strong>Member {i+1}</strong><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null)}}>Remove</button></div>
+            <label>Name<input value={p.name} maxLength={60} onChange={e=>updateJoint(i,{name:e.target.value,nameLayout:'auto'})}/></label>
+            <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
+            {p.nameLayout==='manual'&&<><label>Top<input value={p.line1||''} onChange={e=>updateJoint(i,{line1:e.target.value})}/></label><label>Bottom<input value={p.line2||''} onChange={e=>updateJoint(i,{line2:e.target.value})}/></label></>}
+            <label>Bold<select value={p.boldLine||'both'} onChange={e=>updateJoint(i,{boldLine:e.target.value})}><option value="both">Both</option><option value="top">Top</option><option value="bottom">Bottom</option></select></label>
+            <div className="actions"><button type="button" onClick={()=>jointUploads.current[i]?.click()}><Camera size={15}/> Upload</button><button type="button" disabled={!p.photo} onClick={()=>setCrop({joint:i,src:p.photo,square:true})}><Crop size={15}/> Crop</button></div>
+            <input type="file" accept="image/*" hidden ref={el=>jointUploads.current[i]=el} onChange={e=>uploadJoint(i,e)}/>
+          </div>)}
+        </section>
         {message&&<p role="status" className="message">{message}</p>}
       </aside>
     </div>
-    {crop&&<CropDialog src={crop.src} onClose={()=>setCrop(null)} onSave={src=>{update(crop.i,{photo:src,cutout:false});setCrop(null);}}/>}
+    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={src=>{if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src});else update(crop.i,{photo:src,cutout:false});setCrop(null);}}/>}
   </main>;
 }
