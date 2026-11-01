@@ -88,3 +88,13 @@
 .touch-crop.square-crop{aspect-ratio:1/1;height:auto;max-height:min(60dvh,340px)}
 .square-crop .crop-selection{border-radius:0}
 @media(max-width:600px){.joint-poster-section h2{font-size:clamp(9px,3vw,18px)}.joint-member-name span{font-size:clamp(5px,1.6vw,10px)}}
+
+/* Prevent editor gestures from accidentally zooming or panning the page. Keep browser accessibility zoom available. */
+.frame{touch-action:pan-y;overscroll-behavior:contain}
+.canvas-photo{touch-action:none}
+.joint-square{touch-action:manipulation}
+.joint-poster-section{touch-action:pan-y}
+.joint-order-actions{display:flex;align-items:center;gap:4px}
+.joint-order-actions button{border:1px solid #d9e4db;border-radius:6px;background:white;color:#17543a;padding:7px 9px;min-width:32px}
+.joint-order-actions button:disabled{opacity:.35}
+.joint-poster-row{gap:2%}
