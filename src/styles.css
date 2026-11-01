@@ -193,3 +193,13 @@
 .header-editor textarea{width:100%;min-height:74px;padding:11px;border:1px solid #cbdcd0;border-radius:9px;font:inherit;resize:vertical}
 .header-editor small{display:block;color:#667b6c;margin-top:8px}
 @media(max-width:600px){.poster-msf-heading{left:15%;right:7%}.poster-msf-logo{font-size:clamp(24px,9vw,56px)}.poster-malayalam-title{font-size:clamp(8px,2.5vw,17px)}}
+
+/* Reference-style Malayalam two-line title, standard Malayalam typeface. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@600;700;800;900&display=swap');
+.poster-msf-heading{top:1%;height:9.3%;left:17%;right:8%;gap:2%;align-items:center}
+.poster-msf-logo{font-size:clamp(30px,10vw,110px);align-self:center}
+.poster-malayalam-title{display:flex;flex-direction:column;justify-content:center;gap:0;align-items:flex-start;font-family:'Noto Sans Malayalam','Nirmala UI',sans-serif;font-weight:900;line-height:1.1;text-align:left;color:#087f46;white-space:normal}
+.poster-malayalam-title .malayalam-heading-line{display:block;width:100%;font-size:clamp(11px,3vw,34px);line-height:1.14;overflow-wrap:anywhere}
+.poster-malayalam-title .line-1{color:#116d74;font-size:clamp(10px,2.55vw,29px)}
+.poster-malayalam-title .line-2{color:#07854b;font-size:clamp(12px,3.4vw,39px);font-weight:900}
+@media(max-width:600px){.poster-msf-heading{top:1%;left:17%;right:7%;height:9.3%}.poster-msf-logo{font-size:clamp(29px,10vw,62px)}.poster-malayalam-title .line-1{font-size:clamp(9px,2.55vw,17px)}.poster-malayalam-title .line-2{font-size:clamp(11px,3.3vw,22px)}}
