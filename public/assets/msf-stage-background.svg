@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1472" preserveAspectRatio="xMidYMid slice">
+<defs>
+<radialGradient id="bg"><stop stop-color="#fafffa"/><stop offset=".7" stop-color="#e9ffec"/><stop offset="1" stop-color="#baf5bb"/></radialGradient>
+<radialGradient id="green"><stop stop-color="#7bbf31" stop-opacity=".85"/><stop offset="1" stop-color="#74bb33" stop-opacity="0"/></radialGradient>
+<linearGradient id="flag" x2=".9" y2="1"><stop stop-color="#00a83c"/><stop offset=".52" stop-color="#008f31"/><stop offset="1" stop-color="#06702a"/></linearGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="16"/></filter>
+</defs>
+<rect width="1050" height="1472" fill="url(#bg)"/>
+<ellipse cx="40" cy="75" rx="280" ry="235" fill="url(#green)"/>
+<g fill="#289c2f" opacity=".65" filter="url(#blur)">
+<ellipse cx="933" cy="19" rx="28" ry="12" transform="rotate(25 933 19)"/>
+<ellipse cx="650" cy="101" rx="32" ry="17" transform="rotate(55 650 101)"/>
+<ellipse cx="942" cy="292" rx="46" ry="19" transform="rotate(48 942 292)"/>
+<ellipse cx="36" cy="424" rx="23" ry="10" transform="rotate(-45 36 424)"/>
+<ellipse cx="515" cy="690" rx="27" ry="14" transform="rotate(-50 515 690)"/>
+<ellipse cx="858" cy="637" rx="29" ry="13" transform="rotate(86 858 637)"/>
+<ellipse cx="684" cy="915" rx="35" ry="15" transform="rotate(-72 684 915)"/>
+<ellipse cx="1007" cy="839" rx="24" ry="14"/>
+<ellipse cx="959" cy="1310" rx="35" ry="26" opacity=".3"/>
+</g>
+<ellipse cx="-40" cy="667" rx="112" ry="170" fill="url(#green)"/>
+<g transform="translate(-45 1035) rotate(7 240 160)">
+<path d="M0 0 C100 32 230 66 414 87 L445 271 C260 230 135 239 0 269Z" fill="url(#flag)"/>
+<path d="M0 151 C135 154 288 199 431 184 L445 354 C280 314 134 332 0 365Z" fill="#fff"/>
+<path d="M65 43 A44 44 0 1 0 130 95 A34 34 0 1 1 65 43" fill="#fff"/>
+<path d="M137 52 l7 18 19 1 -15 12 5 19 -16 -11 -16 11 5 -19 -15 -12 19 -1Z" fill="#fff"/>
+<text x="115" y="292" font-size="110" font-weight="bold" font-family="Georgia,serif" fill="#098536">msf</text>
+</g>
+</svg>
