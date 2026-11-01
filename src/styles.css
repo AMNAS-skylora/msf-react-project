@@ -325,3 +325,10 @@
 .joint-sections .executive-poster-section .joint-poster-member{min-width:0;width:100%;max-width:100%}
 .joint-sections .executive-poster-section .joint-member-name{margin-top:3px}
 @media(max-width:600px){.joint-sections .executive-poster-section{padding:1.2% 1.5% 1.8% 12%}.joint-sections .executive-poster-section > h2{left:1%;width:8.5%}.joint-sections .executive-poster-section .joint-poster-row{column-gap:2%;margin-bottom:3.5%}.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{min-height:6px}}
+
+/* Export actions on mobile and desktop */
+.poster-export-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.poster-export-actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:9px;background:#08753c;color:white;padding:10px 13px;font-weight:700}
+.poster-export-actions button:last-child{background:#0c5d42}
+.poster-export-actions button:disabled{opacity:.6;cursor:wait}
+@media(max-width:600px){.editor-bar{align-items:flex-start;gap:10px}.poster-export-actions{max-width:65%;gap:6px}.poster-export-actions button{font-size:12px;padding:9px 10px}}
