@@ -161,3 +161,17 @@
 .joint-sections .executive-poster-section .joint-poster-member{flex:0 1 18%;max-width:18%}
 .joint-sections .executive-poster-section .joint-square{border-radius:3px}
 @media(max-width:600px){.joint-group-tabs{grid-template-columns:1fr 1fr}.joint-group-tabs button{font-size:11px}}
+
+/* Compact committee layout matching the poster reference */
+.joint-sections{top:11%;bottom:39%;max-height:50%;overflow:hidden;gap:1%;align-items:stretch}
+.joint-sections .joint-poster-section{gap:2px;min-height:0}
+.joint-sections .joint-poster-row{gap:2%;margin-bottom:0}
+.joint-sections .joint-poster-member{flex:0 1 14%;max-width:14%}
+.joint-sections .joint-member-name{margin-top:2px}
+.joint-sections .joint-poster-section h2{margin-bottom:2px;font-size:clamp(7px,1.4vw,16px)}
+.joint-sections .executive-poster-section{align-items:stretch}
+.joint-sections .executive-poster-section h2{justify-content:flex-start;text-align:left}
+.joint-sections .executive-poster-section .joint-poster-row{justify-content:flex-start;gap:1.5%}
+.joint-sections .executive-poster-section .joint-poster-member{flex:0 1 12%;max-width:12%}
+.joint-sections .executive-poster-section .joint-member-name span{font-size:clamp(5px,1vw,10px)}
+@media(max-width:600px){.joint-sections{top:11%;bottom:39%;gap:1%}.joint-sections .joint-poster-member{flex-basis:14%;max-width:14%}.joint-sections .executive-poster-section .joint-poster-member{flex-basis:12%;max-width:12%}}
