@@ -183,3 +183,13 @@
 .joint-sections .executive-poster-section .joint-poster-row{justify-content:flex-start;gap:1.5%;width:100%}
 .joint-sections .executive-poster-section .joint-poster-member{flex:0 1 12.8%;max-width:12.8%}
 @media(max-width:600px){.joint-sections .executive-poster-section{padding-left:7%}.joint-sections .executive-poster-section h2{font-size:clamp(5px,1.2vw,9px)}}
+
+.poster-msf-heading{position:absolute;z-index:5;top:1.5%;left:16%;right:9%;height:8.5%;display:flex;align-items:center;gap:2%;pointer-events:none}
+.poster-msf-logo{font-family:Georgia,serif;font-size:clamp(25px,8.5vw,92px);line-height:1;color:#07577d;letter-spacing:-.08em;flex:0 0 auto}
+.poster-malayalam-title{flex:1;min-width:0;font-family:system-ui,sans-serif;font-weight:900;font-size:clamp(9px,2.6vw,29px);line-height:1.15;color:#07864b;overflow-wrap:anywhere;text-align:left}
+.header-editor{padding:14px 0;border-bottom:1px solid #d5e4d9;margin-bottom:15px}
+.header-editor h2{font-size:18px;margin:0 0 10px}
+.header-editor label{display:grid;gap:7px;font-weight:700;font-size:13px}
+.header-editor textarea{width:100%;min-height:74px;padding:11px;border:1px solid #cbdcd0;border-radius:9px;font:inherit;resize:vertical}
+.header-editor small{display:block;color:#667b6c;margin-top:8px}
+@media(max-width:600px){.poster-msf-heading{left:15%;right:7%}.poster-msf-logo{font-size:clamp(24px,9vw,56px)}.poster-malayalam-title{font-size:clamp(8px,2.5vw,17px)}}
