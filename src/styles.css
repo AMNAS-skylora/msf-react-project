@@ -221,3 +221,20 @@
 .joint-sections .joint-poster-section:not(.executive-poster-section) h2 .committee-heading-pill{display:inline-block;flex:0 0 auto;position:relative;z-index:1;background:linear-gradient(180deg,#089c38 0%,#00752b 100%);border:2px solid #fff;border-radius:999px;padding:4px clamp(10px,2vw,24px);box-shadow:0 2px 4px #0b582c44;line-height:1.1;font-weight:900}
 .joint-sections .executive-poster-section h2 .committee-heading-pill{display:inline-block;font-weight:900}
 @media(max-width:600px){.joint-sections .joint-poster-section:not(.executive-poster-section) h2 .committee-heading-pill{padding:3px 9px;border-width:1px}}
+
+/* FIX: executive label must not inherit the full-width horizontal heading pill. */
+.joint-sections .executive-poster-section{position:relative;box-sizing:border-box;padding-left:7%;width:100%;min-width:0;display:flex;flex-direction:column;gap:2px}
+.joint-sections .executive-poster-section > h2{position:absolute;top:0;bottom:0;left:0;right:auto;transform:none;writing-mode:initial;box-sizing:border-box;width:5.5%;height:100%;min-height:0;max-height:100%;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;filter:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:visible}
+.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{content:"";display:block;flex:1 1 0;min-height:4px;width:2px;height:auto;background:#078e39}
+.joint-sections .executive-poster-section > h2 .committee-heading-pill{position:relative;display:block;flex:0 0 auto;max-height:75%;max-width:none;width:auto;padding:8px 3px;margin:0;border-radius:999px;background:#078c35;border:1px solid #fff;box-shadow:0 1px 3px #165e3344;writing-mode:vertical-rl;transform:rotate(180deg);font-size:clamp(6px,1.25vw,13px);font-weight:900;line-height:1;white-space:nowrap;text-shadow:none;color:white}
+.joint-sections .executive-poster-section .joint-poster-row{position:relative;display:flex;justify-content:flex-start;gap:1.5%;margin:0;width:100%;min-width:0}
+.joint-sections .executive-poster-section .joint-poster-member{flex:0 0 12.7%;max-width:12.7%;min-width:0}
+.joint-sections .executive-poster-section .joint-square{width:100%;aspect-ratio:1;min-height:0}
+.joint-sections .executive-poster-section .joint-member-name{margin:2px 0 0;line-height:1.1}
+.joint-sections .joint-poster-section:not(.executive-poster-section) > h2{position:relative;flex:0 0 auto;height:auto;min-height:0;max-height:none;margin:0 0 4px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;transform:none;writing-mode:initial}
+.joint-sections .joint-poster-section:not(.executive-poster-section) .joint-poster-row{position:relative;margin:0 0 7px;gap:2.5%;align-items:flex-start}
+.joint-sections .joint-poster-section:not(.executive-poster-section) .joint-poster-member{flex:0 0 14%;max-width:14%;min-width:0}
+.joint-sections .joint-poster-member .joint-square{box-sizing:border-box;display:block;width:100%;height:auto;aspect-ratio:1;min-height:0}
+.joint-sections .joint-poster-member .joint-square img{display:block;width:100%;height:100%;object-fit:cover}
+.joint-sections .joint-member-name{position:relative;display:flex;flex-direction:column;min-height:0;gap:0}
+@media(max-width:600px){.joint-sections .executive-poster-section > h2 .committee-heading-pill{font-size:clamp(5px,1.25vw,9px);padding:5px 2px}.joint-sections .joint-poster-section:not(.executive-poster-section) .joint-poster-row{margin-bottom:5px}}
