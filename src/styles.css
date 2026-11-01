@@ -175,3 +175,11 @@
 .joint-sections .executive-poster-section .joint-poster-member{flex:0 1 12%;max-width:12%}
 .joint-sections .executive-poster-section .joint-member-name span{font-size:clamp(5px,1vw,10px)}
 @media(max-width:600px){.joint-sections{top:11%;bottom:39%;gap:1%}.joint-sections .joint-poster-member{flex-basis:14%;max-width:14%}.joint-sections .executive-poster-section .joint-poster-member{flex-basis:12%;max-width:12%}}
+
+/* Executive Members label sits vertically on the LEFT, as in the reference poster. */
+.joint-sections .executive-poster-section{position:relative;padding-left:7%;box-sizing:border-box;align-items:stretch}
+.joint-sections .executive-poster-section h2{position:absolute;left:0;top:0;bottom:0;width:5.5%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;margin:0;padding:0;background:transparent;color:#fff;font-size:clamp(6px,1.25vw,14px);line-height:1;font-weight:800;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;white-space:nowrap}
+.joint-sections .executive-poster-section h2::before,.joint-sections .executive-poster-section h2::after{content:"";display:block;flex:1;width:2px;height:auto;min-height:0;background:#087c36}
+.joint-sections .executive-poster-section .joint-poster-row{justify-content:flex-start;gap:1.5%;width:100%}
+.joint-sections .executive-poster-section .joint-poster-member{flex:0 1 12.8%;max-width:12.8%}
+@media(max-width:600px){.joint-sections .executive-poster-section{padding-left:7%}.joint-sections .executive-poster-section h2{font-size:clamp(5px,1.2vw,9px)}}
