@@ -295,7 +295,7 @@ export default function App() {
           </section>})}
         </div>
       </section>
-      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label><small>രണ്ട് വരികളായി കാണിക്കും. വരി മാറ്റാൻ Enter അമർത്തുക. </small><small>MSF logo and the remaining poster design stay unchanged.</small></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
+      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
