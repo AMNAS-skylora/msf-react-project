@@ -16,14 +16,12 @@ const toDataURL = file => new Promise((resolve, reject) => {
 });
 function CropDialog({ src, onSave, onClose }) {
   const canvasRef = useRef(null);
-  const imageRef = useRef(null);
   const pointers = useRef(new Map());
   const gesture = useRef(null);
   const [box, setBox] = useState({ x: 15, y: 10, w: 70, h: 80 });
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({x:0,y:0});
   const [busy, setBusy] = useState(false);
-  const [mode,setMode] = useState('move');
   function pointerDown(e) {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -76,7 +74,7 @@ function CropDialog({ src, onSave, onClose }) {
     }catch{alert('Unable to crop this image.');}finally{setBusy(false);}
   }
   return <div className="crop-overlay" role="dialog" aria-modal="true" aria-label="Crop portrait">
-    <div className="crop-dialog"><h2>Crop portrait</h2><p>Drag photo to move. Drag crop edges or corners to resize. Pinch to zoom.</p>
+    <div className="crop-dialog"><div className="crop-topbar"><h2>Crop</h2><button type="button" aria-label="Close crop editor" onClick={onClose}>×</button></div>
       <div className="touch-crop" ref={canvasRef} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
         <img src={src} draggable={false} alt="Photo to crop" style={{transform:`translate(${offset.x}%,${offset.y}%) scale(${zoom})`}} />
         <div className="crop-selection" style={{left:box.x+'%',top:box.y+'%',width:box.w+'%',height:box.h+'%'}}>
@@ -84,7 +82,7 @@ function CropDialog({ src, onSave, onClose }) {
         </div>
       </div>
       <label>Zoom <input type="range" min="1" max="4" step=".05" value={zoom} onChange={e=>setZoom(Number(e.target.value))}/></label>
-      <div className="actions"><button onClick={onClose}>Cancel</button><button disabled={busy} onClick={save}>{busy?'Cropping…':'Apply crop'}</button></div>
+      <div className="crop-actions"><button type="button" onClick={onClose}>Cancel</button><button type="button" className="crop-apply" disabled={busy} onClick={save}>{busy?'Cropping…' :'Done'}</button></div>
     </div>
   </div>;
 }
@@ -175,7 +173,7 @@ export default function App() {
           <div className="poster-name"><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>
         </div>)}</div>
       </section>
-      <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button><p>Upload, crop and remove backgrounds for the three office bearers. Changes preview instantly on the frame.</p>
+      <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <label>Name<input value={p.name} onChange={e=>update(i,{name:e.target.value})} maxLength={40}/></label>
