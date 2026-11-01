@@ -114,7 +114,11 @@ export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
+  const [jointGroups,setJointGroups]=useState({'Vice Presidents':[],'Joint Secretaries':[]});
+  const [jointReady,setJointReady]=useState(false);
   const [jointRole,setJointRole]=useState('Joint Secretaries');
+  const groupNames=['Vice Presidents','Joint Secretaries'];
+  const changeGroup=role=>{setJointGroups(g=>({...g,[jointRole]:joint}));setJointRole(role);setJoint(jointGroups[role]||[]);setJointSelected(null);};
   const jointUploads=useRef([]);
   const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
   const [jointSelected,setJointSelected]=useState(null);
@@ -186,12 +190,12 @@ export default function App() {
     const request=indexedDB.open('msf-poster-editor',1);
     request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft','readwrite');tx.objectStore('draft').put(people,'leadership');tx.oncomplete=()=>db.close();};
   },[people,ready]);
-  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){setJoint(Array.isArray(saved.members)?saved.members:[]);setJointRole(saved.role||'Joint Secretaries');}}catch{}},[]);
-  useEffect(()=>{try{localStorage.setItem('msf-joint-members',JSON.stringify({members:joint,role:jointRole}));}catch{}},[joint,jointRole]);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){const groups=saved.groups||{'Vice Presidents':[], 'Joint Secretaries':[]};if(Array.isArray(saved.members))groups[saved.role==='Joint Presidents'?'Vice Presidents':(saved.role||'Joint Secretaries')]=saved.members;setJointGroups(groups);setJoint(groups['Joint Secretaries']||[]);setJointRole('Joint Secretaries');}}catch{}setJointReady(true);},[]);
+  useEffect(()=>{if(!jointReady)return;const groups={...jointGroups,[jointRole]:joint};try{localStorage.setItem('msf-joint-members',JSON.stringify({groups}));}catch{}},[joint,jointRole,jointGroups,jointReady]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-    setJoint([]);setJointRole('Joint Secretaries');setMessage('All changes reset.');
+    setJoint([]);setJointGroups({'Vice Presidents':[],'Joint Secretaries':[]});setJointRole('Joint Secretaries');setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
   async function upload(i,e) {
@@ -268,7 +272,7 @@ export default function App() {
         {joint.length>0&&<div className="joint-poster-section">
           <h2>{jointRole.toUpperCase()}</h2>
           {(()=>{let start=0;return jointRows(joint.length).map((count,row)=>{const members=joint.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{members.map((p,k)=><div className="joint-poster-member" key={row+'-'+k}>
-            <button type="button" className="joint-square" onClick={()=>setJointSelected(joint.indexOf(p))} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
+            <button type="button" className="joint-square" onClick={()=>{const index=joint.indexOf(p);setJointSelected(index);if(!p.photo)jointUploads.current[index]?.click();}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
             {jointSelected===joint.indexOf(p)&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:joint.indexOf(p),src:p.photo,square:true}):jointUploads.current[joint.indexOf(p)]?.click()}><Crop size={13}/> Crop</button>}
             <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
           </div>)}</div>})})()}
@@ -277,6 +281,7 @@ export default function App() {
       <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
+          <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
           <label>Name<input ref={el=>nameInputs.current[i]=el} value={p.name} onChange={e=>update(i,{name:e.target.value,nameLayout:'auto'})} maxLength={40}/></label>
           <div className="name-layout-settings">
             <label>Lines
@@ -307,11 +312,12 @@ export default function App() {
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
         <section className="joint-editor"><h2>Joint Committee</h2>
-          <label>Heading<select value={jointRole} onChange={e=>setJointRole(e.target.value)}><option>Joint Secretaries</option><option>Joint Presidents</option></select></label>
-          <p>{joint.length} members</p>
-          <button type="button" onClick={()=>setJoint(v=>[...v,{name:'',photo:'',nameLayout:'auto',boldLine:'both'}])}>+ Add Member</button>
+          <label>Heading<select value={jointRole} onChange={e=>changeGroup(e.target.value)}><option>Joint Secretaries</option><option>Vice Presidents</option></select></label>
+          <p>{joint.length} members · New members appear first</p>
+          <button type="button" onClick={()=>setJoint(v=>[{name:'',photo:'',nameLayout:'auto',boldLine:'both'},...v])}>+ Add Member</button>
           {joint.map((p,i)=><div className="joint-editor-member" key={i}>
             <div className="joint-editor-heading"><strong>Member {i+1}</strong><div className="joint-order-actions"><button type="button" disabled={i===0} onClick={()=>moveJoint(i,i-1)} aria-label="Move member left">←</button><button type="button" disabled={i===joint.length-1} onClick={()=>moveJoint(i,i+1)} aria-label="Move member right">→</button><button type="button" onClick={()=>{setJoint(v=>v.filter((_,j)=>j!==i));setJointSelected(null)}}>Remove</button></div></div>
+            <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt="Uploaded member portrait"/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
             <label>Name<input value={p.name} maxLength={60} onChange={e=>updateJoint(i,{name:e.target.value,nameLayout:'auto'})}/></label>
             <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
             {p.nameLayout==='manual'&&<><label>Top<input value={p.line1||''} onChange={e=>updateJoint(i,{line1:e.target.value})}/></label><label>Bottom<input value={p.line2||''} onChange={e=>updateJoint(i,{line2:e.target.value})}/></label></>}
