@@ -32,3 +32,7 @@
 .position-controls label{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .position-controls input{width:65%;margin:0;accent-color:#087b3d}
 @media(max-width:850px){.canvas-label strong{font-size:clamp(10px,3vw,22px)}.canvas-label small{font-size:clamp(7px,1.8vw,11px)}}
+
+.canvas-photo.active{outline:2px dashed #fff;outline-offset:2px}
+.canvas-photo .photo-selection-handle{right:-13px;bottom:-13px;width:28px;height:28px;border:3px solid white;border-radius:8px;background:#087b3d;cursor:nwse-resize;pointer-events:auto;touch-action:none;z-index:5;box-shadow:0 2px 8px #0004}
+.canvas-photo{overflow:visible;touch-action:none}
