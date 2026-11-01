@@ -92,21 +92,42 @@ export default function App() {
   const [selected,setSelected]=useState(null);
   const [clipboard,setClipboard]=useState(null);
   const drag=useRef(null);
+  const touches=useRef(new Map());
   const frameRef=useRef(null);
   const position=(p,i)=>({x:p.x??(8+i*30),y:p.y??63,w:p.w??27});
   function dragStart(e,i){
     if(!people[i].photo)return;
     e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);
     setSelected(i);
-    drag.current={id:e.pointerId,i,startX:e.clientX,startY:e.clientY,...position(people[i],i)};
+    touches.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const pos=position(people[i],i);
+    const resizing=e.target.closest('[data-resize]')!==null;
+    drag.current={id:e.pointerId,i,startX:e.clientX,startY:e.clientY,...pos,resizing,pinchDistance:null};
   }
   function dragMove(e){
-    const d=drag.current;if(!d||d.id!==e.pointerId)return;
+    if(!touches.current.has(e.pointerId))return;
+    touches.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const d=drag.current;if(!d)return;
     const bounds=frameRef.current?.getBoundingClientRect();if(!bounds)return;
+    if(touches.current.size===2){
+      const points=[...touches.current.values()];
+      const distance=Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);
+      if(!d.pinchDistance){d.pinchDistance=distance;d.pinchWidth=position(people[d.i],d.i).w;}
+      update(d.i,{w:Math.max(8,Math.min(85,d.pinchWidth*distance/d.pinchDistance))});
+      return;
+    }
+    if(d.id!==e.pointerId)return;
     const dx=(e.clientX-d.startX)/bounds.width*100,dy=(e.clientY-d.startY)/bounds.height*100;
-    update(d.i,{x:Math.max(0,Math.min(100-d.w,d.x+dx)),y:Math.max(0,Math.min(90,d.y+dy))});
+    if(d.resizing)update(d.i,{w:Math.max(8,Math.min(85,d.w+dx))});
+    else update(d.i,{x:Math.max(0,Math.min(100-d.w,d.x+dx)),y:Math.max(0,Math.min(90,d.y+dy))});
   }
-  function dragEnd(e){if(drag.current?.id===e.pointerId)drag.current=null;}
+  function dragEnd(e){touches.current.delete(e.pointerId);if(!touches.current.size)drag.current=null;}
+  function zoomPhoto(e,i){
+    if(selected!==i)return;
+    e.preventDefault();
+    const p=position(people[i],i);
+    update(i,{w:Math.max(8,Math.min(85,p.w-(e.deltaY>0?2:-2)))});
+  }
   function copyPhoto(i){const p=people[i];setClipboard({photo:p.photo,w:position(p,i).w});setMessage('Photo copied. Select a person and tap Paste.');}
   function pastePhoto(i){if(!clipboard)return;update(i,{photo:clipboard.photo,w:clipboard.w});setSelected(i);setMessage('Photo pasted.');}
 
@@ -191,9 +212,9 @@ export default function App() {
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
         {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
           style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%'}}
-          onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd}>
+          onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
           <img src={p.photo} alt={p.name} draggable={false}/>
-          {selected===i&&<span className="photo-selection-handle" aria-hidden="true"/>}
+          {selected===i&&<span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>}
         </div>})}
         <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><strong>{p.name.toUpperCase()}</strong></div>)}</div>
       </section>
@@ -210,8 +231,8 @@ export default function App() {
             <button type="button" onClick={()=>copyPhoto(i)} disabled={!p.photo}>Copy</button>
             <button type="button" onClick={()=>pastePhoto(i)} disabled={!clipboard}>Paste</button>
             <button type="button" onClick={()=>setSelected(selected===i?null:i)}>{selected===i?'Done':'Position'}</button>
-            <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload</button>
-            <button onClick={()=>setCrop({i,src:p.photo})} disabled={!p.photo}><Scissors size={16}/> Crop</button>
+            <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload Image</button>
+            <button onClick={()=>setCrop({i,src:p.photo})} disabled={!p.photo}><Scissors size={16}/> Crop / Zoom</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
           </div>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
