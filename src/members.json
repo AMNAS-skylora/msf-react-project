@@ -1,0 +1,170 @@
+[
+  {
+    "name": "Hanan",
+    "role": "Secretary",
+    "group": "leadership",
+    "image": "assets/hanan-1.webp"
+  },
+  {
+    "name": "Inshad",
+    "role": "President",
+    "group": "leadership",
+    "image": "assets/inshad-2.webp"
+  },
+  {
+    "name": "Habeeb",
+    "role": "Treasurer",
+    "group": "leadership",
+    "image": "assets/habeeb-3.webp"
+  },
+  {
+    "name": "Nihal",
+    "role": "Vice President",
+    "group": "vice",
+    "image": "assets/nihal-4.webp"
+  },
+  {
+    "name": "Azka",
+    "role": "Vice President",
+    "group": "vice",
+    "image": "assets/azka-5.webp"
+  },
+  {
+    "name": "Farhan",
+    "role": "Vice President",
+    "group": "vice",
+    "image": "assets/farhan-6.webp"
+  },
+  {
+    "name": "Shifin",
+    "role": "Vice President",
+    "group": "vice",
+    "image": "assets/shifin-7.webp"
+  },
+  {
+    "name": "Ajmal",
+    "role": "Joint Secretary",
+    "group": "joint",
+    "image": "assets/ajmal-8.webp"
+  },
+  {
+    "name": "Sabeer",
+    "role": "Joint Secretary",
+    "group": "joint",
+    "image": "assets/sabeer-9.webp"
+  },
+  {
+    "name": "Sinan",
+    "role": "Joint Secretary",
+    "group": "joint",
+    "image": "assets/sinan-10.webp"
+  },
+  {
+    "name": "Muhthaj",
+    "role": "Joint Secretary",
+    "group": "joint",
+    "image": "assets/muhthaj-11.webp"
+  },
+  {
+    "name": "Junaid",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/junaid-12.webp"
+  },
+  {
+    "name": "Shihan",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/shihan-13.webp"
+  },
+  {
+    "name": "Shameem",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/shameem-14.webp"
+  },
+  {
+    "name": "Faris",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/faris-15.webp"
+  },
+  {
+    "name": "Lukman",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/lukman-16.webp"
+  },
+  {
+    "name": "Hamnas",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/hamnas-17.webp"
+  },
+  {
+    "name": "Febin",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/febin-18.webp"
+  },
+  {
+    "name": "Naseeb",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/naseeb-19.webp"
+  },
+  {
+    "name": "Mubashir",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/mubashir-20.webp"
+  },
+  {
+    "name": "Risal",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/risal-21.webp"
+  },
+  {
+    "name": "Imthiyaz",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/imthiyaz-22.webp"
+  },
+  {
+    "name": "Anas",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/anas-23.webp"
+  },
+  {
+    "name": "Shifin",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/shifin-24.webp"
+  },
+  {
+    "name": "Shabab",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/shabab-25.webp"
+  },
+  {
+    "name": "Aflah",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/aflah-26.webp"
+  },
+  {
+    "name": "Nihal",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/nihal-27.webp"
+  },
+  {
+    "name": "Fahinshan",
+    "role": "Executive Member",
+    "group": "executive",
+    "image": "assets/fahinshan-28.webp"
+  }
+]
