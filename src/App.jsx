@@ -3,6 +3,15 @@ import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import './styles.css';
 
+const splitMalayalamHeading = value => {
+  const text=String(value||'').trim();
+  if(text.includes('\n')) {const parts=text.split('\n');return [parts[0].trim(),parts.slice(1).join(' ').trim()];}
+  const words=text.split(/\s+/).filter(Boolean);
+  if(words.length<2)return [text,''];
+  const last=words.slice(-2).join(' ');
+  const first=words.slice(0,-2).join(' ');
+  return first?[first,last]:[words[0],words.slice(1).join(' ')];
+};
 const INITIAL = [
   { role: 'President', member: MEMBERS.find(m => m.role === 'President') },
   { role: 'Secretary', member: MEMBERS.find(m => m.role === 'Secretary') },
@@ -227,7 +236,7 @@ export default function App() {
       const bg=await loadImage(`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`);
       ctx.drawImage(bg,0,0,1050,1472);
       ctx.textAlign='left';ctx.fillStyle='#07577d';ctx.font='bold 134px Georgia';ctx.fillText('msf',175,133);
-      ctx.fillStyle='#087d48';fitText(ctx,headerText,590,49,'bold');ctx.fillText(headerText,438,85,590);
+      const headingLines=splitMalayalamHeading(headerText);ctx.fillStyle='#087d48';ctx.textAlign='left';for(let h=0;h<headingLines.length;h++){const line=headingLines[h];fitText(ctx,line,585,h===1?59:47,'900');ctx.font=ctx.font.replace('Arial','"Noto Sans Malayalam",sans-serif');ctx.fillText(line,438,65+h*62,585);}
       for(let i=0;i<3;i++){
         const p=people[i],pos=position(p,i);
         try{
@@ -260,7 +269,7 @@ export default function App() {
     <div className="workspace">
       <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
-        <header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{headerText}</span></header>
+        <header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>
         {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
           style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
           onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
@@ -286,7 +295,7 @@ export default function App() {
           </section>})}
         </div>
       </section>
-      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder="മലയാളം തലക്കെട്ട്"/></label><small>MSF logo and the remaining poster design stay unchanged.</small></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
+      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label><small>രണ്ട് വരികളായി കാണിക്കും. വരി മാറ്റാൻ Enter അമർത്തുക. </small><small>MSF logo and the remaining poster design stay unchanged.</small></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
