@@ -112,6 +112,8 @@ function CropDialog({ src, onSave, onClose, square=false }) {
 }
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
+  const [headerText,setHeaderText]=useState(()=>{try{return localStorage.getItem('msf-malayalam-heading')??'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}catch{return 'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}});
+  useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
   const [jointGroups,setJointGroups]=useState({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});
@@ -195,6 +197,7 @@ export default function App() {
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
+    setHeaderText('മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം');
     setJoint([]);setJointGroups({'Vice Presidents':[],'Joint Secretaries':[]});setJointRole('Joint Secretaries');setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
@@ -223,6 +226,8 @@ export default function App() {
       const ctx=canvas.getContext('2d');
       const bg=await loadImage(`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`);
       ctx.drawImage(bg,0,0,1050,1472);
+      ctx.textAlign='left';ctx.fillStyle='#07577d';ctx.font='bold 134px Georgia';ctx.fillText('msf',175,133);
+      ctx.fillStyle='#087d48';fitText(ctx,headerText,590,49,'bold');ctx.fillText(headerText,438,85,590);
       for(let i=0;i<3;i++){
         const p=people[i],pos=position(p,i);
         try{
@@ -255,6 +260,7 @@ export default function App() {
     <div className="workspace">
       <section className="frame" ref={frameRef} aria-label="MSF poster frame">
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
+        <header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{headerText}</span></header>
         {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
           style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
           onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
@@ -280,7 +286,7 @@ export default function App() {
           </section>})}
         </div>
       </section>
-      <aside className="editor-panel"><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
+      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder="മലയാളം തലക്കെട്ട്"/></label><small>MSF logo and the remaining poster design stay unchanged.</small></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
