@@ -314,3 +314,14 @@
 .poster-malayalam-title{flex:0 1 auto;width:auto;max-width:74%;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;gap:0;font-family:'Noto Sans Malayalam','Nirmala UI',sans-serif;font-weight:900}
 .poster-malayalam-title .malayalam-heading-line,.poster-malayalam-title .line-1,.poster-malayalam-title .line-2{width:auto;max-width:100%;font-size:5.2cqw;line-height:1.15;font-weight:900;text-align:left;overflow-wrap:anywhere;text-shadow:.5px 0 currentColor,-.5px 0 currentColor}
 @media(max-width:600px){.poster-msf-heading{left:0;right:0;width:100%;height:11%;gap:3.5%;padding:0 3%;justify-content:center}.poster-msf-logo{font-size:11cqw}.poster-malayalam-title{width:auto;max-width:74%;align-items:flex-start;text-align:left}.poster-malayalam-title .malayalam-heading-line,.poster-malayalam-title .line-1,.poster-malayalam-title .line-2{font-size:5.2cqw;text-align:left}}
+
+/* Executive Members: breathing room between badge, photos and the two rows. */
+.joint-sections .executive-poster-section{box-sizing:border-box;padding:1.2% 1.5% 1.8% 12%;gap:0;min-height:0;align-items:stretch}
+.joint-sections .executive-poster-section > h2{left:1%;top:0;bottom:0;height:100%;width:8.5%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{content:"";display:block;flex:1 1 0;width:3px;min-height:8px;background:#087e36}
+.joint-sections .executive-poster-section > h2 .committee-heading-pill{flex:0 0 auto;max-height:calc(100% - 18px);padding:7px 4px;line-height:1.08;font-weight:900}
+.joint-sections .executive-poster-section .joint-poster-row{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));column-gap:2%;row-gap:0;width:100%;margin:0 0 3.5%;align-items:start}
+.joint-sections .executive-poster-section .joint-poster-row:last-child{margin-bottom:0}
+.joint-sections .executive-poster-section .joint-poster-member{min-width:0;width:100%;max-width:100%}
+.joint-sections .executive-poster-section .joint-member-name{margin-top:3px}
+@media(max-width:600px){.joint-sections .executive-poster-section{padding:1.2% 1.5% 1.8% 12%}.joint-sections .executive-poster-section > h2{left:1%;width:8.5%}.joint-sections .executive-poster-section .joint-poster-row{column-gap:2%;margin-bottom:3.5%}.joint-sections .executive-poster-section > h2::before,.joint-sections .executive-poster-section > h2::after{min-height:6px}}
