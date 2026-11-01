@@ -203,3 +203,16 @@
 .poster-malayalam-title .line-1{color:#116d74;font-size:clamp(10px,2.55vw,29px)}
 .poster-malayalam-title .line-2{color:#07854b;font-size:clamp(12px,3.4vw,39px);font-weight:900}
 @media(max-width:600px){.poster-msf-heading{top:1%;left:17%;right:7%;height:9.3%}.poster-msf-logo{font-size:clamp(29px,10vw,62px)}.poster-malayalam-title .line-1{font-size:clamp(9px,2.55vw,17px)}.poster-malayalam-title .line-2{font-size:clamp(11px,3.3vw,22px)}}
+
+/* Poster reference: bold green curved capsules for group titles. */
+.joint-sections .joint-poster-section h2{position:relative;display:flex;align-items:center;justify-content:center;gap:0;width:100%;min-height:clamp(16px,3vw,34px);margin:0 0 4px;color:#fff;font-family:Arial,sans-serif;font-size:clamp(9px,1.8vw,20px);font-weight:900;letter-spacing:-.025em;line-height:1.15;white-space:nowrap;text-shadow:0 1px 1px #00471f55}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2::before,.joint-sections .joint-poster-section:not(.executive-poster-section) h2::after{content:"";display:block;flex:1;min-width:0;height:3px;background:#087e36}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2{isolation:isolate}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2::selection{background:#087e36}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2{filter:drop-shadow(0 2px 2px #145a2a22)}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2{background:linear-gradient(to bottom,transparent 0%,transparent 100%)}
+.joint-sections .joint-poster-section:not(.executive-poster-section) h2::first-line{font-weight:900}
+.joint-sections .executive-poster-section h2{border-radius:999px;background:linear-gradient(90deg,#04752a,#079738);border:2px solid white;box-shadow:0 2px 5px #0b582c55;padding:7px 3px;font-weight:900;color:#fff}
+.joint-sections .executive-poster-section h2::before,.joint-sections .executive-poster-section h2::after{background:#087e36}
+.joint-sections .joint-poster-member .joint-square{border:2px solid #fff;border-radius:9px;box-shadow:0 2px 4px #124c2c30}
+.joint-sections .joint-member-name span{font-weight:900;color:#092f51;text-shadow:0 0 .2px currentColor}
