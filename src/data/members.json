@@ -1,0 +1,21 @@
+[
+  {
+    "role": "President",
+    "name": "",
+    "image": "members/president.webp",
+    "group": "leadership"
+  },
+  {
+    "role": "General Secretary",
+    "name": "",
+    "image": "members/general-secretary.webp",
+    "group": "leadership"
+  },
+  {
+    "role": "Treasurer",
+    "name": "",
+    "image": "members/treasurer.webp",
+    "group": "leadership"
+  }
+]
+

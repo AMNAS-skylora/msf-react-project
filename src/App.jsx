@@ -139,6 +139,8 @@ export default function App() {
   const jointUploads=useRef([]);
   const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
   const [jointSelected,setJointSelected]=useState(null);
+  const [selected,setSelected]=useState(null);
+  const [posterPage,setPosterPage]=useState(0);
   const jointRows=(n,columns=4)=>{const rowCount=Math.ceil(n/columns);if(!rowCount)return [];const base=Math.floor(n/rowCount),extra=n%rowCount;return Array.from({length:rowCount},(_,i)=>base+(i<extra?1:0));};
   const executiveMembers=jointRole==='Executive Members'?joint:(jointGroups['Executive Members']||[]);
   const posterPageCount=Math.max(1,Math.ceil(executiveMembers.length/EXECUTIVE_PAGE_SIZE));
@@ -146,9 +148,6 @@ export default function App() {
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
-
-  const [selected,setSelected]=useState(null);
-  const [posterPage,setPosterPage]=useState(0);
   const drag=useRef(null);
   const touches=useRef(new Map());
   const frameRef=useRef(null);
