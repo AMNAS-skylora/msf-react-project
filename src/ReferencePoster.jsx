@@ -33,7 +33,7 @@ function Portrait({ person, onClick, role, type = 'member' }) {
       <button
         type="button"
         className={'ref-portrait' + (isCutout ? ' ref-portrait-cutout' : '') + (isCutout && person.photoMode === 'popout' ? ' ref-portrait-popout' : '')}
-        style={{'--portrait-overhang': Math.min(40,Math.max(0,Number(person.photoPopout) || 15)) + '%'}}
+        style={{'--portrait-overhang': Math.min(40,Math.max(0,Number(person.photoPopout ?? 15))) + '%'}}
         onClick={onClick}
         aria-label={(person.photo ? 'Crop photo: ' : 'Upload photo: ') + (person.name || role)}
       >
