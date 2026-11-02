@@ -1,0 +1,169 @@
+/* Photo adjust overlay: on-device, touch-first, non-destructive editing. */
+.portrait-adjust-overlay{
+  position:fixed;inset:0;z-index:1200;
+  background:rgba(11,30,19,.74);
+  display:flex;align-items:center;justify-content:center;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+  overscroll-behavior:contain;
+}
+.portrait-adjust-dialog{
+  box-sizing:border-box;
+  width:min(100%,520px);
+  max-height:min(100%,900px);
+  display:flex;flex-direction:column;
+  gap:12px;
+  overflow-y:auto;
+  background:#fff;
+  color:#173925;
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 20px 90px #0005;
+  font-family:Inter,"Noto Sans Malayalam",sans-serif;
+}
+.portrait-adjust-dialog *{box-sizing:border-box}
+.portrait-adjust-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
+.portrait-adjust-heading strong{font-size:18px;font-weight:800;display:block;color:#18492d}
+.portrait-adjust-heading small{font-size:12px;color:#607865;display:block;margin-top:3px}
+.portrait-adjust-dialog button{font:inherit;cursor:pointer}
+.portrait-adjust-close{
+  display:flex;align-items:center;justify-content:center;
+  width:42px;height:42px;flex:none;border:1px solid #dfebe1;
+  color:#29583a;background:#f6faf7;border-radius:12px;
+}
+.portrait-adjust-help{margin:0;font-size:12px;line-height:1.45;color:#617869}
+.portrait-adjust-preview{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  width:min(100%,310px);
+  height:auto;aspect-ratio:4/5;
+  flex:0 0 auto;
+  margin:0 auto;
+  background:repeating-conic-gradient(#edf0ee 0% 25%,#fff 0% 50%) 50%/16px 16px;
+  border:1px solid #d2e6d7;
+  border-radius:16px;
+  padding:12px;
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  overflow:hidden;
+}
+.portrait-adjust-preview:active{cursor:grabbing}
+.portrait-adjust-shape{
+  width:84%;height:92%;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  border-radius:45% 45% 28% 28% / 37% 37% 24% 24%;
+  background:
+    radial-gradient(ellipse at 30% 15%,rgba(226,250,191,.52),transparent 55%),
+    linear-gradient(155deg,#a5d575 0%,#7abf59 52%,#5caa48 100%);
+  box-shadow:inset 0 0 0 2px rgba(31,112,43,.26);
+  -webkit-mask-image:-webkit-radial-gradient(white,black);
+  pointer-events:none;
+}
+.portrait-adjust-shape img{
+  width:100%;height:100%;max-width:100%;max-height:100%;
+  display:block;
+  flex:none;
+  object-fit:cover;object-position:50% 28%;
+  transform-origin:center center;
+  user-select:none;
+  pointer-events:none;
+  -webkit-user-drag:none;
+}
+.portrait-adjust-shape img.portrait-adjust-cutout{object-fit:contain;object-position:center bottom}
+.portrait-adjust-crosshair{
+  position:absolute;width:20px;height:20px;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  border:1px solid #ffffffae;border-radius:50%;
+  box-shadow:0 0 0 1px #2d6b4044;
+  pointer-events:none;
+  opacity:.45;
+}
+.portrait-adjust-control{
+  display:flex;flex-direction:column;gap:9px;
+}
+.portrait-adjust-control-label{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;font-weight:700}
+.portrait-adjust-control-label span{font-size:13px;color:#147643;font-variant-numeric:tabular-nums}
+.portrait-adjust-zoom-row{display:flex;align-items:center;gap:12px}
+.portrait-adjust-zoom-row button{
+  width:42px;height:42px;flex:none;
+  border:1px solid #d1e6d5;
+  border-radius:11px;
+  color:#156d3a;background:#f1f9f3;
+  display:flex;align-items:center;justify-content:center;
+}
+.portrait-adjust-zoom-row input{
+  flex:1;
+  accent-color:#158445;
+  height:28px;
+  min-width:0;
+}
+.portrait-adjust-toolbar{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px
+}
+.portrait-adjust-toolbar button{
+  min-width:0;min-height:44px;padding:9px 5px;
+  border:1px solid #d6e7da;border-radius:10px;
+  background:#fff;color:#215b39;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  font-size:12px;font-weight:700;
+}
+.portrait-adjust-background{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 12px;border:1px solid #d3e7d5;border-radius:12px;background:#f2f9f3;
+}
+.portrait-adjust-background label{
+  min-width:0;display:flex;align-items:center;gap:8px;
+  font-size:12px;line-height:1.4;font-weight:650;
+}
+.portrait-adjust-background label input{width:18px;height:18px;flex:none;accent-color:#197e46}
+.portrait-adjust-background button{
+  flex:none;min-height:40px;padding:7px 11px;
+  background:#197f46;color:white;border:0;border-radius:9px;
+  font-size:12px;font-weight:700;
+  display:flex;gap:5px;align-items:center;justify-content:center;
+}
+.portrait-adjust-background button:disabled{opacity:.55;cursor:not-allowed}
+.portrait-adjust-error{
+  border-radius:9px;background:#fff4ec;color:#a04516;margin:0;padding:10px;
+  font-size:12px;line-height:1.5;
+}
+.portrait-adjust-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:9px}
+.portrait-adjust-actions button{
+  min-height:49px;padding:9px 13px;border-radius:11px;
+  border:1px solid #c9decf;
+  background:#fff;color:#2d573b;
+  font-weight:750;font-size:14px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.portrait-adjust-actions button:last-child{
+  background:#108447;border-color:#108447;color:#fff;
+}
+.portrait-adjust-actions button:disabled{opacity:.56;cursor:not-allowed}
+.auto-removal-setting{
+  padding:13px 14px;margin:0 0 16px;
+  background:#f3f9f4;border:1px solid #d8e9d9;border-radius:12px;
+}
+.auto-removal-setting label{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.45;font-weight:700}
+.auto-removal-setting input{width:18px;height:18px;flex:none;accent-color:#0c8244}
+.auto-removal-setting small{display:block;font-size:11px;color:#6e8775;margin-top:8px;line-height:1.45}
+@media(max-width:580px){
+  .portrait-adjust-overlay{padding:0;align-items:stretch}
+  .portrait-adjust-dialog{
+    width:100%;height:100dvh;max-height:100dvh;max-width:none;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 13px calc(13px + env(safe-area-inset-bottom,0px));
+    border-radius:0;
+    gap:10px;
+  }
+  .portrait-adjust-preview{
+    width:min(100%,280px);
+    max-height:38dvh;
+    aspect-ratio:4/5;
+    min-height:0;
+  }
+  .portrait-adjust-background{flex-wrap:wrap}
+  .portrait-adjust-background button{width:100%}
+  .portrait-adjust-toolbar button{font-size:11px}
+}
