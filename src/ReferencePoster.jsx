@@ -52,38 +52,6 @@ function SectionHeading({ children }) {
   return <h2 className="ref-section-heading"><span>{children}</span></h2>;
 }
 
-// A stylized MSF flag for the poster. No SKSSF branding is reproduced.
-function MsfFlag() {
-  return (
-    <svg className="ref-feature-flag" viewBox="0 0 340 425" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="msf-pole" x1="0" y1="0" x2="1" y2="0">
-          <stop stopColor="#7c8c93"/>
-          <stop offset=".45" stopColor="#e9f2f3"/>
-          <stop offset="1" stopColor="#778c98"/>
-        </linearGradient>
-        <linearGradient id="msf-blue" x1="0" y1="0" x2=".95" y2="1">
-          <stop stopColor="#0874c9"/><stop offset="1" stopColor="#00549c"/>
-        </linearGradient>
-        <linearGradient id="msf-green" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#0ba153"/><stop offset="1" stopColor="#00662d"/>
-        </linearGradient>
-      </defs>
-      <path d="M35 26 L81 404" stroke="#45677e" strokeWidth="8" opacity=".14"/>
-      <path d="M29 20 L70 404" stroke="url(#msf-pole)" strokeWidth="5" strokeLinecap="round"/>
-      <circle cx="28" cy="17" r="5" fill="#bed6dc"/>
-      <g transform="rotate(6 44 70)">
-        <path d="M40 52 Q142 43 317 190 L276 318 Q153 214 52 202 Z" fill="#fff" stroke="#d3dfe0" strokeWidth="1.2"/>
-        <path d="M40 52 Q141 45 317 190 L293 237 Q161 139 47 139 Z" fill="url(#msf-blue)"/>
-        <path d="M47 139 Q167 151 293 237 L276 318 Q154 217 52 202 Z" fill="url(#msf-green)"/>
-        <path d="M151 110 a22 22 0 1 0 30 27 a18 18 0 1 1 -30 -27" fill="white"/>
-        <path d="M193 110 l4 10 11 1 -9 7 3 11 -9 -6 -9 6 3 -11 -9 -7 11 -1z" fill="#fff"/>
-        <text x="200" y="241" textAnchor="middle" transform="rotate(22 200 241)" fontFamily="Georgia,serif" fontSize="55" fontWeight="bold" fontStyle="italic" fill="#fff">msf</text>
-      </g>
-    </svg>
-  );
-}
-
 export default function ReferencePoster({
   people,
   unitName,
@@ -114,8 +82,6 @@ export default function ReferencePoster({
             <p>MSF {placeName} യൂണിറ്റ് കമ്മിറ്റി</p>
             <h1>{headingText}</h1>
           </div>
-
-          <MsfFlag />
 
           <section className="ref-primary-leadership" aria-label="Primary leadership">
             {people.map((person, i) => (
