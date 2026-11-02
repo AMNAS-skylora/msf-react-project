@@ -50,7 +50,8 @@
 }
 .portrait-adjust-preview:active{cursor:grabbing}
 .portrait-adjust-shape{
-  width:84%;height:92%;
+  width:82%;height:auto;
+  aspect-ratio:1 / 1;
   position:relative;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
