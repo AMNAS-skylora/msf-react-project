@@ -570,3 +570,21 @@
 }
 .frame.design-two .poster-strength-mark{right:2%;bottom:2%;width:34%;opacity:.78}
 .frame.design-three .poster-strength-mark{right:2%;bottom:2%;width:34%;opacity:.8}
+
+/* Chokkad Grama Panchayat congratulations: always visible in preview and PNG. */
+.frame .msf-congratulations-footer{
+ position:absolute;z-index:15;left:3%;right:3%;bottom:0;
+ box-sizing:border-box;min-height:6.5%;
+ padding:1.1% 2% 1.3%;border-radius:12px 12px 0 0;
+ background:linear-gradient(105deg,#064c28,#168143 54%,#064c28);
+ border-top:2px solid #d6ef9c;
+ box-shadow:0 -2px 10px #063b2926;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2em;
+ color:#fff;text-align:center;
+ font-family:"Noto Sans Malayalam","Manjari",sans-serif;
+ pointer-events:none;
+}
+.frame .msf-congratulations-footer span{font-size:2.25cqw;font-weight:600;line-height:1.3}
+.frame .msf-congratulations-footer strong{font-size:3.2cqw;font-weight:900;line-height:1.2;color:#f4ffcc}
+.frame .poster-strength-mark{bottom:8%}
+.frame.design-two .poster-strength-mark,.frame.design-three .poster-strength-mark{bottom:8%}
