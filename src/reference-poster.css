@@ -105,17 +105,6 @@
   text-align: left;
   text-shadow: 0 .14cqw 0 #cfead5;
 }
-.frame .ref-feature-flag {
-  position: absolute;
-  z-index: 1;
-  right: -1%;
-  top: 5%;
-  width: 34%;
-  height: 32%;
-  overflow: visible;
-  pointer-events: none;
-  filter: drop-shadow(.7cqw 1cqw .7cqw rgba(18,78,102,.15));
-}
 .frame .ref-primary-leadership {
   position: absolute;
   z-index: 3;
