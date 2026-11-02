@@ -178,19 +178,34 @@
   object-position:center bottom;
   transform:none;
 }
+/* Keep the vertical officer badges exactly on the photo's horizontal centerline. */
 .frame .ref-poster .ref-role{
   position:absolute;
   z-index:5;
   left:0;
-  bottom:6%;
-  max-height:88%;
+  top:50%;
+  bottom:auto;
+  transform:translateY(-50%) rotate(180deg);
+  transform-origin:center center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:auto;
+  max-height:calc(100% - 1.2cqw);
   max-width:20%;
-  padding:.75cqw .45cqw;
+  padding:.65cqw .4cqw;
   text-align:center;
+  white-space:nowrap;
   overflow:hidden;
+  font-size:1.7cqw;
+  line-height:1.05;
   background:#438b3d;
   border-radius:.6cqw .6cqw 0 0;
   box-shadow:0 .2cqw .5cqw #144e2630;
+}
+.frame .ref-poster .ref-role.ref-role-long{
+  font-size:1.45cqw;
+  letter-spacing:-.02cqw;
 }
 .frame .ref-poster .ref-person-name{
   display:flex;
