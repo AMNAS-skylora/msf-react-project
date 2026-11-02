@@ -378,11 +378,11 @@ export default function App() {
           page={posterPage}
           pageCount={posterPageCount}
           membersFor={posterMembersFor}
-          onLeaderClick={(index,person)=>person.photo?setCrop({i:index,src:person.photo}):uploads.current[index]?.click()}
+          onLeaderClick={(index,person)=>person.photo?setPhotoEdit({role:'leader',index}):uploads.current[index]?.click()}
           onMemberClick={(role,index)=>{
             const members=role===jointRole?joint:(jointGroups[role]||[]);
             if(members[index]?.photo){
-              setCrop({role,index,src:members[index].photo,square:true});
+              setPhotoEdit({role,index});
             }else{
               if(role!==jointRole)changeGroup(role);
               setJointSelected(index);
@@ -421,11 +421,13 @@ export default function App() {
           </div>
           <div className="actions">
             <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload Image</button>
+            <button type="button" disabled={!p.photo} onClick={()=>setPhotoEdit({role:'leader',index:i})}><Crop size={16}/> Adjust / Zoom</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
           </div>
           <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>update(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
+        <section className="auto-removal-setting"><label><input type="checkbox" checked={autoRemoveUpload} onChange={event=>setAutoRemoveUpload(event.target.checked)}/> <span>Automatically remove background after photo upload</span></label><small>Processes photos on your device. Transparent PNG files are kept as-is. If removal fails, the original photo is saved.</small></section>
         <section className="joint-editor"><h2>Committee Sections</h2>
           <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
           <h3>{jointRole}</h3>
@@ -439,7 +441,7 @@ export default function App() {
             <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
             {p.nameLayout==='manual'&&<><label>Top<input value={p.line1||''} onChange={e=>updateJoint(i,{line1:e.target.value})}/></label><label>Bottom<input value={p.line2||''} onChange={e=>updateJoint(i,{line2:e.target.value})}/></label></>}
             <label>Bold<select value={p.boldLine||'both'} onChange={e=>updateJoint(i,{boldLine:e.target.value})}><option value="both">Both</option><option value="top">Top</option><option value="bottom">Bottom</option></select></label>
-            <div className="actions"><button type="button" onClick={()=>jointUploads.current[i]?.click()}><Camera size={15}/> Upload</button><button type="button" disabled={!p.photo} onClick={()=>setCrop({joint:i,src:p.photo,square:true})}><Crop size={15}/> Crop</button><button type="button" disabled={!p.photo||busy!==-1} onClick={()=>removeJointBg(i)}><WandSparkles size={15}/>{busy==='joint-'+i?'Processing…':'Remove BG'}</button></div>
+            <div className="actions"><button type="button" onClick={()=>jointUploads.current[i]?.click()}><Camera size={15}/> Upload</button><button type="button" disabled={!p.photo} onClick={()=>setPhotoEdit({role:jointRole,index:i})}><Crop size={15}/> Adjust / Zoom</button><button type="button" disabled={!p.photo||busy!==-1} onClick={()=>removeJointBg(i)}><WandSparkles size={15}/>{busy==='joint-'+i?'Processing…':'Remove BG'}</button></div>
             <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>updateJoint(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
             <input type="file" accept="image/*" hidden ref={el=>jointUploads.current[i]=el} onChange={e=>uploadJoint(i,e)}/>
           </div>)}
