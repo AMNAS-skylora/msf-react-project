@@ -588,3 +588,21 @@
 .frame .msf-congratulations-footer strong{font-size:3.2cqw;font-weight:900;line-height:1.2;color:#f4ffcc}
 .frame .poster-strength-mark{bottom:8%}
 .frame.design-two .poster-strength-mark,.frame.design-three .poster-strength-mark{bottom:8%}
+
+/* Committee flow: Vice Presidents -> Joint Secretaries -> Executive Members.
+   Headings sit directly above their own member rows without decorative side rules. */
+.frame .joint-sections{display:flex;flex-direction:column;align-items:stretch}
+.frame .joint-poster-section{position:relative;display:flex;flex-direction:column;align-items:stretch}
+.frame .joint-poster-section h2{position:relative;display:flex;justify-content:center;align-items:center;gap:0;text-align:center}
+.frame .joint-poster-section h2::before,
+.frame .joint-poster-section h2::after,
+.frame .joint-poster-section .committee-heading-pill::before,
+.frame .joint-poster-section .committee-heading-pill::after{content:none!important;display:none!important;border:0!important}
+.frame .joint-secretaries-poster-section{order:2}
+.frame .executive-poster-section{order:3}
+.frame .joint-poster-section:not(.joint-secretaries-poster-section):not(.executive-poster-section){order:1}
+.frame .joint-poster-section .joint-poster-row{position:relative}
+.frame.design-two .design-two-group h2::before,
+.frame.design-two .design-two-group h2::after,
+.frame.design-three .design-three-committee h2::before,
+.frame.design-three .design-three-committee h2::after{content:none!important;display:none!important}
