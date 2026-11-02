@@ -500,3 +500,22 @@
 .design-three-flags>div{height:37%;filter:drop-shadow(3px 4px 3px #375b2830);transform:skewY(8deg);display:flex;flex-direction:column}
 .design-three-flags span{height:50%;display:flex;align-items:center;justify-content:center;background:#078d36;color:#fff;font:bold 9cqw Georgia,serif}
 .design-three-flags strong{height:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#078d36;font:bold italic 8cqw Georgia,serif}
+
+/* Design 3 final print layout: use the complete 1050:1472 poster canvas. */
+.frame.design-three{width:100%;aspect-ratio:1050/1472;container-type:inline-size;overflow:hidden}
+.design-three-content{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;container-type:inline-size}
+.design-three-title{top:4%;left:6%;right:6%;height:13%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1%}
+.design-three-title span{font-size:4.4cqw;line-height:1.2}
+.design-three-title strong{font-size:7cqw;line-height:1.15}
+.design-three-leaders{top:19%;left:10%;right:10%;height:23%;gap:5%}
+.design-three-committees{top:44%;bottom:3%;left:10%;width:65%;gap:3%;overflow:hidden}
+.design-three-committee{flex:0 1 auto;min-height:0;max-width:100%}
+.design-three-committee h2{box-sizing:border-box;width:94%;font-size:2.6cqw;line-height:1.15;padding:1.7% 2%;margin-bottom:0}
+.design-three-members{box-sizing:border-box;width:100%;grid-template-columns:repeat(3,minmax(0,1fr));gap:3%;padding:3% 2% 1%}
+.design-three-member{min-width:0}
+.design-three-member-photo{width:90%;max-width:100%;aspect-ratio:1/1.05}
+.design-three-member .design-three-name{font-size:2cqw;line-height:1.1}
+.design-three-flags{top:48%;right:-5%;width:29%;height:42%;gap:10%}
+.design-three-flags>div{height:40%}
+.design-three-leader .design-three-name{font-size:2.4cqw;line-height:1.12}
+@media(max-width:600px){.frame.design-three{aspect-ratio:1050/1472}.design-three-committees{left:10%;width:65%;top:44%;bottom:3%}.design-three-leaders{left:10%;right:10%;top:19%;height:23%}}
