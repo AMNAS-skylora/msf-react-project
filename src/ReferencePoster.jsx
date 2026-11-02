@@ -97,7 +97,7 @@ export default function ReferencePoster({
   const executives = membersFor('Executive Members');
   const executiveOffset = firstPage ? 0 : FIRST_EXECUTIVE_COUNT + (page - 1) * LATER_EXECUTIVE_COUNT;
   const placeName = String(unitName || '').trim() || 'ചോക്കാട്';
-  const headingText = 'ഇനി ഇവർ\\nനയിക്കും';
+  const headingText = 'ഇനി ഇവർ\nനയിക്കും';
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
