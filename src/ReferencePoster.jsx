@@ -26,7 +26,7 @@ function splitName(person = {}) {
   return [words.slice(0, bestIndex).join(' '), words.slice(bestIndex).join(' ')];
 }
 
-function Portrait({ person, onClick, role, type = 'member' }) {
+function Portrait({ person, onClick, role, type = 'member', selectionRole, selectionIndex, editingPhoto, onPortraitPointerDown, onPortraitPointerMove, onPortraitPointerUp }) {
   const isCutout = !!person.cutout;
   return (
     <div className={'ref-profile ref-profile-' + type}>
@@ -35,7 +35,12 @@ function Portrait({ person, onClick, role, type = 'member' }) {
         className={'ref-portrait' + (isCutout ? ' ref-portrait-cutout' : '') + (isCutout && person.photoMode === 'popout' ? ' ref-portrait-popout' : '')}
         style={{'--portrait-overhang': Math.min(40,Math.max(0,Number(person.photoPopout ?? 15))) + '%'}}
         onClick={onClick}
-        aria-label={(person.photo ? 'Crop photo: ' : 'Upload photo: ') + (person.name || role)}
+        onPointerDown={person.photo ? event => onPortraitPointerDown?.(event,selectionRole,selectionIndex) : undefined}
+        onPointerMove={person.photo ? onPortraitPointerMove : undefined}
+        onPointerUp={person.photo ? onPortraitPointerUp : undefined}
+        onPointerCancel={person.photo ? onPortraitPointerUp : undefined}
+        onLostPointerCapture={person.photo ? onPortraitPointerUp : undefined}
+        aria-label={(person.photo ? 'Adjust photo: ' : 'Upload photo: ') + (person.name || role)}
       >
         {person.photo
           ? <img
@@ -45,6 +50,8 @@ function Portrait({ person, onClick, role, type = 'member' }) {
             style={{transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1})`}}
           />
           : <Camera className="ref-camera-placeholder" size={22} aria-hidden="true" />}
+        {person.photo && editingPhoto?.role===selectionRole && editingPhoto?.index===selectionIndex &&
+          <span className="ref-photo-selection-ring" aria-hidden="true"/>}
       </button>
       {role && <span className="ref-profile-role">{role}</span>}
       <div className="ref-profile-name">
@@ -66,6 +73,10 @@ export default function ReferencePoster({
   membersFor,
   onLeaderClick,
   onMemberClick,
+  editingPhoto,
+  onPortraitPointerDown,
+  onPortraitPointerMove,
+  onPortraitPointerUp,
 }) {
   const firstPage = page === 0;
   const executives = membersFor('Executive Members');
@@ -96,6 +107,12 @@ export default function ReferencePoster({
                 person={person}
                 role={person.role}
                 type="leader"
+                selectionRole="leader"
+                selectionIndex={i}
+                editingPhoto={editingPhoto}
+                onPortraitPointerDown={onPortraitPointerDown}
+                onPortraitPointerMove={onPortraitPointerMove}
+                onPortraitPointerUp={onPortraitPointerUp}
                 onClick={() => onLeaderClick(i, person)}
               />
             ))}
@@ -109,6 +126,12 @@ export default function ReferencePoster({
                   key={i}
                   person={person}
                   type="committee"
+                  selectionRole="Vice Presidents"
+                  selectionIndex={i}
+                  editingPhoto={editingPhoto}
+                  onPortraitPointerDown={onPortraitPointerDown}
+                  onPortraitPointerMove={onPortraitPointerMove}
+                  onPortraitPointerUp={onPortraitPointerUp}
                   onClick={() => onMemberClick('Vice Presidents', i)}
                 />
               ))}
@@ -123,6 +146,12 @@ export default function ReferencePoster({
                   key={i}
                   person={person}
                   type="committee"
+                  selectionRole="Joint Secretaries"
+                  selectionIndex={i}
+                  editingPhoto={editingPhoto}
+                  onPortraitPointerDown={onPortraitPointerDown}
+                  onPortraitPointerMove={onPortraitPointerMove}
+                  onPortraitPointerUp={onPortraitPointerUp}
                   onClick={() => onMemberClick('Joint Secretaries', i)}
                 />
               ))}
@@ -148,6 +177,12 @@ export default function ReferencePoster({
               key={executiveOffset + i}
               person={person}
               type="executive"
+              selectionRole="Executive Members"
+              selectionIndex={executiveOffset + i}
+              editingPhoto={editingPhoto}
+              onPortraitPointerDown={onPortraitPointerDown}
+              onPortraitPointerMove={onPortraitPointerMove}
+              onPortraitPointerUp={onPortraitPointerUp}
               onClick={() => onMemberClick('Executive Members', executiveOffset + i)}
             />
           ))}
