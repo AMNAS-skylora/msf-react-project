@@ -23,7 +23,8 @@ const splitMalayalamHeading = value => {
   return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
 const INITIAL = ['President', 'General Secretary', 'Treasurer'].map(role=>({role}));
-const EXECUTIVE_PAGE_SIZE = 8;
+const EXECUTIVE_FIRST_PAGE_SIZE = 8;
+const EXECUTIVE_PAGE_SIZE = 16;
 const COMMITTEE_LIMIT = 4;
 const loadImage = src => new Promise((resolve, reject) => {
   const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
@@ -129,7 +130,7 @@ function CropDialog({ src, onSave, onClose, square=false }) {
 }
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:'',photo:'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'?'ഇവർ നയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇവർ നയിക്കും';}});
+  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'?'ഇനി ഇവർ\nനയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇനി ഇവർ\nനയിക്കും';}});
   useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
@@ -145,8 +146,12 @@ export default function App() {
   const [posterPage,setPosterPage]=useState(0);
   const jointRows=(n,columns=4)=>{const rowCount=Math.ceil(n/columns);if(!rowCount)return [];const base=Math.floor(n/rowCount),extra=n%rowCount;return Array.from({length:rowCount},(_,i)=>base+(i<extra?1:0));};
   const executiveMembers=jointRole==='Executive Members'?joint:(jointGroups['Executive Members']||[]);
-  const posterPageCount=1+Math.ceil(executiveMembers.length/EXECUTIVE_PAGE_SIZE);
-  const posterMembersFor=role=>{const all=role===jointRole?joint:(jointGroups[role]||[]);if(role==='Executive Members')return posterPage===0?[]:all.slice((posterPage-1)*EXECUTIVE_PAGE_SIZE,posterPage*EXECUTIVE_PAGE_SIZE);return all.slice(0,COMMITTEE_LIMIT);};
+  const posterPageCount=1+Math.ceil(Math.max(0,executiveMembers.length-EXECUTIVE_FIRST_PAGE_SIZE)/EXECUTIVE_PAGE_SIZE);
+  const posterMembersFor=role=>{const all=role===jointRole?joint:(jointGroups[role]||[]);if(role==='Executive Members'){
+    if(posterPage===0)return all.slice(0,EXECUTIVE_FIRST_PAGE_SIZE);
+    const start=EXECUTIVE_FIRST_PAGE_SIZE+(posterPage-1)*EXECUTIVE_PAGE_SIZE;
+    return all.slice(start,start+EXECUTIVE_PAGE_SIZE);
+  }return all.slice(0,COMMITTEE_LIMIT);};
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
@@ -222,7 +227,7 @@ export default function App() {
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-    setHeaderText('ഇവർ നയിക്കും');
+    setHeaderText('ഇനി ഇവർ\nനയിക്കും');
     setJoint([]);setJointGroups({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});setJointRole('Joint Secretaries');setPosterPage(0);setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
@@ -284,8 +289,8 @@ export default function App() {
       cacheBust:false,
       width:node.getBoundingClientRect().width,
       height:node.getBoundingClientRect().height,
-      backgroundColor:'#e5f8e8',
-      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button'].some(cls=>element.classList.contains(cls)),
+      backgroundColor:'#ffffff',
+      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button','ref-camera-placeholder'].some(cls=>element.classList.contains(cls)),
       style:{boxShadow:'none'}
     });
     if(!blob)throw new Error('Could not create poster image.');
