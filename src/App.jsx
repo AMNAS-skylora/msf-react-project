@@ -242,8 +242,10 @@ export default function App() {
     await Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});})));
     const node=frameRef.current;
     const blob=await toBlob(node,{
-      pixelRatio:Math.max(2,1050/node.getBoundingClientRect().width),
+      pixelRatio:1080/node.getBoundingClientRect().width,
       cacheBust:false,
+      width:node.getBoundingClientRect().width,
+      height:node.getBoundingClientRect().height,
       backgroundColor:'#e5f8e8',
       filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button'].some(cls=>element.classList.contains(cls)),
       style:{boxShadow:'none'}
