@@ -442,3 +442,35 @@
   .joint-sections .executive-poster-section > h2{left:1.8%;width:7%}
   .joint-sections .executive-poster-section > h2 .committee-heading-pill{font-size:clamp(6px,1.15cqw,9px);padding:7px 3px}
 }
+
+/* Design 2: alternate editorial MSF committee poster. */
+.template-switcher{display:flex;gap:8px;max-width:1500px;margin:14px auto -10px;padding:0 24px}
+.template-switcher button{border:1px solid #c5d9cb;background:white;color:#17553a;border-radius:999px;padding:10px 20px;font-weight:800;cursor:pointer}
+.template-switcher button.active{background:#087d3c;color:#fff;border-color:#087d3c}
+.frame.design-two{background:radial-gradient(ellipse at 7% 5%,#b0ed83 0%,transparent 36%),radial-gradient(ellipse at 97% 4%,#c6f29c 0%,transparent 35%),radial-gradient(ellipse at 100% 72%,#b0e89e 0%,transparent 45%),linear-gradient(150deg,#f5fff0,#e3f9e5 65%,#c8ebbe)}
+.design-two .frame-bg{display:none}
+.design-two-wash{position:absolute;inset:0;background:radial-gradient(ellipse at 12% 32%,#fff9,transparent 45%),radial-gradient(ellipse at 80% 58%,#fff8,transparent 42%);pointer-events:none}
+.design-two-title{position:absolute;top:4%;left:5%;width:90%;text-align:center;font-family:'Noto Sans Malayalam',sans-serif;font-weight:900;line-height:1.22;color:#158847;font-size:5.8cqw;text-shadow:0 2px 2px #fff}
+.design-two-title div+div{font-size:4.8cqw;color:#284d39;margin-top:1%}
+.design-two-content{position:absolute;inset:22% 5% 2%;display:flex;flex-direction:column;min-height:0}
+.design-two-leaders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4%;width:100%;height:27%;flex:none}
+.design-two-leader,.design-two-member{min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center}
+.design-two-leader-photo{height:75%;width:85%;position:relative;border-radius:23% 23% 23% 23%;background:#d9eadd;border:3px solid #fff;overflow:visible}
+.design-two-leader-photo img{width:100%;height:100%;object-fit:cover;border-radius:21%}
+.design-two-leader-photo button{width:100%;height:100%;border:0;background:transparent;color:#087d3c}
+.design-two-role{position:absolute;z-index:2;left:-11%;bottom:6%;writing-mode:vertical-rl;transform:rotate(180deg);padding:7px 5px;border-radius:6px;background:#168b46;color:#fff;font:bold 2.2cqw Arial,sans-serif}
+.design-two-person-name{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font:600 2.4cqw/1.13 Arial,sans-serif;color:#343e38;overflow-wrap:anywhere;max-width:100%;padding-top:3px}
+.design-two-lower{display:grid;grid-template-columns:minmax(0,63%) minmax(0,37%);gap:1%;flex:1;min-height:0}
+.design-two-groups{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:2.2%}
+.design-two-group{min-height:0}
+.design-two-group h2{background:#168c45;color:white;border-radius:6px;font:500 2.5cqw Arial,sans-serif;text-align:center;padding:1.8% 2%;margin:0 0 2%}
+.design-two-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3%}
+.design-two-member-photo{width:85%;aspect-ratio:1/1.13;border-radius:24%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#dbeadf;color:#0c7e41;border:2px solid #fff}
+.design-two-member-photo img{width:100%;height:100%;object-fit:cover}
+.design-two-member .design-two-person-name{font-size:2cqw}
+.design-two-flags{display:flex;flex-direction:column;justify-content:center;gap:9%;padding-left:3%;overflow:hidden}
+.design-two-flag{width:100%;height:23%;display:flex;flex-direction:column;transform:skewY(8deg);filter:drop-shadow(3px 5px 3px #174b2638)}
+.design-two-flag span{height:50%;display:flex;align-items:center;justify-content:center;background:#008f36;color:#fff;font:bold 10cqw Georgia,serif}
+.design-two-flag strong{height:50%;display:flex;align-items:center;justify-content:center;background:white;color:#008b36;font:bold italic 9cqw Georgia,serif}
+.design-two-footer{flex:none;align-self:center;background:#168b46;color:#fff;border-radius:999px 999px 0 0;padding:1% 5%;font:bold 2.8cqw Arial,sans-serif}
+@media(max-width:850px){.template-switcher{padding:0 12px;margin:10px auto 0}}
