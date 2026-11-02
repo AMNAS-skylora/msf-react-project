@@ -731,3 +731,21 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
 .frame.design-two .design-two-member-row .design-two-member,
 .frame.design-three .design-three-member-row .design-three-member{min-width:0}
 .frame.design-three .design-three-member-row .design-three-name{max-width:100%;overflow-wrap:anywhere}
+
+/* Fix white/blank poster backgrounds. Keep green artwork behind content on all templates. */
+.frame{background-color:#e4f6dc!important;background-image:linear-gradient(145deg,#d1ecb8 0%,#f3fae9 35%,#e1f1d0 72%,#b4d78d 100%)!important}
+.frame:not(.design-two):not(.design-three) .frame-bg{
+ display:block!important;position:absolute;inset:0;width:100%;height:100%;
+ object-fit:cover;z-index:0;pointer-events:none
+}
+.frame.design-two{
+ background-image:radial-gradient(ellipse at 0% 0%,#8cce64 0%,transparent 37%),radial-gradient(ellipse at 100% 78%,#9fd789 0%,transparent 48%),linear-gradient(155deg,#e0f2cc,#f7fbf0 40%,#c1e5aa 100%)!important
+}
+.frame.design-three{
+ background-image:radial-gradient(ellipse at 8% 5%,#a3c76a 0%,transparent 36%),radial-gradient(ellipse at 100% 70%,#a2c873 0%,transparent 45%),linear-gradient(150deg,#e1edc7,#fafbf2 48%,#c3dba4 100%)!important
+}
+.frame.design-two .frame-bg,.frame.design-three .frame-bg{display:none!important}
+.frame .poster-msf-heading,.frame .canvas-photo,.frame .canvas-labels,.frame .joint-sections,
+.frame .design-two-content,.frame .design-two-title,.frame .design-three-content,
+.frame .msf-congratulations-footer,.frame .poster-strength-mark{z-index:2}
+.frame .msf-congratulations-footer{z-index:20}
