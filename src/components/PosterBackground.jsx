@@ -4,7 +4,7 @@ import { GROUPS, MEMBERS, imageUrl } from '../data/committee.js';
 
 const defaultBackground = `${import.meta.env.BASE_URL}assets/msf-poster-background.webp`;
 const WIDTH = 1080;
-const HEIGHT = 1512;
+const HEIGHT = 1350;
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -127,7 +127,7 @@ export default function PosterBackground({ photos = {} }) {
           <input value={headline} onChange={event => setHeadline(event.target.value)} maxLength={80} style={{ display: 'block', width: '100%', maxWidth: 420, padding: 12, marginTop: 8, border: '1px solid #b7d3c1', borderRadius: 8 }} />
         </label>
         {status && <p role="status" style={{ marginBottom: 12 }}>{status}</p>}
-        <div style={{ maxWidth: 525, margin: '0 auto', aspectRatio: '1080 / 1512', position: 'relative', overflow: 'hidden', borderRadius: 12, background: '#e8f9e8', boxShadow: '0 16px 45px #123a2a20' }}>
+        <div style={{ maxWidth: 525, margin: '0 auto', aspectRatio: '1080 / 1350', position: 'relative', overflow: 'hidden', borderRadius: 12, background: '#e8f9e8', boxShadow: '0 16px 45px #123a2a20' }}>
           <img src={background} alt="Selected poster background" style={{ width: '100%', height: '100%', objectFit: 'fill', position: 'absolute', inset: 0 }} />
           <div style={{ position: 'absolute', inset: 0, padding: '4% 5%', display: 'flex', flexDirection: 'column', gap: '1%', color: '#073e2a', textAlign: 'center' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(26px, 7vw, 65px)', fontWeight: 800, lineHeight: 1 }}>msf</div>
