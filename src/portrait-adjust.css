@@ -254,3 +254,47 @@
   object-position:center bottom;
   border-radius:0;
 }
+
+/* Photo-safe preview: reserve headroom for subjects rising over the curved frame.
+   On short phones the preview may scroll rather than clipping the forehead. */
+.portrait-adjust-preview {
+  width:min(100%,320px);
+  height:clamp(235px,40dvh,330px);
+  max-height:none;
+  aspect-ratio:auto;
+  flex:0 0 auto;
+  padding:12px;
+  border-radius:18px;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg,rgba(229,243,229,.88),rgba(249,252,249,.93));
+}
+.portrait-adjust-shape {
+  flex:0 0 auto;
+  width:61%;
+  height:auto;
+  aspect-ratio:1 / 1;
+  transform:translateY(7%);
+}
+.portrait-adjust-shape.portrait-adjust-popout,
+.portrait-adjust-shape.portrait-adjust-popout img {
+  overflow:visible;
+}
+.portrait-adjust-shape.portrait-adjust-popout img {
+  max-height:none;
+  object-fit:contain;
+  object-position:center bottom;
+}
+.portrait-adjust-dialog {
+  gap:11px;
+}
+@media(max-width:580px){
+  .portrait-adjust-preview {
+    width:min(100%,310px);
+    height:clamp(230px,39dvh,300px);
+    max-height:none;
+    min-height:230px;
+    aspect-ratio:auto;
+  }
+  .portrait-adjust-shape {width:60%;transform:translateY(9%);}
+}
