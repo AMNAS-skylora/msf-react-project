@@ -244,6 +244,35 @@ export default function App() {
     }catch(error){setMessage('Background removal failed: '+(error?.message||'Try again online.'));}
     finally{setBusy(-1);}
   }
+  async function removeJointBg(i) {
+    const member=joint[i];
+    if (!member?.photo || busy!==-1) return;
+    setBusy('joint-'+i);
+    setMessage('Removing member background. The AI model may need an internet connection.');
+    try {
+      const { removeBackground }=await import('@imgly/background-removal');
+      const response=await fetch(member.photo);
+      if(!response.ok)throw new Error('Could not load the member image');
+      const result=await removeBackground(await response.blob());
+      updateJoint(i,{photo:await toDataURL(result),cutout:true});
+      setMessage('Background removed. The portrait now fits inside the green frame.');
+    }catch(error){
+      setMessage('Background removal failed: '+(error?.message||'Please try again.'));
+    }finally{setBusy(-1);}
+  }
+  async function imageHasTransparency(src){
+    try {
+      const img=await loadImage(src);
+      const probe=document.createElement('canvas');
+      probe.width=48;probe.height=48;
+      const context=probe.getContext('2d',{willReadFrequently:true});
+      if(!context)return false;
+      context.drawImage(img,0,0,48,48);
+      const pixels=context.getImageData(0,0,48,48).data;
+      for(let i=3;i<pixels.length;i+=4){if(pixels[i]<240)return true;}
+    }catch{}
+    return false;
+  }
   async function makePosterBlob(){
     if(!frameRef.current)throw new Error('Poster preview is not ready.');
     await document.fonts.ready;
@@ -360,6 +389,7 @@ export default function App() {
             <button onClick={()=>uploads.current[i]?.click()}><Camera size={16}/> Upload Image</button>
             <button onClick={()=>removeBg(i)} disabled={!p.photo||busy!==-1}><WandSparkles size={16}/>{busy===i?'Processing…':'Remove BG'}</button>
           </div>
+          <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>update(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
         <section className="joint-editor"><h2>Committee Sections</h2>
@@ -375,7 +405,8 @@ export default function App() {
             <label>Lines<select value={p.nameLayout==='manual'?'manual':'auto'} onChange={e=>{if(e.target.value==='manual'){const [line1,line2]=nameLines(p);updateJoint(i,{nameLayout:'manual',line1,line2});}else updateJoint(i,{nameLayout:'auto'})}}><option value="auto">Auto (max 2 lines)</option><option value="manual">Custom 2 lines</option></select></label>
             {p.nameLayout==='manual'&&<><label>Top<input value={p.line1||''} onChange={e=>updateJoint(i,{line1:e.target.value})}/></label><label>Bottom<input value={p.line2||''} onChange={e=>updateJoint(i,{line2:e.target.value})}/></label></>}
             <label>Bold<select value={p.boldLine||'both'} onChange={e=>updateJoint(i,{boldLine:e.target.value})}><option value="both">Both</option><option value="top">Top</option><option value="bottom">Bottom</option></select></label>
-            <div className="actions"><button type="button" onClick={()=>jointUploads.current[i]?.click()}><Camera size={15}/> Upload</button><button type="button" disabled={!p.photo} onClick={()=>setCrop({joint:i,src:p.photo,square:true})}><Crop size={15}/> Crop</button></div>
+            <div className="actions"><button type="button" onClick={()=>jointUploads.current[i]?.click()}><Camera size={15}/> Upload</button><button type="button" disabled={!p.photo} onClick={()=>setCrop({joint:i,src:p.photo,square:true})}><Crop size={15}/> Crop</button><button type="button" disabled={!p.photo||busy!==-1} onClick={()=>removeJointBg(i)}><WandSparkles size={15}/>{busy==='joint-'+i?'Processing…':'Remove BG'}</button></div>
+            <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>updateJoint(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
             <input type="file" accept="image/*" hidden ref={el=>jointUploads.current[i]=el} onChange={e=>uploadJoint(i,e)}/>
           </div>)}
         </section>
@@ -384,6 +415,6 @@ export default function App() {
         {message&&<p role="status" className="message">{message}</p>}
       </aside>
     </div>
-    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={src=>{if(crop.role){if(crop.role===jointRole)updateJoint(crop.index,{photo:src});else setJointGroups(g=>({...g,[crop.role]:(g[crop.role]||[]).map((p,i)=>i===crop.index?{...p,photo:src}:p)}));}else if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src});else update(crop.i,{photo:src,cutout:false});setCrop(null);}}/>}
+    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={async src=>{const cutout=await imageHasTransparency(src);if(crop.role){if(crop.role===jointRole)updateJoint(crop.index,{photo:src,cutout});else setJointGroups(g=>({...g,[crop.role]:(g[crop.role]||[]).map((p,i)=>i===crop.index?{...p,photo:src,cutout}:p)}));}else if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src,cutout});else update(crop.i,{photo:src,cutout});setCrop(null);}}/>}
   </main>;
 }
