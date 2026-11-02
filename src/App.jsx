@@ -130,7 +130,7 @@ function CropDialog({ src, onSave, onClose, square=false }) {
 }
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:'',photo:'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'?'ഇനി ഇവർ\nനയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇനി ഇവർ\nനയിക്കും';}});
+  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||(saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'||saved==='ഇവർ നയിക്കും')?'ഇനി ഇവർ\nനയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇനി ഇവർ\nനയിക്കും';}});
   useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
