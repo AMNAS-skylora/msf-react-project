@@ -317,9 +317,15 @@ export default function App() {
           membersFor={posterMembersFor}
           onLeaderClick={(index,person)=>person.photo?setCrop({i:index,src:person.photo}):uploads.current[index]?.click()}
           onMemberClick={(role,index)=>{
-            if(role!==jointRole)changeGroup(role);
-            setJointSelected(index);
-            setMessage('Edit the selected member in the '+role+' editor.');
+            const members=role===jointRole?joint:(jointGroups[role]||[]);
+            if(members[index]?.photo){
+              setCrop({role,index,src:members[index].photo,square:true});
+            }else{
+              if(role!==jointRole)changeGroup(role);
+              setJointSelected(index);
+              setMessage('Use Upload in '+role+' to add this member photo.');
+              document.querySelector('.joint-editor')?.scrollIntoView({behavior:'smooth',block:'start'});
+            }
           }}
         />
       </section>
@@ -378,6 +384,6 @@ export default function App() {
         {message&&<p role="status" className="message">{message}</p>}
       </aside>
     </div>
-    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={src=>{if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src});else update(crop.i,{photo:src,cutout:false});setCrop(null);}}/>}
+    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={src=>{if(crop.role){if(crop.role===jointRole)updateJoint(crop.index,{photo:src});else setJointGroups(g=>({...g,[crop.role]:(g[crop.role]||[]).map((p,i)=>i===crop.index?{...p,photo:src}:p)}));}else if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src});else update(crop.i,{photo:src,cutout:false});setCrop(null);}}/>}
   </main>;
 }
