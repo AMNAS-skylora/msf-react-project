@@ -21,7 +21,7 @@ const splitMalayalamHeading = value => {
   return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
 const INITIAL = ['President', 'General Secretary', 'Treasurer'].map(role=>({role}));
-const EXECUTIVE_PAGE_SIZE = 12;
+const EXECUTIVE_PAGE_SIZE = 8;
 const COMMITTEE_LIMIT = 4;
 const loadImage = src => new Promise((resolve, reject) => {
   const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
@@ -139,7 +139,7 @@ export default function App() {
   const jointUploads=useRef([]);
   const moveJoint=(from,to)=>setJoint(current=>{if(to<0||to>=current.length)return current;const next=[...current];const [item]=next.splice(from,1);next.splice(to,0,item);return next;});
   const [jointSelected,setJointSelected]=useState(null);
-  const jointRows=(n,columns=4)=>Array.from({length:Math.ceil(n/columns)},(_,i)=>Math.min(columns,n-i*columns));
+  const jointRows=(n,columns=4)=>{const rowCount=Math.ceil(n/columns);if(!rowCount)return [];const base=Math.floor(n/rowCount),extra=n%rowCount;return Array.from({length:rowCount},(_,i)=>base+(i<extra?1:0));};
   const executiveMembers=jointRole==='Executive Members'?joint:(jointGroups['Executive Members']||[]);
   const posterPageCount=Math.max(1,Math.ceil(executiveMembers.length/EXECUTIVE_PAGE_SIZE));
   const posterMembersFor=role=>{const all=role===jointRole?joint:(jointGroups[role]||[]);if(role==='Executive Members')return all.slice(posterPage*EXECUTIVE_PAGE_SIZE,(posterPage+1)*EXECUTIVE_PAGE_SIZE);return all.slice(0,COMMITTEE_LIMIT);};
@@ -259,6 +259,8 @@ export default function App() {
       style:{boxShadow:'none'}
     });
     if(!blob)throw new Error('Could not create poster image.');
+    const previewUrl=URL.createObjectURL(blob);
+    try{const exported=await loadImage(previewUrl);if(exported.naturalWidth!==1080||exported.naturalHeight!==1350)throw new Error(`PNG must be 1080 × 1350 px; received ${exported.naturalWidth} × ${exported.naturalHeight} px.`);}finally{URL.revokeObjectURL(previewUrl);}
     return blob;
   }
   function saveBlob(blob){
@@ -270,15 +272,22 @@ export default function App() {
   }
   const waitForPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   const exportAllPages=async()=>{const original=posterPage;const blobs=[];try{for(let page=0;page<posterPageCount;page++){flushSync(()=>setPosterPage(page));await waitForPaint();blobs.push(await makePosterBlob());}return blobs;}finally{flushSync(()=>setPosterPage(Math.min(original,posterPageCount-1)));await waitForPaint();}};
+  function validateCommitteeLimits(){
+    const groups={...jointGroups,[jointRole]:joint};
+    const exceeded=Object.entries(groups).filter(([role,members])=>role!=='Executive Members'&&members.length>COMMITTEE_LIMIT);
+    if(!exceeded.length)return true;
+    setMessage(`Please reduce ${exceeded.map(([role,members])=>`${role} (${members.length})`).join(', ')} to 4 members before exporting. Your saved member data is unchanged.`);
+    return false;
+  }
   async function download(){
-    if(exporting)return;
+    if(exporting||!validateCommitteeLimits())return;
     setExporting(true);setMessage('');
     try{const blobs=await exportAllPages();blobs.forEach((blob,i)=>{const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);});if(blobs.length>1)setMessage(`${blobs.length} poster pages downloaded.`);}
     catch(error){flushSync(()=>setPosterPage(0));setMessage('Download failed: '+(error?.message||'Please try again.'));}
     finally{setExporting(false);}
   }
   async function sharePoster(){
-    if(exporting)return;
+    if(exporting||!validateCommitteeLimits())return;
     setExporting(true);setMessage('');
     try{
       const blobs=await exportAllPages();
@@ -319,20 +328,20 @@ export default function App() {
           </>}
         </div>})}
         {template==='1'&&<div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>}
-        {template==='2'&&<div className="design-two-content"><div className="design-two-leaders">{people.map((p,i)=><div className="design-two-leader" key={p.role}><div className="design-two-leader-photo"><span className="design-two-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={"Upload "+p.role+" photo"}><Camera size={28}/></button>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div><div className="design-two-lower"><div className="design-two-groups">{groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section key={role} className={'design-two-group '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')}><h2>{role}</h2><div className="design-two-grid" style={{gridTemplateColumns:`repeat(${Math.min(members.length,4)},minmax(0,1fr))`}}>{members.map((p,i)=><div className="design-two-member" key={i}><div className="design-two-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div></section>})}</div><div className="design-two-flags" aria-hidden="true"><div className="design-two-flag"><span>☪</span><strong>msf</strong></div><div className="design-two-flag"><span>☪</span><strong>msf</strong></div></div></div><div className="design-two-footer">msf · Leadership Committee</div></div>}
+        {template==='2'&&<div className="design-two-content"><div className="design-two-leaders">{people.map((p,i)=><div className="design-two-leader" key={p.role}><div className="design-two-leader-photo"><span className="design-two-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={"Upload "+p.role+" photo"}><Camera size={28}/></button>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div><div className="design-two-lower"><div className="design-two-groups">{groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section key={role} className={'design-two-group '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')}><h2>{role}</h2><div className="design-two-grid">{(()=>{let start=0;return jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="design-two-member-row" key={row} style={{'--member-count':count}}>{items.map((p,i)=><div className="design-two-member" key={rowStart+i}><div className="design-two-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div>})})()}</div></section>})}</div><div className="design-two-flags" aria-hidden="true"><div className="design-two-flag"><span>☪</span><strong>msf</strong></div><div className="design-two-flag"><span>☪</span><strong>msf</strong></div></div></div><div className="design-two-footer">msf · Leadership Committee</div></div>}
         {template==='3'&&<div className="design-three-content">
           <div className="design-three-title"><span>{splitMalayalamHeading(headerText)[0]}</span><strong>{splitMalayalamHeading(headerText)[1]}</strong></div>
           <div className="design-three-leaders">{people.map((p,i)=><div className="design-three-leader" key={p.role}>
             <div className="design-three-portrait"><span className="design-three-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={'Upload '+p.role+' photo'}><Camera size={24}/></button>}</div>
             <div className="design-three-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div>
           </div>)}</div>
-          <div className="design-three-committees">{['Vice Presidents','Joint Secretaries','Executive Members'].map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section className={'design-three-committee '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')} key={role}><h2>{role}</h2><div className="design-three-members" style={{gridTemplateColumns:`repeat(${Math.min(members.length,4)},minmax(0,1fr))`}}>{members.map((p,i)=><div className="design-three-member" key={i}><div className="design-three-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-three-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div></section>})}</div>
+          <div className="design-three-committees">{['Vice Presidents','Joint Secretaries','Executive Members'].map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section className={'design-three-committee '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')} key={role}><h2>{role}</h2><div className="design-three-members">{(()=>{let start=0;return jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="design-three-member-row" key={row} style={{'--member-count':count}}>{items.map((p,i)=><div className="design-three-member" key={rowStart+i}><div className="design-three-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-three-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div>})})()}</div></section>})}</div>
           <div className="design-three-flags" aria-hidden="true"><div><span>☪</span><strong>msf</strong></div><div><span>☪</span><strong>msf</strong></div></div>
         </div>}
         {template==='1'&&<div className="joint-sections">
-          {groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")+(role==='Joint Secretaries'?" joint-secretaries-poster-section":"")+(role==='Vice Presidents'?" vice-presidents-poster-section":"")} style={{'--rows':jointRows(members.length,role==='Executive Members'?6:4).length}} key={role}>
+          {groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")+(role==='Joint Secretaries'?" joint-secretaries-poster-section":"")+(role==='Vice Presidents'?" vice-presidents-poster-section":"")} style={{'--rows':jointRows(members.length,4).length}} key={role}>
             <h2><span className="committee-heading-pill">{role.toUpperCase()}</span></h2>
-            {jointRows(members.length,role==='Executive Members'?6:4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row} style={{"--member-count":count}}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
+            {jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row} style={{"--member-count":count}}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
               <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
               {jointRole===role&&jointSelected===index&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:index,src:p.photo,square:true}):jointUploads.current[index]?.click()}><Crop size={13}/> Crop</button>}
               <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>

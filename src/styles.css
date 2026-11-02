@@ -722,3 +722,12 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
 .frame .executive-poster-section .joint-poster-row{
   grid-template-columns:repeat(var(--member-count,6),minmax(0,1fr));
 }
+
+/* Balanced committee rows keep the last executive row centered on every design. */
+.frame.design-two .design-two-grid,
+.frame.design-three .design-three-members{display:flex;flex-direction:column;gap:2.5%;align-items:stretch}
+.frame.design-two .design-two-member-row,
+.frame.design-three .design-three-member-row{display:grid;grid-template-columns:repeat(var(--member-count,4),minmax(0,1fr));gap:3%;width:100%;justify-content:center}
+.frame.design-two .design-two-member-row .design-two-member,
+.frame.design-three .design-three-member-row .design-three-member{min-width:0}
+.frame.design-three .design-three-member-row .design-three-name{max-width:100%;overflow-wrap:anywhere}
