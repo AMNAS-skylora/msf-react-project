@@ -4,12 +4,12 @@ import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
-import PortraitAdjustDialog from './PortraitAdjustDialog.jsx';
 import { removePortraitBackgroundFast, warmPortraitSegmenter } from './fastPortraitBackground.js';
 import './styles.css';
 import './reference-poster.css';
 import './portrait-frames.css';
 import './portrait-adjust.css';
+import './inline-portrait-editor.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
@@ -158,6 +158,7 @@ export default function App() {
     return all.slice(start,start+EXECUTIVE_PAGE_SIZE);
   }return all.slice(0,COMMITTEE_LIMIT);};
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
+  useEffect(()=>{setPhotoEdit(null);},[posterPage]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e) {
     const file=e.target.files?.[0];e.target.value='';
@@ -435,7 +436,7 @@ export default function App() {
       width:node.getBoundingClientRect().width,
       height:node.getBoundingClientRect().height,
       backgroundColor:'#ffffff',
-      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button','ref-camera-placeholder'].some(cls=>element.classList.contains(cls)),
+      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button','ref-camera-placeholder','ref-photo-selection-ring'].some(cls=>element.classList.contains(cls)),
       style:{boxShadow:'none'}
     });
     if(!blob)throw new Error('Could not create poster image.');
@@ -487,6 +488,7 @@ export default function App() {
     
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
+      <div className="poster-edit-stage">
       <section className="frame" ref={frameRef} aria-label="MSF poster preview">
         <ReferencePoster
           people={people}
@@ -512,6 +514,7 @@ export default function App() {
           }}
         />
       </section>
+      </div>
       <aside className="editor-panel"><section className="header-editor"><h2>Unit Name</h2><label htmlFor="msf-unit-place">സ്ഥലത്തിന്റെ പേര് മാത്രം<input id="msf-unit-place" type="text" maxLength={45} value={unitName} onChange={e=>setUnitName(e.target.value.replace(/[\r\n]/g,' ').replace(/\s{2,}/g,' '))} placeholder="ഉദാ: ചോക്കാട് / മഞ്ഞപ്പെട്ടി"/></label><p className="unit-heading-preview">MSF {(unitName.trim()||'ചോക്കാട്')} യൂണിറ്റ് കമ്മിറ്റി</p><p className="unit-heading-note">പോസ്റ്ററിൽ സ്ഥിരമായി കാണുന്നത്: ഇനി ഇവർ നയിക്കും</p></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
@@ -573,21 +576,23 @@ export default function App() {
     </div>
     {photoEdit&&(()=>{
       const {role,index}=photoEdit;
-      const person=role==='leader'?people[index]:(role===jointRole?joint[index]:(jointGroups[role]||[])[index]);
+      const person=memberForEdit(role,index);
       if(!person?.photo)return null;
-      return <PortraitAdjustDialog
-        key={role+':'+index}
-        person={person}
-        label={person.name||role}
-        onClose={()=>setPhotoEdit(null)}
-        onSave={patch=>savePortraitChanges(role,index,patch)}
-        onRemoveBackground={removeBackgroundSource}
-        onCrop={()=>{
-          setPhotoEdit(null);
-          if(role==='leader')setCrop({i:index,src:person.photo,fromExisting:true});
-          else setCrop({role,index,src:person.photo,square:true,fromExisting:true});
-        }}
-      />;
+      return <div className="inline-photo-toolbar" role="toolbar" aria-label="Photo position controls">
+        <div className="inline-photo-toolbar-heading">
+          <span>{person.name||role} <small>· Drag / pinch photo</small></span>
+          <button type="button" className="inline-photo-done" onClick={()=>setPhotoEdit(null)}>Done</button>
+        </div>
+        <div className="inline-photo-toolbar-buttons">
+          <button type="button" className={person.photoMode!=='popout'?'is-active':''}
+            onClick={()=>patchPortrait(role,index,{photoMode:'inside'})}>Inside</button>
+          <button type="button" disabled={!person.cutout} className={person.photoMode==='popout'?'is-active':''}
+            onClick={()=>patchPortrait(role,index,{photoMode:'popout'})}>Pop out</button>
+          <button type="button" onClick={cropSelectedPortrait}>Crop</button>
+          <button type="button" disabled={busy!==-1} onClick={removeSelectedPortraitBackground}>{busy==='inline-bg'?'Removing…':'Remove BG'}</button>
+          <button type="button" onClick={()=>patchPortrait(role,index,{photoZoom:1,photoX:0,photoY:0})}>Reset</button>
+        </div>
+      </div>;
     })()}
     {crop&&<CropDialog
       src={crop.src}
