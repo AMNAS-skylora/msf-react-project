@@ -451,6 +451,44 @@ export default function App() {
         {message&&<p role="status" className="message">{message}</p>}
       </aside>
     </div>
-    {crop&&<CropDialog src={crop.src} square={!!crop.square} onClose={()=>setCrop(null)} onSave={async src=>{const cutout=await imageHasTransparency(src);if(crop.role){if(crop.role===jointRole)updateJoint(crop.index,{photo:src,cutout});else setJointGroups(g=>({...g,[crop.role]:(g[crop.role]||[]).map((p,i)=>i===crop.index?{...p,photo:src,cutout}:p)}));}else if(Number.isInteger(crop.joint))updateJoint(crop.joint,{photo:src,cutout});else update(crop.i,{photo:src,cutout});setCrop(null);}}/>}
+    {photoEdit&&(()=>{
+      const {role,index}=photoEdit;
+      const person=role==='leader'?people[index]:(role===jointRole?joint[index]:(jointGroups[role]||[])[index]);
+      if(!person?.photo)return null;
+      return <PortraitAdjustDialog
+        key={role+':'+index}
+        person={person}
+        label={person.name||role}
+        onClose={()=>setPhotoEdit(null)}
+        onSave={patch=>savePortraitChanges(role,index,patch)}
+        onRemoveBackground={removeBackgroundSource}
+        onCrop={()=>{
+          setPhotoEdit(null);
+          if(role==='leader')setCrop({i:index,src:person.photo});
+          else setCrop({role,index,src:person.photo,square:true});
+        }}
+      />;
+    })()}
+    {crop&&<CropDialog
+      src={crop.src}
+      square={!!crop.square}
+      onClose={()=>setCrop(null)}
+      onSave={async src=>{
+        const currentCrop=crop;
+        setCrop(null);
+        const patch=await prepareUploadedPortrait(src);
+        if(currentCrop.role){
+          if(currentCrop.role===jointRole)updateJoint(currentCrop.index,patch);
+          else setJointGroups(g=>({...g,[currentCrop.role]:(g[currentCrop.role]||[]).map((p,i)=>i===currentCrop.index?{...p,...patch}:p)}));
+          setPhotoEdit({role:currentCrop.role,index:currentCrop.index});
+        }else if(Number.isInteger(currentCrop.joint)){
+          updateJoint(currentCrop.joint,patch);
+          setPhotoEdit({role:jointRole,index:currentCrop.joint});
+        }else{
+          update(currentCrop.i,patch);
+          setPhotoEdit({role:'leader',index:currentCrop.i});
+        }
+      }}
+    />}
   </main>;
 }
