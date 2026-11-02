@@ -245,16 +245,24 @@ export default function App() {
     try { setCrop({i,src:await toDataURL(file)}); } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
-    const { removeBackground } = await import('@imgly/background-removal');
+    // Load the browser-only inference engine on demand, keeping initial page load small.
+    // IMG.LY 1.7 exports the processor as default; some versions also export a named alias.
+    const library = await import('@imgly/background-removal');
+    const processor = library.default || library.removeBackground;
+    if (typeof processor !== 'function') throw new Error('Background-removal engine did not initialize.');
     const response = await fetch(source);
-    if (!response.ok) throw new Error('Photo could not be loaded');
-    const blob = await removeBackground(await response.blob());
+    if (!response.ok) throw new Error('Photo could not be loaded.');
+    const blob = await processor(await response.blob(), {
+      device: 'cpu',
+      model: 'isnet_quint8',
+    });
+    if (!(blob instanceof Blob)) throw new Error('Background removal returned no photo.');
     return toDataURL(blob);
   }
   async function removeBg(i) {
     setBusy(i);setMessage('Removing background. First run may download the AI model.');
     try {
-      update(i,{photo:await removeBackgroundSource(people[i].photo),cutout:true,photoZoom:1,photoX:0,photoY:0});
+      update(i,{photo:await removeBackgroundSource(people[i].photo),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
       setMessage('Background removed. Transparent image ready.');
     }catch(error){setMessage('Background removal failed: '+(error?.message||'Try again online.'));}
     finally{setBusy(-1);}
@@ -274,14 +282,14 @@ export default function App() {
   // Keep the original crop even if client-side AI removal is unavailable.
   async function prepareUploadedPortrait(src) {
     const transparent = await imageHasTransparency(src);
-    const original = {photo:src,cutout:transparent,photoZoom:1,photoX:0,photoY:0};
+    const original = {photo:src,cutout:transparent,photoMode:'inside',photoZoom:1,photoX:0,photoY:0};
     if (transparent || !autoRemoveUpload) return original;
     setBusy('auto-bg');
     setMessage('Automatically removing photo background…');
     try {
       const photo=await removeBackgroundSource(src);
       setMessage('Background removed. Photo fitted to the green frame.');
-      return {...original,photo,cutout:true};
+      return {...original,photo,cutout:true,photoMode:'popout'};
     } catch(error) {
       setMessage('Auto background removal unavailable. Your original photo has been kept; use Remove BG to retry.');
       return original;
