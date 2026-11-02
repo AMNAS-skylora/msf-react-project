@@ -542,3 +542,31 @@
 @media(max-width:600px){
   .frame,.frame.design-two,.frame.design-three{aspect-ratio:4/5;width:100%;height:auto}
 }
+
+/* Decorative Strength lettering on every template: green, unobtrusive and export-safe. */
+.frame .poster-strength-mark{
+  position:absolute;
+  z-index:3;
+  right:3%;
+  bottom:2.5%;
+  width:35%;
+  pointer-events:none;
+  user-select:none;
+  text-align:center;
+  transform:rotate(-7deg);
+  opacity:.72;
+}
+.frame .poster-strength-mark span{
+  display:block;
+  font-family:"Brush Script MT","Segoe Script","URW Chancery L",cursive;
+  font-size:7cqw;
+  font-style:italic;
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-.06em;
+  white-space:nowrap;
+  color:#177b36;
+  text-shadow:0 1px 0 #f5ffef,1px 2px 1px #164a2b38;
+}
+.frame.design-two .poster-strength-mark{right:2%;bottom:2%;width:34%;opacity:.78}
+.frame.design-three .poster-strength-mark{right:2%;bottom:2%;width:34%;opacity:.8}
