@@ -606,3 +606,110 @@
 .frame.design-two .design-two-group h2::after,
 .frame.design-three .design-three-committee h2::before,
 .frame.design-three .design-three-committee h2::after{content:none!important;display:none!important}
+
+
+/* Professional 4:5 poster system */
+:root{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif}
+body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
+.frame,.frame.design-two,.frame.design-three{width:min(100%,700px);aspect-ratio:4/5;height:auto;max-height:none;container-type:inline-size}
+.frame .poster-msf-heading,.frame .poster-malayalam-title,.frame .design-two-title,.frame .design-three-title,.frame .msf-congratulations-footer{font-family:"Noto Sans Malayalam",Inter,sans-serif}
+.frame .poster-malayalam-title{font-weight:850;line-height:1.18}
+.frame .canvas-label,.frame .joint-member-name,.frame .design-two-person-name,.frame .design-three-name{font-family:Inter,"Noto Sans Malayalam",sans-serif}
+.frame .canvas-label{overflow:visible}
+.frame .canvas-label .name-lines,.frame .joint-member-name,.frame .design-two-person-name,.frame .design-three-name{overflow-wrap:anywhere;word-break:normal}
+.frame .joint-sections{top:12%;bottom:39%;max-height:none;overflow:hidden;gap:1.8%;justify-content:flex-start}
+.frame .joint-poster-section{flex:0 0 auto;min-height:0;gap:clamp(4px,.45cqw,7px)}
+.frame .joint-poster-section h2{min-height:0;font-family:Inter,"Noto Sans Malayalam",sans-serif;font-size:clamp(9px,1.65cqw,18px);line-height:1.2}
+.frame .joint-poster-section h2 .committee-heading-pill{padding:3px 14px;font-size:inherit}
+.frame .joint-poster-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-content:center;align-items:start;gap:2.2%;width:min(100%,68%);margin:0 auto 1%}
+.frame .joint-poster-member{width:100%;max-width:none;min-width:0;flex:none}
+.frame .joint-poster-member .joint-square{width:100%;aspect-ratio:1;min-height:0;border:2px solid #fff;border-radius:10px}
+.frame .joint-member-name{padding-top:2px;font-size:clamp(7px,1.12cqw,12px);line-height:1.15;color:#123c27}
+.frame .executive-poster-section{padding:1% 5% 1% 12%}
+.frame .executive-poster-section .joint-poster-row{width:100%;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:2%;row-gap:1%;margin:0 0 1.2%}
+.frame .executive-poster-section .joint-poster-member .joint-square{border-radius:8px}
+.frame .executive-poster-section .joint-member-name{font-size:clamp(6px,.92cqw,10px)}
+.frame .executive-poster-section > h2 .committee-heading-pill{font-family:Inter,"Noto Sans Malayalam",sans-serif}
+.frame .msf-congratulations-footer{left:0;right:0;min-height:7%;padding:1% 3%;border-radius:12px 12px 0 0}
+.frame .msf-congratulations-footer span{font-size:clamp(10px,2.15cqw,23px)}
+.frame .msf-congratulations-footer strong{font-size:clamp(14px,3.1cqw,34px)}
+.frame .poster-strength-mark{bottom:8%;z-index:3}
+.frame.design-two .design-two-content{top:20%;bottom:8%;height:auto;overflow:hidden}
+.frame.design-two .design-two-group{min-height:0;overflow:hidden}
+.frame.design-two .design-two-group h2{font-family:Inter,"Noto Sans Malayalam",sans-serif;font-weight:800;line-height:1.2}
+.frame.design-two .design-two-grid{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:3%;align-content:start}
+.frame.design-two .design-two-member-photo{width:82%;aspect-ratio:1;border-radius:22%;flex:none}
+.frame.design-two .design-two-person-name{font-size:clamp(8px,1.55cqw,15px);line-height:1.14}
+.frame.design-two .design-two-leader-photo{aspect-ratio:4/5;height:auto;width:82%;flex:1;overflow:hidden;border-radius:22px}
+.frame.design-two .design-two-leader-photo img{border-radius:18px}
+.frame.design-two .design-two-person-name{font-family:Inter,"Noto Sans Malayalam",sans-serif;overflow-wrap:anywhere}
+.frame.design-two .design-two-footer{display:none}
+.frame.design-three .design-three-committees{top:43%;bottom:8%;overflow:hidden}
+.frame.design-three .design-three-committee{flex:0 0 auto;min-height:0;overflow:hidden}
+.frame.design-three .design-three-committee h2{font-family:Inter,"Noto Sans Malayalam",sans-serif;font-weight:800}
+.frame.design-three .design-three-members{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:2%;align-content:start}
+.frame.design-three .executive-group .design-three-members{grid-template-columns:repeat(4,minmax(0,1fr))}
+.frame.design-three .design-three-member-photo{width:78%;aspect-ratio:1;border-radius:18%;flex:none}
+.frame.design-three .design-three-member .design-three-name{font-size:clamp(7px,1.25cqw,12px);line-height:1.15}
+.frame.design-three .design-three-leader .design-three-name{font-size:clamp(10px,2.2cqw,22px);line-height:1.15}
+.frame.design-three .design-three-flags{top:48%;height:39%;pointer-events:none}
+.poster-pagination{max-width:1500px;margin:12px auto -4px;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#345d45;font-size:14px;font-weight:700}
+.poster-pagination>div{display:flex;gap:8px}
+.poster-pagination button{min-height:42px;padding:8px 16px;border:1px solid #c9dbcf;border-radius:10px;background:#fff;color:#145a35;font-weight:750}
+.poster-pagination button:disabled{opacity:.48;cursor:not-allowed}
+.limit-message{padding:10px 12px;border-radius:9px;background:#fff4e3;color:#7a4911;font-size:13px;line-height:1.45}
+.add-member-button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:850px){
+ .workspace{grid-template-columns:minmax(0,1fr);padding:12px;gap:14px}
+ .editor-panel{width:100%}
+ .poster-pagination{padding:0 12px}
+}
+@media(max-width:600px){
+ .editor-bar{align-items:center;padding:12px;flex-wrap:wrap}
+ .editor-bar strong{font-size:16px}
+ .poster-export-actions{display:flex;gap:7px;width:100%}
+ .poster-export-actions button{flex:1;min-height:44px}
+ .template-switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .template-switcher button{padding:11px 8px;min-height:44px}
+ .workspace{padding:10px;gap:12px}
+ .frame{max-width:min(100%,520px)}
+ .poster-pagination{padding:0 10px;font-size:12px}
+ .poster-pagination button{min-height:44px;padding:8px 11px}
+ .frame .joint-sections{top:12%;bottom:39%;gap:1.2%}
+ .frame.design-three .design-three-committees{width:68%;left:8%;top:43%;bottom:8%}
+}
+
+
+/* Equal primary portrait frames for Design 1, with crop instead of distortion. */
+.frame:not(.design-two):not(.design-three) .canvas-photo{
+  height:22%;
+  overflow:hidden;
+  border-radius:18px;
+  background:#e8f3e9;
+}
+.frame:not(.design-two):not(.design-three) .canvas-photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 28%;
+}
+.frame:not(.design-two):not(.design-three) .canvas-labels{
+  height:10%;
+  align-items:stretch;
+  bottom:2.2%;
+}
+.frame:not(.design-two):not(.design-three) .canvas-label{
+  padding:3% 2%;
+}
+.frame:not(.design-two):not(.design-three) .canvas-label small{
+  font-family:Inter,"Noto Sans Malayalam",sans-serif;
+  font-size:clamp(7px,1.2cqw,13px);
+  letter-spacing:.02em;
+}
+.frame:not(.design-two):not(.design-three) .canvas-label .name-lines span{
+  display:block;
+  font-family:Inter,"Noto Sans Malayalam",sans-serif;
+  font-size:clamp(9px,1.85cqw,20px);
+  line-height:1.12;
+  overflow-wrap:anywhere;
+}
