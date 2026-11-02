@@ -61,7 +61,7 @@ export default function ReferencePoster({
         {people.map((person, index) => <div className="ref-leader" key={person.role}>
           <div className="ref-leader-photo">
             <span className="ref-role">{person.role}</span>
-            <button type="button" className="ref-portrait-action" onClick={() => onLeaderClick(index, person)} aria-label={(person.photo ? 'Crop ' : 'Upload ') + person.role + ' portrait'}>
+            <button type="button" className={"ref-portrait-action"+(person.cutout?" ref-photo-cutout":"")} onClick={() => onLeaderClick(index, person)} aria-label={(person.photo ? 'Crop ' : 'Upload ') + person.role + ' portrait'}>
               {person.photo ? <img src={person.photo} alt={person.name || person.role}/> : <Camera size={30}/>}
             </button>
           </div>
@@ -75,7 +75,7 @@ export default function ReferencePoster({
           <div className="ref-committee-outline">
             <div className="ref-committee-row">
               {members.map((person, index) => <div className="ref-member" key={index}>
-                <button type="button" className="ref-member-photo" onClick={() => onMemberClick(role, index)} aria-label={'Edit ' + role + ' member ' + (index + 1)}>
+                <button type="button" className={"ref-member-photo"+(person.cutout?" ref-photo-cutout":"")} onClick={() => onMemberClick(role, index)} aria-label={'Edit ' + role + ' member ' + (index + 1)}>
                   {person.photo ? <img src={person.photo} alt={person.name || role + ' member'}/> : <Camera size={22}/>}
                 </button>
                 <PersonName person={person}/>
@@ -96,7 +96,7 @@ export default function ReferencePoster({
           {membersFor('Executive Members').map((person, index) => {
             const globalIndex = (page - 1) * 8 + index;
             return <div className="ref-executive-member" key={globalIndex}>
-              <button className="ref-member-photo" type="button" onClick={() => onMemberClick('Executive Members', globalIndex)} aria-label={'Edit executive member ' + (globalIndex + 1)}>
+              <button className={"ref-member-photo"+(person.cutout?" ref-photo-cutout":"")} type="button" onClick={() => onMemberClick('Executive Members', globalIndex)} aria-label={'Edit executive member ' + (globalIndex + 1)}>
                 {person.photo ? <img src={person.photo} alt={person.name || 'Executive member'}/> : <Camera size={25}/>}
               </button>
               <PersonName person={person}/>
