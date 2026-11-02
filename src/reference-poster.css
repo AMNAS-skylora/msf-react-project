@@ -1,0 +1,115 @@
+/* Reference-based MSF committee poster. All dimensions respond to the 4:5 frame, not the viewport. */
+.frame .ref-poster,
+.frame .ref-poster *{box-sizing:border-box}
+.frame .ref-poster{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  isolation:isolate;
+  color:#34472b;
+  font-family:"Noto Sans Malayalam",Inter,Arial,sans-serif;
+  background:
+    radial-gradient(ellipse 36% 24% at 9% 7%,rgba(129,178,54,.47) 0%,transparent 100%),
+    radial-gradient(ellipse 30% 25% at 95% 4%,rgba(109,171,60,.37) 0%,transparent 100%),
+    radial-gradient(ellipse 31% 22% at 8% 54%,rgba(152,180,79,.24) 0%,transparent 100%),
+    radial-gradient(ellipse 40% 24% at 97% 78%,rgba(160,201,85,.42) 0%,transparent 100%),
+    linear-gradient(145deg,#edf4d4 0%,#f8fbe6 37%,#eef7d9 67%,#dae9b5 100%);
+}
+.frame .ref-atmosphere{
+  position:absolute;inset:-3%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 19% 12% at 31% 10%,#ffffffa8 0%,transparent 100%),
+    radial-gradient(ellipse 18% 22% at 83% 28%,#ffffff92 0%,transparent 100%),
+    radial-gradient(ellipse 13% 20% at 7% 78%,#ffffff9e 0%,transparent 100%),
+    radial-gradient(ellipse 9% 7% at 83% 54%,#9dbe7260 0%,transparent 100%),
+    radial-gradient(ellipse 10% 7% at 94% 15%,#acd47b59 0%,transparent 100%);
+  filter:blur(1.6cqw);
+}
+.frame .ref-flags{position:absolute;z-index:1;right:-1.5%;top:44%;height:48%;width:23%;pointer-events:none;filter:drop-shadow(0.5cqw 0.8cqw 0.6cqw #31582d25)}
+.frame .ref-poster-header{
+  position:absolute;z-index:3;top:4%;left:4%;right:4%;height:12%;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;gap:.35cqw;
+}
+.frame .ref-identity{
+  display:block;max-width:96%;color:#3d5d2c;font-weight:700;font-size:3.15cqw;line-height:1.25;
+}
+.frame .ref-poster-header h1{
+  margin:0;padding:0;max-width:100%;color:#4d8730;font-size:7.2cqw;line-height:1.18;
+  font-weight:900;letter-spacing:-.07cqw;text-wrap:balance;overflow-wrap:anywhere;
+}
+.frame .ref-leaders{
+  position:absolute;z-index:3;left:10.5%;right:11%;top:17.4%;height:23%;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7.5%;align-items:start;
+}
+.frame .ref-leader{display:flex;flex-direction:column;align-items:center;min-width:0;height:100%;text-align:center}
+.frame .ref-leader-photo{position:relative;width:100%;height:77%;background:#adc96f;border-radius:25% 25% 20% 20%}
+.frame .ref-portrait-action,.frame .ref-member-photo{
+  display:flex;align-items:center;justify-content:center;padding:0;border:0;
+  color:#557c46;cursor:pointer;overflow:hidden;background:linear-gradient(145deg,#bdd887,#93bc61);
+}
+.frame .ref-portrait-action{
+  width:100%;height:100%;border-radius:25% 25% 20% 20%;
+}
+.frame .ref-portrait-action img,.frame .ref-member-photo img{
+  display:block;width:100%;height:100%;object-fit:cover;object-position:center 30%;flex:none;
+}
+.frame .ref-role{
+  position:absolute;z-index:4;left:-7%;bottom:8%;display:flex;align-items:center;justify-content:center;
+  padding:1.2cqw .4cqw;border-radius:1cqw 1cqw 0 0;
+  color:white;background:linear-gradient(180deg,#629d39,#357b32);
+  font:500 1.95cqw/1.1 Inter,Arial,sans-serif;writing-mode:vertical-rl;transform:rotate(180deg);
+  white-space:nowrap;min-height:6.5cqw;
+}
+.frame .ref-person-name{
+  width:100%;min-height:2.8cqw;max-height:6cqw;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:.15cqw;padding:.8cqw .1cqw 0;
+  color:#27352b;font:500 2.06cqw/1.13 Inter,"Noto Sans Malayalam",Arial,sans-serif;
+  overflow-wrap:anywhere;word-break:normal;text-align:center;
+}
+.frame .ref-person-name span{display:block;max-width:100%}
+.frame .ref-committee-section{position:absolute;z-index:3;left:12%;width:67%;height:21.6%}
+.frame .ref-vice{top:43.5%}
+.frame .ref-joint{top:67.5%}
+.frame .ref-committee-section h2{
+  position:relative;z-index:2;height:10%;min-height:0;width:87%;margin:0 auto -1%;
+  display:flex;justify-content:center;align-items:center;
+  padding:0 .8cqw;border-radius:1.2cqw 1.2cqw 0 0;background:linear-gradient(90deg,#79a740,#5f9939,#79a740);
+  font:600 2.25cqw/1.1 Inter,Arial,sans-serif;color:#fff;text-align:center;
+}
+.frame .ref-committee-outline{
+  position:relative;width:100%;height:90%;padding:2.7% 2.5% 0;border:1px solid #91b06b;
+  border-bottom:0;border-radius:3.5cqw 3.5cqw 0 0;background:linear-gradient(180deg,#f9fbe72c,#f0f9df05);
+}
+.frame .ref-committee-row{height:100%;display:flex;justify-content:center;align-items:flex-start;gap:2.8%}
+.frame .ref-member{width:22.4%;height:100%;flex:0 0 22.4%;display:flex;flex-direction:column;align-items:center;min-width:0}
+.frame .ref-member-photo{width:100%;height:75%;border-radius:23% 23% 16% 16%;box-shadow:0 .25cqw .4cqw #3f613021}
+.frame .ref-member .ref-person-name{font-size:1.65cqw;line-height:1.11;padding-top:.6cqw;max-height:5cqw}
+.frame .ref-bottom-ribbon{
+  position:absolute;left:-8%;right:-8%;bottom:5.1%;height:4.8%;z-index:1;pointer-events:none;
+  background:linear-gradient(95deg,#78aa3dba,#cceca1c7 52%,#5d9a35ae);
+  transform:rotate(-2deg);clip-path:polygon(0 47%,17% 18%,50% 44%,80% 11%,100% 33%,100% 100%,0 100%);
+}
+.frame .ref-congratulations{
+  position:absolute;z-index:5;left:0;right:0;bottom:0;height:7.5%;padding:.6% 2%;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.1cqw;text-align:center;
+  color:#faffed;background:linear-gradient(100deg,#5e922f,#2e7731 50%,#5f9831);border-top:.35cqw solid #87b94e;
+  font-family:"Noto Sans Malayalam",sans-serif;
+}
+.frame .ref-congratulations span{font-size:2cqw;line-height:1.2;font-weight:600}
+.frame .ref-congratulations strong{font-size:3.1cqw;line-height:1.2;font-weight:900;color:#fbffe3}
+.frame .ref-poster-header-executive{top:6%;height:13%}
+.frame .ref-poster-header-executive h1{font-size:6cqw;font-family:Inter,Arial,sans-serif;letter-spacing:0}
+.frame .ref-executive-page-label{font-size:1.9cqw;color:#587d3d;font-family:Inter,Arial,sans-serif;font-weight:600}
+.frame .ref-executive-section{position:absolute;z-index:3;top:24%;left:9%;width:82%;height:64%;text-align:center}
+.frame .ref-executive-section h2{
+  width:85%;margin:0 auto 3%;padding:1.4% 3%;background:#609439;color:#fff;
+  border-radius:1.5cqw;font:700 2.8cqw/1.1 Inter,Arial,sans-serif;
+}
+.frame .ref-executive-grid{height:86%;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;column-gap:3.8%;row-gap:5%}
+.frame .ref-executive-member{flex:0 0 22%;min-width:0;height:43%;display:flex;flex-direction:column;align-items:center}
+.frame .ref-executive-member .ref-member-photo{width:93%;height:76%;border-radius:2cqw;box-shadow:0 .4cqw 1cqw #2c5c2222}
+.frame .ref-executive-member .ref-person-name{font-size:2cqw;max-height:6cqw}
+@media (prefers-reduced-motion:reduce){.frame .ref-poster *{scroll-behavior:auto}}
