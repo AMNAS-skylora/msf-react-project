@@ -1,179 +1,115 @@
 import { useRef, useState } from 'react';
-import { Check, Maximize2, Minus, Plus, RotateCcw, Scissors, Sparkles, X } from 'lucide-react';
+import { Check, RotateCcw, Scissors, Sparkles, X } from 'lucide-react';
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const positionOf = person => ({
-  zoom: clamp(Number(person.photoZoom) || 1, 0.7, 3.5),
-  x: clamp(Number(person.photoX) || 0, -65, 65),
-  y: clamp(Number(person.photoY) || 0, -65, 65),
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+const defaults=person=>({
+  zoom:clamp(Number(person.photoZoom)||1,.7,3.5),
+  x:clamp(Number(person.photoX)||0,-65,65),
+  y:clamp(Number(person.photoY)||0,-65,65),
 });
 
-// Non-destructive editing: this transform is saved on the member, so the
-// poster preview and the exported PNG render the same clipped image.
-export default function PortraitAdjustDialog({
-  person,
-  label,
-  onClose,
-  onSave,
-  onRemoveBackground,
-  onCrop,
-}) {
-  const [source, setSource] = useState(person.photo);
-  const [cutout, setCutout] = useState(!!person.cutout);
-  const [mode, setMode] = useState(person.cutout && person.photoMode === 'popout' ? 'popout' : 'inside');
-  const [overhang, setOverhang] = useState(clamp(Number(person.photoPopout ?? 15), 0, 40));
-  const [position, setPosition] = useState(() => positionOf(person));
-  const [working, setWorking] = useState(false);
-  const [error, setError] = useState('');
-  const surfaceRef = useRef(null);
-  const pointers = useRef(new Map());
-  const lastDistance = useRef(0);
+export default function PortraitAdjustDialog({person,label,onClose,onSave,onRemoveBackground,onCrop}) {
+  const [source,setSource]=useState(person.photo);
+  const [cutout,setCutout]=useState(!!person.cutout);
+  const [mode,setMode]=useState(person.cutout&&person.photoMode==='popout'?'popout':'inside');
+  const [position,setPosition]=useState(()=>defaults(person));
+  const [working,setWorking]=useState(false);
+  const [error,setError]=useState('');
+  const surface=useRef(null);
+  const pointers=useRef(new Map());
+  const previousDistance=useRef(0);
 
-  const patch = update => setPosition(previous => ({
-    ...previous,
-    ...update,
-  }));
-
-  function pointerDown(event) {
-    if (!source) return;
+  function pointerDown(event){
+    if(!source)return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointers.current.size === 2) {
-      const [a, b] = [...pointers.current.values()];
-      lastDistance.current = Math.hypot(b.x - a.x, b.y - a.y);
+    pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    if(pointers.current.size===2){
+      const [a,b]=[...pointers.current.values()];
+      previousDistance.current=Math.hypot(b.x-a.x,b.y-a.y);
     }
   }
-
-  function pointerMove(event) {
-    const previous = pointers.current.get(event.pointerId);
-    if (!previous || !surfaceRef.current) return;
+  function pointerMove(event){
+    const before=pointers.current.get(event.pointerId);
+    if(!before||!surface.current)return;
     event.preventDefault();
-    const next = { x: event.clientX, y: event.clientY };
-    pointers.current.set(event.pointerId, next);
-    const rect = surfaceRef.current.getBoundingClientRect();
-    if (pointers.current.size >= 2) {
-      const [a, b] = [...pointers.current.values()];
-      const distance = Math.hypot(b.x - a.x, b.y - a.y);
-      if (lastDistance.current > 0) {
-        const ratio = distance / lastDistance.current;
-        setPosition(current => ({
-          ...current,
-          zoom: clamp(current.zoom * ratio, .7, 3.5),
-        }));
+    const current={x:event.clientX,y:event.clientY};
+    pointers.current.set(event.pointerId,current);
+    if(pointers.current.size>=2){
+      const [a,b]=[...pointers.current.values()];
+      const distance=Math.hypot(b.x-a.x,b.y-a.y);
+      if(previousDistance.current>0) {
+        const scale=distance/previousDistance.current;
+        setPosition(p=>({...p,zoom:clamp(p.zoom*scale,.7,3.5)}));
       }
-      lastDistance.current = distance;
-    } else {
-      const dx = (next.x - previous.x) / Math.max(1, rect.width) * 100;
-      const dy = (next.y - previous.y) / Math.max(1, rect.height) * 100;
-      setPosition(current => ({
-        ...current,
-        x: clamp(current.x + dx, -65, 65),
-        y: clamp(current.y + dy, -65, 65),
-      }));
+      previousDistance.current=distance;
+    }else{
+      const rect=surface.current.getBoundingClientRect();
+      const dx=(current.x-before.x)/Math.max(rect.width,1)*100;
+      const dy=(current.y-before.y)/Math.max(rect.height,1)*100;
+      setPosition(p=>({...p,x:clamp(p.x+dx,-65,65),y:clamp(p.y+dy,-65,65)}));
     }
   }
-
-  function pointerUp(event) {
+  function pointerUp(event){
     pointers.current.delete(event.pointerId);
-    lastDistance.current = 0;
+    previousDistance.current=0;
   }
-
-  async function removeBackground() {
+  async function removeBackground(){
+    if(working||!source)return;
     setWorking(true);
     setError('');
     try {
-      const transparent = await onRemoveBackground(source);
-      setSource(transparent);
+      const photo=await onRemoveBackground(source);
+      setSource(photo);
       setCutout(true);
       setMode('popout');
-      setPosition({ zoom: 1, x: 0, y: 0 });
-    } catch (err) {
-      setError('Background removal failed. Check internet connection or try a transparent PNG. ' + (err?.message || ''));
-    } finally {
-      setWorking(false);
-    }
+      setPosition({zoom:1,x:0,y:0});
+    }catch(err){
+      setError(err?.message||'Could not remove background. Please try again.');
+    }finally{setWorking(false);}
   }
-
-  function save() {
-    onSave({
-      photo: source,
-      cutout,
-      photoMode: cutout ? mode : 'inside',
-      photoPopout: overhang,
-      photoZoom: position.zoom,
-      photoX: position.x,
-      photoY: position.y,
-    });
+  function reset(){
+    setSource(person.photo);
+    setCutout(!!person.cutout);
+    setMode(person.cutout&&person.photoMode==='popout'?'popout':'inside');
+    setPosition(defaults(person));
+    setError('');
   }
-
-  return (
-    <div className="portrait-adjust-overlay" role="presentation">
-      <section className="portrait-adjust-dialog" role="dialog" aria-modal="true" aria-label={'Adjust photo: ' + label}>
-        <div className="portrait-adjust-heading">
-          <div><strong>Adjust portrait</strong><small>{label}</small></div>
-          <button type="button" className="portrait-adjust-close" onClick={onClose} aria-label="Close"><X size={21}/></button>
+  function save(){
+    onSave({photo:source,cutout,photoMode:cutout?mode:'inside',
+      photoPopout:Number(person.photoPopout??15),
+      photoZoom:position.zoom,photoX:position.x,photoY:position.y});
+  }
+  return <div className="portrait-adjust-overlay" role="presentation">
+    <section className="portrait-adjust-dialog" role="dialog" aria-modal="true" aria-label={'Adjust photo: '+label}>
+      <div className="portrait-adjust-heading">
+        <div><strong>Adjust photo</strong><small>{label}</small></div>
+        <button type="button" className="portrait-adjust-close" onClick={onClose} aria-label="Close"><X size={21}/></button>
+      </div>
+      <div className="portrait-adjust-preview" ref={surface} onPointerDown={pointerDown} onPointerMove={pointerMove}
+        onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp}
+        aria-label="Move photo by dragging; use two fingers to resize">
+        <div className={'portrait-adjust-shape'+(cutout&&mode==='popout'?' portrait-adjust-popout':'')}
+          style={{'--portrait-overhang':(person.photoPopout??15)+'%'}}>
+          {source&&<img src={source} alt="Portrait preview" draggable={false}
+            className={cutout?'portrait-adjust-cutout':''}
+            style={{transform:`translate(${position.x}%, ${position.y}%) scale(${position.zoom})`}}/>}
         </div>
-        <p className="portrait-adjust-help">Drag to move · Pinch or use Zoom to resize. Inside frame clips the photo to the curve. Pop out allows a transparent cutout to rise above it.</p>
-        <div
-          className="portrait-adjust-preview"
-          ref={surfaceRef}
-          onPointerDown={pointerDown}
-          onPointerMove={pointerMove}
-          onPointerUp={pointerUp}
-          onPointerCancel={pointerUp}
-          onLostPointerCapture={pointerUp}
-          aria-label="Drag photo to adjust position"
-        >
-          <div className={'portrait-adjust-shape'+(cutout&&mode==='popout'?' portrait-adjust-popout':'')} style={{'--portrait-overhang':overhang+'%'}}>
-            {source && <img
-              src={source}
-              alt="Adjust uploaded portrait"
-              draggable={false}
-              className={cutout ? 'portrait-adjust-cutout' : ''}
-              style={{ transform: `translate(${position.x}%, ${position.y}%) scale(${position.zoom})` }}
-            />}
-          </div>
-          <div className="portrait-adjust-crosshair" aria-hidden="true"/>
-        </div>
-
-        <fieldset className="portrait-adjust-modes">
-          <legend>Photo shape</legend>
-          <div className="portrait-adjust-mode-options">
-            <button type="button" className={mode==='inside'?'active':''} aria-pressed={mode==='inside'} onClick={()=>setMode('inside')}>Inside curved frame</button>
-            <button type="button" className={mode==='popout'?'active':''} aria-pressed={mode==='popout'} disabled={!cutout} onClick={()=>setMode('popout')}>Pop out above frame</button>
-          </div>
-          {!cutout && <small>Remove the image background first to enable Pop out.</small>}
-        </fieldset>
-        {cutout&&mode==='popout'&&<div className="portrait-adjust-control">
-          <div className="portrait-adjust-control-label"><label htmlFor="portrait-adjust-overhang">Extend above curve</label><span>{overhang}%</span></div>
-          <div className="portrait-adjust-zoom-row">
-            <input id="portrait-adjust-overhang" type="range" min="0" max="40" step="1" value={overhang} onChange={event=>setOverhang(Number(event.target.value))}/>
-          </div>
-        </div>}
-        <div className="portrait-adjust-control">
-          <div className="portrait-adjust-control-label"><label htmlFor="portrait-adjust-zoom">Zoom</label><span>{Math.round(position.zoom * 100)}%</span></div>
-          <div className="portrait-adjust-zoom-row">
-            <button type="button" onClick={() => patch({ zoom: clamp(position.zoom - .1, .7, 3.5) })} aria-label="Zoom out"><Minus size={19}/></button>
-            <input id="portrait-adjust-zoom" type="range" min=".7" max="3.5" step=".01" value={position.zoom} onChange={event => patch({ zoom: Number(event.target.value) })}/>
-            <button type="button" onClick={() => patch({ zoom: clamp(position.zoom + .1, .7, 3.5) })} aria-label="Zoom in"><Plus size={19}/></button>
-          </div>
-        </div>
-        <div className="portrait-adjust-toolbar">
-          <button type="button" onClick={() => setPosition({ zoom: 1, x: 0, y: 0 })}><Maximize2 size={17}/> Fit center</button>
-          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setOverhang(clamp(Number(person.photoPopout ?? 15),0,40)); setError(''); }}><RotateCcw size={17}/> Reset</button>
-          <button type="button" onClick={onCrop}><Scissors size={17}/> Crop</button>
-        </div>
-        <div className="portrait-adjust-background">
-          <label><input type="checkbox" checked={cutout} onChange={e => {setCutout(e.target.checked);if(!e.target.checked)setMode('inside');}}/> Transparent / removed background</label>
-          <button type="button" disabled={working || !source} onClick={removeBackground}><Sparkles size={16}/> {working ? 'Removing…' : 'Remove BG'}</button>
-        </div>
-        {error && <p role="alert" className="portrait-adjust-error">{error}</p>}
-        <div className="portrait-adjust-actions">
-          <button type="button" onClick={onClose}>Cancel</button>
-          <button type="button" onClick={save} disabled={working}><Check size={18}/> Save position</button>
-        </div>
-      </section>
-    </div>
-  );
+      </div>
+      <div className="portrait-adjust-mode-options">
+        <button type="button" className={mode==='inside'?'active':''} aria-pressed={mode==='inside'} onClick={()=>setMode('inside')}>Inside shape</button>
+        <button type="button" className={mode==='popout'?'active':''} aria-pressed={mode==='popout'} disabled={!cutout} onClick={()=>setMode('popout')}>Pop out</button>
+      </div>
+      <div className="portrait-adjust-toolbar">
+        <button type="button" onClick={reset}><RotateCcw size={17}/> Reset</button>
+        <button type="button" onClick={onCrop}><Scissors size={17}/> Crop</button>
+        <button type="button" disabled={working||!source} onClick={removeBackground}><Sparkles size={17}/>{working?'Removing…':'Remove BG'}</button>
+      </div>
+      {error&&<p role="alert" className="portrait-adjust-error">{error}</p>}
+      <div className="portrait-adjust-actions">
+        <button type="button" onClick={onClose}>Cancel</button>
+        <button type="button" disabled={working} onClick={save}><Check size={18}/> Save</button>
+      </div>
+    </section>
+  </div>;
 }
