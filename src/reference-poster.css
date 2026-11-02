@@ -113,3 +113,102 @@
 .frame .ref-executive-member .ref-member-photo{width:93%;height:76%;border-radius:2cqw;box-shadow:0 .4cqw 1cqw #2c5c2222}
 .frame .ref-executive-member .ref-person-name{font-size:2cqw;max-height:6cqw}
 @media (prefers-reduced-motion:reduce){.frame .ref-poster *{scroll-behavior:auto}}
+
+/* Portrait alignment — all five officer and committee sections share the same crop rules.
+   Cutouts display against the green panel without being enlarged or spilling outside. */
+.frame .ref-poster .ref-leader,
+.frame .ref-poster .ref-member,
+.frame .ref-poster .ref-executive-member{
+  min-width:0;
+  max-width:100%;
+  align-items:center;
+  text-align:center;
+  isolation:isolate;
+}
+.frame .ref-poster .ref-leader-photo{
+  display:block;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  flex-shrink:0;
+  background:linear-gradient(135deg,#aed075 0%,#91ba5a 100%);
+  box-shadow:inset 0 0 0 1px #5c9a3a30;
+}
+.frame .ref-poster .ref-portrait-action,
+.frame .ref-poster .ref-member-photo{
+  position:relative;
+  display:flex;
+  flex:none;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  max-width:100%;
+  padding:0;
+  overflow:hidden;
+  background:linear-gradient(135deg,#aed075 0%,#91ba5a 100%);
+  isolation:isolate;
+  -webkit-mask-image:-webkit-radial-gradient(white,black);
+}
+.frame .ref-poster .ref-portrait-action{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+}
+.frame .ref-poster .ref-member-photo{
+  margin-left:auto;
+  margin-right:auto;
+}
+.frame .ref-poster .ref-portrait-action img,
+.frame .ref-poster .ref-member-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  flex:0 0 auto;
+  object-fit:cover;
+  object-position:50% 30%;
+  border:0;
+  border-radius:inherit;
+}
+.frame .ref-poster .ref-photo-cutout img{
+  object-fit:contain;
+  object-position:center bottom;
+  transform:none;
+}
+.frame .ref-poster .ref-role{
+  position:absolute;
+  z-index:5;
+  left:0;
+  bottom:6%;
+  max-height:88%;
+  max-width:20%;
+  padding:.75cqw .45cqw;
+  text-align:center;
+  overflow:hidden;
+  background:#438b3d;
+  border-radius:.6cqw .6cqw 0 0;
+  box-shadow:0 .2cqw .5cqw #144e2630;
+}
+.frame .ref-poster .ref-person-name{
+  display:flex;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+  padding-left:.25cqw;
+  padding-right:.25cqw;
+  margin:0 auto;
+}
+.frame .ref-poster .ref-person-name span{
+  display:block;
+  width:100%;
+  max-width:100%;
+  text-align:center;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
