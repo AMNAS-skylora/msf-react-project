@@ -573,7 +573,7 @@ export default function App() {
         {message&&<p role="status" className="message">{message}</p>}
       </aside>
     </div>
-    {photoEdit&&(()=>{
+    {photoEdit&&!crop&&(()=>{
       const {role,index}=photoEdit;
       const person=memberForEdit(role,index);
       if(!person?.photo)return null;
