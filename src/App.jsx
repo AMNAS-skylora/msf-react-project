@@ -190,7 +190,7 @@ export default function App() {
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
-  const [template,setTemplate]=useState(()=>{try{return ['1','2','3'].includes(localStorage.getItem('msf-poster-template'))?localStorage.getItem('msf-poster-template'):'1';}catch{return '1';}});
+  const [template,setTemplate]=useState(()=>{try{return '1';}catch{return '1';}});
   useEffect(()=>{try{localStorage.setItem('msf-poster-template',template)}catch{}},[template]);
   const [exporting,setExporting]=useState(false);
   const [shareOpen,setShareOpen]=useState(false);
@@ -303,16 +303,16 @@ export default function App() {
   }
   return <main className="app-shell">
     <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
-    <div className="template-switcher" role="group" aria-label="Poster design"><button type="button" className={template==='1'?'active':''} onClick={()=>setTemplate('1')}>Design 1</button><button type="button" className={template==='2'?'active':''} onClick={()=>{setTemplate('2');setSelected(null);}}>Design 2</button><button type="button" className={template==='3'?'active':''} onClick={()=>{setTemplate('3');setSelected(null);}}>Design 3</button></div>
+    
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Executive committee · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
-      <section className={"frame"+(template==='2'?" design-two":template==='3'?" design-three":"")} ref={frameRef} aria-label="MSF poster frame">
-        {template==='2'&&<div className="design-two-wash" aria-hidden="true"/>}
+      <section className="frame" ref={frameRef} aria-label="MSF poster frame">
+        
         <div className="poster-strength-mark" aria-hidden="true"><span>Strength</span></div>
         <div className="msf-congratulations-footer"><span>MSF ചോക്കാട് ഗ്രാമപഞ്ചായത്ത് കമ്മിറ്റിയുടെ</span><strong>ഹൃദയം നിറഞ്ഞ അഭിനന്ദനങ്ങൾ</strong></div>
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
         {template==='1'&&<header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>}
-        {template==='2'&&<div className="design-two-title"><div>{splitMalayalamHeading(headerText)[0]}</div><div>{splitMalayalamHeading(headerText)[1]}</div></div>}
+        
         {template==='1'&&people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
           style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
           onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
@@ -327,16 +327,6 @@ export default function App() {
           </>}
         </div>})}
         {template==='1'&&<div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>}
-        {template==='2'&&<div className="design-two-content"><div className="design-two-leaders">{people.map((p,i)=><div className="design-two-leader" key={p.role}><div className="design-two-leader-photo"><span className="design-two-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={"Upload "+p.role+" photo"}><Camera size={28}/></button>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div><div className="design-two-lower"><div className="design-two-groups">{groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section key={role} className={'design-two-group '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')}><h2>{role}</h2><div className="design-two-grid">{(()=>{let start=0;return jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="design-two-member-row" key={row} style={{'--member-count':count}}>{items.map((p,i)=><div className="design-two-member" key={rowStart+i}><div className="design-two-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div>})})()}</div></section>})}</div><div className="design-two-flags" aria-hidden="true"><div className="design-two-flag"><span>☪</span><strong>msf</strong></div><div className="design-two-flag"><span>☪</span><strong>msf</strong></div></div></div><div className="design-two-footer">msf · Leadership Committee</div></div>}
-        {template==='3'&&<div className="design-three-content">
-          <div className="design-three-title"><span>{splitMalayalamHeading(headerText)[0]}</span><strong>{splitMalayalamHeading(headerText)[1]}</strong></div>
-          <div className="design-three-leaders">{people.map((p,i)=><div className="design-three-leader" key={p.role}>
-            <div className="design-three-portrait"><span className="design-three-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={'Upload '+p.role+' photo'}><Camera size={24}/></button>}</div>
-            <div className="design-three-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div>
-          </div>)}</div>
-          <div className="design-three-committees">{['Vice Presidents','Joint Secretaries','Executive Members'].map(role=>{const members=posterMembersFor(role);if(!members.length)return null;return <section className={'design-three-committee '+(role==='Vice Presidents'?'vice-presidents-group':role==='Joint Secretaries'?'joint-secretaries-group':'executive-group')} key={role}><h2>{role}</h2><div className="design-three-members">{(()=>{let start=0;return jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="design-three-member-row" key={row} style={{'--member-count':count}}>{items.map((p,i)=><div className="design-three-member" key={rowStart+i}><div className="design-three-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-three-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div>})})()}</div></section>})}</div>
-          <div className="design-three-flags" aria-hidden="true"><div><span>☪</span><strong>msf</strong></div><div><span>☪</span><strong>msf</strong></div></div>
-        </div>}
         {template==='1'&&<div className="joint-sections">
           {groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")+(role==='Joint Secretaries'?" joint-secretaries-poster-section":"")+(role==='Vice Presidents'?" vice-presidents-poster-section":"")} style={{'--rows':jointRows(members.length,4).length}} key={role}>
             <h2><span className="committee-heading-pill">{role.toUpperCase()}</span></h2>
