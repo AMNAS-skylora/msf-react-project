@@ -60,7 +60,7 @@ export default function ReferencePoster({
       <div className="ref-leaders">
         {people.map((person, index) => <div className="ref-leader" key={person.role}>
           <div className="ref-leader-photo">
-            <span className="ref-role">{person.role}</span>
+            <span className={"ref-role"+(person.role==="General Secretary"?" ref-role-long":"")}>{person.role}</span>
             <button type="button" className={"ref-portrait-action"+(person.cutout?" ref-photo-cutout":"")} onClick={() => onLeaderClick(index, person)} aria-label={(person.photo ? 'Crop ' : 'Upload ') + person.role + ' portrait'}>
               {person.photo ? <img src={person.photo} alt={person.name || person.role}/> : <Camera size={30}/>}
             </button>
