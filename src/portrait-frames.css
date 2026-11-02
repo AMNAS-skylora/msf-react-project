@@ -36,3 +36,27 @@
   color:#2f7234;
   opacity:.72;
 }
+
+/* Keep photo silhouettes proportionate instead of horizontally stretched.
+   Member-name space is reserved by each existing committee row. */
+.frame .ref-poster .ref-profile-leader .ref-portrait{
+  aspect-ratio:1 / 1;
+}
+.frame .ref-poster .ref-profile-committee .ref-portrait{
+  width:auto;
+  height:70%;
+  max-width:76%;
+  aspect-ratio:1 / 1;
+}
+.frame .ref-poster .ref-main-executives .ref-profile-executive .ref-portrait{
+  width:auto;
+  height:70%;
+  max-width:66%;
+  aspect-ratio:1 / 1;
+}
+.frame .ref-poster .ref-extra-executives .ref-profile-executive .ref-portrait{
+  width:auto;
+  height:73%;
+  max-width:75%;
+  aspect-ratio:1 / 1;
+}
