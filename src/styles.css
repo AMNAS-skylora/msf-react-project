@@ -773,3 +773,38 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
   padding:0;
   accent-color:#328240;
 }
+
+/* Only the place/unit name can be edited; the fixed poster headline is rendered from the template. */
+.header-editor input#msf-unit-place {
+  display:block;
+  width:100%;
+  min-height:48px;
+  margin:0;
+  padding:11px 13px;
+  border:1px solid #b9d6c1;
+  border-radius:10px;
+  background:#fff;
+  color:#173f2a;
+  font-family:"Noto Sans Malayalam",Inter,sans-serif;
+  font-size:16px;
+  line-height:1.45;
+}
+.header-editor input#msf-unit-place:focus-visible {
+  outline:2px solid #138244;
+  outline-offset:2px;
+}
+.header-editor .unit-heading-preview {
+  margin:11px 0 4px;
+  padding:10px 12px;
+  background:#eff9ef;
+  color:#155a2e;
+  border:1px solid #d0e7d1;
+  border-radius:9px;
+  font:800 14px/1.5 "Noto Sans Malayalam",sans-serif;
+  overflow-wrap:anywhere;
+}
+.header-editor .unit-heading-note {
+  color:#55705d;
+  font:600 12px/1.5 "Noto Sans Malayalam",sans-serif;
+  margin:5px 0 0;
+}
