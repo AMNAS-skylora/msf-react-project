@@ -1,0 +1,28 @@
+/* Keep officer portraits at a consistent size and center short rows. */
+.frame .joint-sections .joint-poster-section:not(.executive-poster-section) .joint-poster-row {
+  width: min(68%, calc(var(--member-count, 4) * 17%));
+  margin-left: auto;
+  margin-right: auto;
+  grid-template-columns: repeat(var(--member-count, 4), minmax(0, 1fr));
+}
+
+/* Executive pages contain at most two balanced rows of four portraits. */
+.frame .executive-poster-section .joint-poster-row {
+  width: min(100%, calc(var(--member-count, 4) * 16%));
+  margin-left: auto;
+  margin-right: auto;
+  grid-template-columns: repeat(var(--member-count, 4), minmax(0, 1fr));
+}
+
+/* Keep portrait cards the same size when a design has fewer than four members. */
+.frame.design-two .design-two-member-row {
+  width: min(100%, calc(var(--member-count, 4) * 25%));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.frame.design-three .design-three-member-row {
+  width: min(100%, calc(var(--member-count, 4) * 25%));
+  margin-left: auto;
+  margin-right: auto;
+}
