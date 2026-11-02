@@ -289,6 +289,7 @@ export default function App() {
     <div className="workspace">
       <section className={"frame"+(template==='2'?" design-two":template==='3'?" design-three":"")} ref={frameRef} aria-label="MSF poster frame">
         {template==='2'&&<div className="design-two-wash" aria-hidden="true"/>}
+        <div className="poster-strength-mark" aria-hidden="true"><span>Strength</span></div>
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
         {template==='1'&&<header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>}
         {template==='2'&&<div className="design-two-title"><div>{splitMalayalamHeading(headerText)[0]}</div><div>{splitMalayalamHeading(headerText)[1]}</div></div>}
