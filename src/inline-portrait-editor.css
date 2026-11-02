@@ -1,0 +1,112 @@
+/* The editing controls stay in the current poster page, never in another modal.
+ * They are a sibling of the export frame, so downloaded PNGs contain only artwork. */
+.poster-edit-stage{
+  width:min(100%,700px);
+  max-width:100%;
+  min-width:0;
+  margin:0 auto;
+  position:relative;
+  display:flex;
+  align-items:center;
+  flex-direction:column;
+}
+.poster-edit-stage>.frame{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+}
+.inline-photo-toolbar,
+.inline-photo-toolbar *{
+  box-sizing:border-box;
+}
+.inline-photo-toolbar{
+  position:fixed;
+  z-index:1000;
+  left:50%;
+  bottom:max(12px, env(safe-area-inset-bottom,12px));
+  transform:translateX(-50%);
+  width:min(96vw,590px);
+  padding:11px;
+  border-radius:17px;
+  background:rgba(250,255,251,.97);
+  border:1px solid #bcd8c5;
+  box-shadow:0 8px 35px rgba(13,69,35,.28);
+  color:#195435;
+  font-family:Inter,'Noto Sans Malayalam',sans-serif;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.inline-photo-toolbar-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:0 0 8px;
+  font-size:14px;
+  font-weight:800;
+  min-width:0;
+}
+.inline-photo-toolbar-heading span{
+  display:block;
+  min-width:0;
+  text-overflow:ellipsis;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.inline-photo-toolbar-heading small{
+  color:#6b8872;
+  font-size:11px;
+  font-weight:500;
+}
+.inline-photo-toolbar button{
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  min-height:39px;
+  padding:6px 10px;
+  border:1px solid #cbded0;
+  border-radius:10px;
+  color:#225c3b;
+  background:white;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.inline-photo-toolbar button.is-active{
+  background:#19834a;
+  border-color:#19834a;
+  color:white;
+}
+.inline-photo-toolbar button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+.inline-photo-toolbar .inline-photo-done{
+  min-width:64px;
+  flex:none;
+  color:white;
+  background:#0f8649;
+  border-color:#0f8649;
+}
+.inline-photo-toolbar-buttons{
+  display:flex;
+  gap:6px;
+  width:100%;
+  overflow-x:auto;
+  scrollbar-width:thin;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.inline-photo-toolbar-buttons>button{flex:1 0 auto}
+@media(max-width:580px){
+  .inline-photo-toolbar{
+    bottom:max(11px,env(safe-area-inset-bottom,11px));
+    padding:9px;
+    border-radius:14px;
+  }
+  .inline-photo-toolbar-heading{font-size:12px}
+  .inline-photo-toolbar-heading small{font-size:10px}
+  .inline-photo-toolbar button{min-height:40px;font-size:12px}
+}
