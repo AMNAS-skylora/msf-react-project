@@ -319,7 +319,7 @@ export default function App() {
           <div className="design-three-flags" aria-hidden="true"><div><span>☪</span><strong>msf</strong></div><div><span>☪</span><strong>msf</strong></div></div>
         </div>}
         {template==='1'&&<div className="joint-sections">
-          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")} style={{'--rows':jointRows(members.length,role==='Executive Members'?7:5).length}} key={role}>
+          {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")+(role==='Joint Secretaries'?" joint-secretaries-poster-section":"")} style={{'--rows':jointRows(members.length,role==='Executive Members'?7:5).length}} key={role}>
             <h2><span className="committee-heading-pill">{role.toUpperCase()}</span></h2>
             {jointRows(members.length,role==='Executive Members'?7:5).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
               <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
