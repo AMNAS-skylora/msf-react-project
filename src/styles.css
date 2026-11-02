@@ -519,3 +519,26 @@
 .design-three-flags>div{height:40%}
 .design-three-leader .design-three-name{font-size:2.4cqw;line-height:1.12}
 @media(max-width:600px){.frame.design-three{aspect-ratio:1050/1472}.design-three-committees{left:10%;width:65%;top:44%;bottom:3%}.design-three-leaders{left:10%;right:10%;top:19%;height:23%}}
+
+/* Standard social poster format for all three templates: 1080 × 1350 (4:5).
+   Keep the rendered preview and exported image at the same aspect ratio. */
+.frame,.frame.design-two,.frame.design-three{
+  width:100%;
+  max-width:700px;
+  aspect-ratio:4/5;
+  height:auto;
+  position:relative;
+  overflow:hidden;
+  container-type:inline-size;
+}
+.frame .frame-bg{position:absolute;inset:0;width:100%;height:100%}
+.frame.design-two .design-two-content,.frame.design-three .design-three-content{position:absolute;inset:0;width:100%;height:100%}
+/* Reserve the final 4:5 poster area without clipping the committee grid. */
+.frame.design-three .design-three-title{top:3%}
+.frame.design-three .design-three-leaders{top:17%;height:25%}
+.frame.design-three .design-three-committees{top:43%;bottom:2%}
+.frame.design-three .design-three-flags{top:47%;height:43%}
+.frame.design-two .design-two-content{top:20%;bottom:2%;height:auto}
+@media(max-width:600px){
+  .frame,.frame.design-two,.frame.design-three{aspect-ratio:4/5;width:100%;height:auto}
+}
