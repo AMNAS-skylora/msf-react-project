@@ -1,229 +1,392 @@
-/* Reference-based MSF committee poster. All dimensions respond to the 4:5 frame, not the viewport. */
+/*
+  MSF Chokkad reference poster
+  Fixed 4:5 design coordinates; CSS container units track the poster width.
+  All portrait frames are clipped rounded shapes. The same DOM is exported to PNG.
+*/
 .frame .ref-poster,
-.frame .ref-poster *{box-sizing:border-box}
-.frame .ref-poster{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  isolation:isolate;
-  color:#34472b;
-  font-family:"Noto Sans Malayalam",Inter,Arial,sans-serif;
-  background:
-    radial-gradient(ellipse 36% 24% at 9% 7%,rgba(129,178,54,.47) 0%,transparent 100%),
-    radial-gradient(ellipse 30% 25% at 95% 4%,rgba(109,171,60,.37) 0%,transparent 100%),
-    radial-gradient(ellipse 31% 22% at 8% 54%,rgba(152,180,79,.24) 0%,transparent 100%),
-    radial-gradient(ellipse 40% 24% at 97% 78%,rgba(160,201,85,.42) 0%,transparent 100%),
-    linear-gradient(145deg,#edf4d4 0%,#f8fbe6 37%,#eef7d9 67%,#dae9b5 100%);
-}
-.frame .ref-atmosphere{
-  position:absolute;inset:-3%;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 19% 12% at 31% 10%,#ffffffa8 0%,transparent 100%),
-    radial-gradient(ellipse 18% 22% at 83% 28%,#ffffff92 0%,transparent 100%),
-    radial-gradient(ellipse 13% 20% at 7% 78%,#ffffff9e 0%,transparent 100%),
-    radial-gradient(ellipse 9% 7% at 83% 54%,#9dbe7260 0%,transparent 100%),
-    radial-gradient(ellipse 10% 7% at 94% 15%,#acd47b59 0%,transparent 100%);
-  filter:blur(1.6cqw);
-}
-.frame .ref-flags{position:absolute;z-index:1;right:-1.5%;top:44%;height:48%;width:23%;pointer-events:none;filter:drop-shadow(0.5cqw 0.8cqw 0.6cqw #31582d25)}
-.frame .ref-poster-header{
-  position:absolute;z-index:3;top:4%;left:4%;right:4%;height:12%;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;text-align:center;gap:.35cqw;
-}
-.frame .ref-identity{
-  display:block;max-width:96%;color:#3d5d2c;font-weight:700;font-size:3.15cqw;line-height:1.25;
-}
-.frame .ref-poster-header h1{
-  margin:0;padding:0;max-width:100%;color:#4d8730;font-size:7.2cqw;line-height:1.18;
-  font-weight:900;letter-spacing:-.07cqw;text-wrap:balance;overflow-wrap:anywhere;
-}
-.frame .ref-leaders{
-  position:absolute;z-index:3;left:10.5%;right:11%;top:17.4%;height:23%;
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7.5%;align-items:start;
-}
-.frame .ref-leader{display:flex;flex-direction:column;align-items:center;min-width:0;height:100%;text-align:center}
-.frame .ref-leader-photo{position:relative;width:100%;height:77%;background:#adc96f;border-radius:25% 25% 20% 20%}
-.frame .ref-portrait-action,.frame .ref-member-photo{
-  display:flex;align-items:center;justify-content:center;padding:0;border:0;
-  color:#557c46;cursor:pointer;overflow:hidden;background:linear-gradient(145deg,#bdd887,#93bc61);
-}
-.frame .ref-portrait-action{
-  width:100%;height:100%;border-radius:25% 25% 20% 20%;
-}
-.frame .ref-portrait-action img,.frame .ref-member-photo img{
-  display:block;width:100%;height:100%;object-fit:cover;object-position:center 30%;flex:none;
-}
-.frame .ref-role{
-  position:absolute;z-index:4;left:-7%;bottom:8%;display:flex;align-items:center;justify-content:center;
-  padding:1.2cqw .4cqw;border-radius:1cqw 1cqw 0 0;
-  color:white;background:linear-gradient(180deg,#629d39,#357b32);
-  font:500 1.95cqw/1.1 Inter,Arial,sans-serif;writing-mode:vertical-rl;transform:rotate(180deg);
-  white-space:nowrap;min-height:6.5cqw;
-}
-.frame .ref-person-name{
-  width:100%;min-height:2.8cqw;max-height:6cqw;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-  gap:.15cqw;padding:.8cqw .1cqw 0;
-  color:#27352b;font:500 2.06cqw/1.13 Inter,"Noto Sans Malayalam",Arial,sans-serif;
-  overflow-wrap:anywhere;word-break:normal;text-align:center;
-}
-.frame .ref-person-name span{display:block;max-width:100%}
-.frame .ref-committee-section{position:absolute;z-index:3;left:12%;width:67%;height:21.6%}
-.frame .ref-vice{top:43.5%}
-.frame .ref-joint{top:67.5%}
-.frame .ref-committee-section h2{
-  position:relative;z-index:2;height:10%;min-height:0;width:87%;margin:0 auto -1%;
-  display:flex;justify-content:center;align-items:center;
-  padding:0 .8cqw;border-radius:1.2cqw 1.2cqw 0 0;background:linear-gradient(90deg,#79a740,#5f9939,#79a740);
-  font:600 2.25cqw/1.1 Inter,Arial,sans-serif;color:#fff;text-align:center;
-}
-.frame .ref-committee-outline{
-  position:relative;width:100%;height:90%;padding:2.7% 2.5% 0;border:1px solid #91b06b;
-  border-bottom:0;border-radius:3.5cqw 3.5cqw 0 0;background:linear-gradient(180deg,#f9fbe72c,#f0f9df05);
-}
-.frame .ref-committee-row{height:100%;display:flex;justify-content:center;align-items:flex-start;gap:2.8%}
-.frame .ref-member{width:22.4%;height:100%;flex:0 0 22.4%;display:flex;flex-direction:column;align-items:center;min-width:0}
-.frame .ref-member-photo{width:100%;height:75%;border-radius:23% 23% 16% 16%;box-shadow:0 .25cqw .4cqw #3f613021}
-.frame .ref-member .ref-person-name{font-size:1.65cqw;line-height:1.11;padding-top:.6cqw;max-height:5cqw}
-.frame .ref-bottom-ribbon{
-  position:absolute;left:-8%;right:-8%;bottom:5.1%;height:4.8%;z-index:1;pointer-events:none;
-  background:linear-gradient(95deg,#78aa3dba,#cceca1c7 52%,#5d9a35ae);
-  transform:rotate(-2deg);clip-path:polygon(0 47%,17% 18%,50% 44%,80% 11%,100% 33%,100% 100%,0 100%);
-}
-.frame .ref-congratulations{
-  position:absolute;z-index:5;left:0;right:0;bottom:0;height:7.5%;padding:.6% 2%;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.1cqw;text-align:center;
-  color:#faffed;background:linear-gradient(100deg,#5e922f,#2e7731 50%,#5f9831);border-top:.35cqw solid #87b94e;
-  font-family:"Noto Sans Malayalam",sans-serif;
-}
-.frame .ref-congratulations span{font-size:2cqw;line-height:1.2;font-weight:600}
-.frame .ref-congratulations strong{font-size:3.1cqw;line-height:1.2;font-weight:900;color:#fbffe3}
-.frame .ref-poster-header-executive{top:6%;height:13%}
-.frame .ref-poster-header-executive h1{font-size:6cqw;font-family:Inter,Arial,sans-serif;letter-spacing:0}
-.frame .ref-executive-page-label{font-size:1.9cqw;color:#587d3d;font-family:Inter,Arial,sans-serif;font-weight:600}
-.frame .ref-executive-section{position:absolute;z-index:3;top:24%;left:9%;width:82%;height:64%;text-align:center}
-.frame .ref-executive-section h2{
-  width:85%;margin:0 auto 3%;padding:1.4% 3%;background:#609439;color:#fff;
-  border-radius:1.5cqw;font:700 2.8cqw/1.1 Inter,Arial,sans-serif;
-}
-.frame .ref-executive-grid{height:86%;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;column-gap:3.8%;row-gap:5%}
-.frame .ref-executive-member{flex:0 0 22%;min-width:0;height:43%;display:flex;flex-direction:column;align-items:center}
-.frame .ref-executive-member .ref-member-photo{width:93%;height:76%;border-radius:2cqw;box-shadow:0 .4cqw 1cqw #2c5c2222}
-.frame .ref-executive-member .ref-person-name{font-size:2cqw;max-height:6cqw}
-@media (prefers-reduced-motion:reduce){.frame .ref-poster *{scroll-behavior:auto}}
+.frame .ref-poster * { box-sizing: border-box; }
 
-/* Portrait alignment — all five officer and committee sections share the same crop rules.
-   Cutouts display against the green panel without being enlarged or spilling outside. */
-.frame .ref-poster .ref-leader,
-.frame .ref-poster .ref-member,
-.frame .ref-poster .ref-executive-member{
-  min-width:0;
-  max-width:100%;
-  align-items:center;
-  text-align:center;
-  isolation:isolate;
+.frame .ref-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  color: #172333;
+  font-family: Inter, "Noto Sans Malayalam", sans-serif;
+  background-color: #fcfefd;
+  background-image:
+    linear-gradient(to right, rgba(18,60,104,.039) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18,60,104,.039) 1px, transparent 1px),
+    linear-gradient(145deg, #ffffff, #f9fbf9 65%, #ffffff);
+  background-size: 5.2cqw 5.2cqw, 5.2cqw 5.2cqw, 100% 100%;
 }
-.frame .ref-poster .ref-leader-photo{
-  display:block;
-  position:relative;
-  overflow:hidden;
-  isolation:isolate;
-  flex-shrink:0;
-  background:linear-gradient(135deg,#aed075 0%,#91ba5a 100%);
-  box-shadow:inset 0 0 0 1px #5c9a3a30;
+
+.frame .ref-background-corner {
+  position: absolute;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
+  width: 48%;
+  height: 27%;
+  opacity: .7;
+  filter: blur(.25cqw);
 }
-.frame .ref-poster .ref-portrait-action,
-.frame .ref-poster .ref-member-photo{
-  position:relative;
-  display:flex;
-  flex:none;
-  align-items:center;
-  justify-content:center;
-  min-width:0;
-  max-width:100%;
-  padding:0;
-  overflow:hidden;
-  background:linear-gradient(135deg,#aed075 0%,#91ba5a 100%);
-  isolation:isolate;
-  -webkit-mask-image:-webkit-radial-gradient(white,black);
+.frame .ref-corner-top {
+  top: -12%;
+  right: -21%;
+  transform: rotate(-16deg);
+  background:
+    linear-gradient(142deg, transparent 25%, rgba(10,122,51,.57) 36%, rgba(111,197,102,.18) 45%, transparent 53%),
+    linear-gradient(150deg, transparent 38%, rgba(40,160,80,.37) 46%, transparent 51%);
 }
-.frame .ref-poster .ref-portrait-action{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  border-radius:inherit;
+.frame .ref-corner-bottom {
+  left: -24%;
+  bottom: -12%;
+  transform: rotate(18deg);
+  background:
+    linear-gradient(130deg, transparent 24%, rgba(0,124,220,.57) 36%, rgba(103,198,244,.25) 46%, transparent 54%),
+    linear-gradient(150deg, transparent 26%, rgba(5,150,72,.52) 38%, transparent 50%);
 }
-.frame .ref-poster .ref-member-photo{
-  margin-left:auto;
-  margin-right:auto;
+.frame .ref-brand {
+  position: absolute;
+  z-index: 3;
+  top: 3.1%;
+  left: 5.3%;
+  width: 31%;
+  height: 5.8%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: .8cqw;
 }
-.frame .ref-poster .ref-portrait-action img,
-.frame .ref-poster .ref-member-photo img{
-  display:block;
-  width:100%;
-  height:100%;
-  max-width:100%;
-  max-height:100%;
-  flex:0 0 auto;
-  object-fit:cover;
-  object-position:50% 30%;
-  border:0;
-  border-radius:inherit;
+.frame .ref-brand-logo {
+  color: #067531;
+  font: 900 italic 5.8cqw/.85 Georgia, serif;
+  letter-spacing: -.42cqw;
+  text-shadow: .1cqw .1cqw 0 #b4d8a1;
+  white-space: nowrap;
 }
-.frame .ref-poster .ref-photo-cutout img{
-  object-fit:contain;
-  object-position:center bottom;
-  transform:none;
+.frame .ref-brand span {
+  display: block;
+  color: #35573e;
+  font: 800 1.45cqw/1.22 "Noto Sans Malayalam", sans-serif;
+  text-align: left;
 }
-/* Keep the vertical officer badges exactly on the photo's horizontal centerline. */
-.frame .ref-poster .ref-role{
-  position:absolute;
-  z-index:5;
-  left:0;
-  top:50%;
-  bottom:auto;
-  transform:translateY(-50%) rotate(180deg);
-  transform-origin:center center;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:auto;
-  max-height:calc(100% - 1.2cqw);
-  max-width:20%;
-  padding:.65cqw .4cqw;
-  text-align:center;
-  white-space:nowrap;
-  overflow:hidden;
-  font-size:1.7cqw;
-  line-height:1.05;
-  background:#438b3d;
-  border-radius:.6cqw .6cqw 0 0;
-  box-shadow:0 .2cqw .5cqw #144e2630;
+.frame .ref-title {
+  position: absolute;
+  z-index: 3;
+  top: 10%;
+  left: 25%;
+  width: 49%;
+  height: 18.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: .7cqw;
 }
-.frame .ref-poster .ref-role.ref-role-long{
-  font-size:1.45cqw;
-  letter-spacing:-.02cqw;
+.frame .ref-title p {
+  margin: 0;
+  font: 800 2.25cqw/1.3 "Noto Sans Malayalam", sans-serif;
+  color: #2b3035;
 }
-.frame .ref-poster .ref-person-name{
-  display:flex;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  align-items:center;
-  justify-content:flex-start;
-  text-align:center;
-  padding-left:.25cqw;
-  padding-right:.25cqw;
-  margin:0 auto;
+.frame .ref-title h1 {
+  margin: 0;
+  width: 100%;
+  color: #125caa;
+  font: 900 8.2cqw/1.12 "Noto Sans Malayalam", sans-serif;
+  letter-spacing: -.16cqw;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: left;
+  text-shadow: 0 .18cqw 0 #d2e4f8;
 }
-.frame .ref-poster .ref-person-name span{
-  display:block;
-  width:100%;
-  max-width:100%;
-  text-align:center;
-  overflow-wrap:anywhere;
-  white-space:normal;
+.frame .ref-feature-flag {
+  position: absolute;
+  z-index: 1;
+  right: -1%;
+  top: 5%;
+  width: 34%;
+  height: 32%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(.7cqw 1cqw .7cqw rgba(18,78,102,.15));
+}
+.frame .ref-primary-leadership {
+  position: absolute;
+  z-index: 3;
+  top: 30%;
+  left: 20.5%;
+  width: 59%;
+  height: 19.5%;
+  display: flex;
+  gap: 3.5%;
+  align-items: start;
+  justify-content: center;
+}
+.frame .ref-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
+  isolation: isolate;
+}
+.frame .ref-profile-leader {
+  width: 31%;
+  height: 100%;
+  flex: 0 1 31%;
+}
+.frame .ref-portrait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: none;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  color: #59836b;
+  background:
+    radial-gradient(circle at 35% 22%, #dfecfa 0%, transparent 56%),
+    linear-gradient(145deg, #b8d8ec, #8ab6db);
+  box-shadow: inset 0 0 0 .12cqw rgba(13,77,126,.17);
+  border-radius: 48% 48% 42% 42% / 40% 40% 31% 31%;
+  cursor: pointer;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.frame .ref-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  border-radius: inherit;
+}
+.frame .ref-portrait-cutout img {
+  object-fit: contain;
+  object-position: center bottom;
+}
+.frame .ref-camera-placeholder {
+  width: 25%;
+  height: 25%;
+  opacity: .58;
+  flex: none;
+}
+.frame .ref-profile-leader .ref-portrait {
+  width: 90%;
+  height: 71%;
+}
+.frame .ref-profile-role {
+  display: block;
+  width: 100%;
+  min-height: 1.9cqw;
+  max-width: 100%;
+  padding: .55cqw 0 0;
+  text-align: center;
+  color: #176444;
+  font: 800 1.5cqw/1.13 Inter, sans-serif;
+  white-space: normal;
+}
+.frame .ref-profile-name {
+  width: 100%;
+  max-width: 100%;
+  padding: .12cqw .15cqw 0;
+  color: #111921;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .05cqw;
+  text-align: center;
+  font: 800 1.7cqw/1.09 Inter, "Noto Sans Malayalam", sans-serif;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.frame .ref-profile-name span {
+  display: block;
+  max-width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.frame .ref-member-section,
+.frame .ref-executive-section {
+  position: absolute;
+  z-index: 3;
+  left: 10%;
+  width: 80%;
+}
+.frame .ref-vice-section { top: 50.5%; height: 12.5%; }
+.frame .ref-joint-section { top: 63.5%; height: 12.5%; }
+.frame .ref-main-executives { top: 76.5%; height: 17.5%; }
+.frame .ref-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqw;
+  height: 17%;
+  margin: 0 0 1.2%;
+  padding: 0;
+  color: #236338;
+  font: 900 1.75cqw/1.15 Inter, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+}
+.frame .ref-section-heading::before,
+.frame .ref-section-heading::after {
+  content: "";
+  display: block;
+  flex: 1;
+  height: .11cqw;
+  max-width: 40%;
+  background: linear-gradient(90deg, transparent, #81a48a);
+}
+.frame .ref-section-heading::after {
+  background: linear-gradient(90deg, #81a48a, transparent);
+}
+.frame .ref-section-heading span {
+  display: inline-block;
+  border-radius: 2cqw;
+  padding: .55cqw 2.4cqw;
+  background: linear-gradient(95deg, #0c7037, #168245);
+  box-shadow: 0 .2cqw .3cqw #176c4020;
+  color: #fff;
+}
+.frame .ref-member-row {
+  width: 100%;
+  height: 82%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.8%;
+}
+.frame .ref-profile-committee {
+  flex: 0 0 21.6%;
+  width: 21.6%;
+  height: 100%;
+}
+.frame .ref-profile-committee .ref-portrait {
+  width: 76%;
+  height: 70%;
+  background:
+    radial-gradient(circle at 35% 15%, #e9f5e5, transparent 60%),
+    linear-gradient(160deg, #b7d5b6, #7eac89);
+}
+.frame .ref-profile-committee .ref-profile-name {
+  padding-top: .75cqw;
+  font-size: 1.42cqw;
+  line-height: 1.12;
+}
+.frame .ref-executive-grid {
+  width: 100%;
+  height: 82%;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+  justify-content: center;
+  column-gap: 3%;
+  row-gap: 2%;
+}
+.frame .ref-profile-executive {
+  flex: 0 0 20%;
+  width: 20%;
+  height: 48%;
+}
+.frame .ref-profile-executive .ref-portrait {
+  width: 66%;
+  height: 70%;
+  background:
+    radial-gradient(circle at 38% 25%, #e4f3ec, transparent 60%),
+    linear-gradient(145deg, #b6d3c9, #84b6a2);
+}
+.frame .ref-profile-executive .ref-profile-name {
+  padding-top: .4cqw;
+  font-size: 1.25cqw;
+  line-height: 1.08;
+}
+.frame .ref-footer {
+  position: absolute;
+  z-index: 4;
+  bottom: 1.3%;
+  left: 8%;
+  width: 84%;
+  height: 4.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: .25cqw;
+  color: #17282d;
+}
+.frame .ref-footer-organization {
+  font: 900 2.15cqw/1.15 Inter, sans-serif;
+  color: #163629;
+  letter-spacing: .08cqw;
+}
+.frame .ref-footer-message {
+  font: 700 1.45cqw/1.2 "Noto Sans Malayalam", sans-serif;
+  color: #385344;
+}
+.frame .ref-extra-header {
+  position: absolute;
+  z-index: 3;
+  top: 12%;
+  left: 10%;
+  width: 80%;
+  height: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.frame .ref-extra-header small {
+  color: #1f7048;
+  font: 800 1.9cqw/1.15 Inter,sans-serif;
+}
+.frame .ref-extra-header h1 {
+  margin: 1.1cqw 0;
+  color: #125caa;
+  font: 900 7cqw/1.05 Inter, sans-serif;
+}
+.frame .ref-extra-header p {
+  margin: 0;
+  color: #486657;
+  font: 700 1.85cqw/1.1 Inter,sans-serif;
+}
+.frame .ref-extra-executives {
+  top: 30%;
+  left: 8%;
+  width: 84%;
+  height: 59%;
+}
+.frame .ref-extra-executives .ref-section-heading {
+  height: 9%;
+  margin-bottom: 3%;
+}
+.frame .ref-extra-executives .ref-executive-grid { height: 88%; row-gap: 2%; }
+.frame .ref-extra-executives .ref-profile-executive {
+  height: 23%;
+  flex-basis: 20%;
+  width: 20%;
+}
+.frame .ref-extra-executives .ref-profile-executive .ref-portrait {
+  height: 73%;
+  width: 75%;
+}
+.frame .ref-extra-executives .ref-profile-executive .ref-profile-name {
+  font-size: 1.42cqw;
+  padding-top: .5cqw;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame .ref-poster * { scroll-behavior: auto; }
 }
