@@ -159,7 +159,20 @@ export default function App() {
   }return all.slice(0,COMMITTEE_LIMIT);};
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
-  async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{warmPortraitSegmenter();setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
+  async function uploadJoint(i,e) {
+    const file=e.target.files?.[0];e.target.value='';
+    if(!file)return;
+    if(!file.type.startsWith('image/')||file.size>15*1024*1024){
+      setMessage('Choose an image under 15 MB.');return;
+    }
+    try {
+      const src=await toDataURL(file);
+      // Upload is immediate. Crop remains an optional action in Adjust photo.
+      updateJoint(i,await prepareUploadedPortrait(src));
+      setPhotoEdit({role:jointRole,index:i});
+      if(autoRemoveUpload)warmPortraitSegmenter();
+    }catch {setMessage('Unable to read photo.');}
+  }
   const drag=useRef(null);
   const touches=useRef(new Map());
   const frameRef=useRef(null);
@@ -243,8 +256,13 @@ export default function App() {
     const file=e.target.files?.[0]; e.target.value=''; if(!file)return;
     if(!file.type.startsWith('image/')){setMessage('Choose an image file.');return;}
     if(file.size>15*1024*1024){setMessage('Maximum photo size is 15 MB.');return;}
-    warmPortraitSegmenter(); // start small model while user is cropping the photo
-    try { setCrop({i,src:await toDataURL(file)}); } catch {setMessage('Unable to read photo.');}
+    try {
+      const src=await toDataURL(file);
+      // Keep the entire image; do not force a crop step on upload.
+      update(i,await prepareUploadedPortrait(src));
+      setPhotoEdit({role:'leader',index:i});
+      if(autoRemoveUpload)warmPortraitSegmenter();
+    } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
     try {
@@ -476,8 +494,8 @@ export default function App() {
         onRemoveBackground={removeBackgroundSource}
         onCrop={()=>{
           setPhotoEdit(null);
-          if(role==='leader')setCrop({i:index,src:person.photo});
-          else setCrop({role,index,src:person.photo,square:true});
+          if(role==='leader')setCrop({i:index,src:person.photo,fromExisting:true});
+          else setCrop({role,index,src:person.photo,square:true,fromExisting:true});
         }}
       />;
     })()}
@@ -488,7 +506,9 @@ export default function App() {
       onSave={async src=>{
         const currentCrop=crop;
         setCrop(null);
-        const patch=await prepareUploadedPortrait(src);
+        const patch=currentCrop.fromExisting
+          ? {photo:src,cutout:await imageHasTransparency(src),photoMode:'inside',photoZoom:1,photoX:0,photoY:0}
+          : await prepareUploadedPortrait(src);
         if(currentCrop.role){
           if(currentCrop.role===jointRole)updateJoint(currentCrop.index,patch);
           else setJointGroups(g=>({...g,[currentCrop.role]:(g[currentCrop.role]||[]).map((p,i)=>i===currentCrop.index?{...p,...patch}:p)}));
