@@ -110,3 +110,44 @@
 .frame .ref-poster .ref-profile {
   overflow:visible;
 }
+
+/* Preserve a transparent head above the arch, but crop the entire lower
+   silhouette to the same curved boundary as the green frame.
+   The clipping is on the stationary button, not on the translated photo:
+   dragging can never push coat/shoulders below the frame. */
+.frame .ref-poster .ref-portrait-popout,
+.frame .ref-poster .ref-profile-committee .ref-portrait-popout,
+.frame .ref-poster .ref-profile-executive .ref-portrait-popout {
+  overflow:visible;
+  clip-path:polygon(
+    0 -60%, 100% -60%,
+    100% 64%, 98% 82%, 90% 94%, 75% 100%,
+    25% 100%, 10% 94%, 2% 82%, 0 64%
+  );
+  -webkit-clip-path:polygon(
+    0 -60%, 100% -60%,
+    100% 64%, 98% 82%, 90% 94%, 75% 100%,
+    25% 100%, 10% 94%, 2% 82%, 0 64%
+  );
+}
+.frame .ref-poster .ref-portrait img {
+  pointer-events:none;
+}
+.frame .ref-poster .ref-portrait {
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.frame .ref-poster .ref-portrait .ref-photo-selection-ring {
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:block;
+  border:2px solid rgba(10,119,61,.95);
+  border-radius:45% 45% 28% 28% / 37% 37% 24% 24%;
+  box-shadow:0 0 0 2px rgba(255,255,255,.8);
+  pointer-events:none;
+}
+.frame .ref-poster .ref-portrait-popout .ref-photo-selection-ring{
+  border-radius:45% 45% 28% 28% / 37% 37% 24% 24%;
+}
