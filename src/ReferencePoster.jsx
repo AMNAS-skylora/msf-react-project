@@ -1,4 +1,5 @@
 import { Camera } from 'lucide-react';
+import { strengthLogo } from './strength-mark.js';
 
 const FIRST_EXECUTIVE_COUNT = 8;
 const LATER_EXECUTIVE_COUNT = 16;
@@ -102,9 +103,8 @@ export default function ReferencePoster({
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
-      <div className="ref-brand">
-        <strong className="ref-brand-logo">msf</strong>
-        <span>ചോക്കാട് ഗ്രാമപഞ്ചായത്ത്<br/>കമ്മിറ്റി</span>
+      <div className="ref-brand" aria-label="Strength logo">
+        <img className="ref-brand-strength-logo" src={strengthLogo} alt="Strength" draggable={false} />
       </div>
 
       {firstPage ? (
