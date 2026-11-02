@@ -60,3 +60,53 @@
   max-width:75%;
   aspect-ratio:1 / 1;
 }
+
+/* Two deliberate portrait treatments:
+ * - Inside: the full image is masked by the arched shape.
+ * - Pop-out: the arched backdrop remains, while a transparent cutout rises above it.
+ * Only the cutout image (not an unremoved rectangular background) can pop out. */
+.frame .ref-poster .ref-portrait-popout,
+.frame .ref-poster .ref-profile-committee .ref-portrait-popout,
+.frame .ref-poster .ref-profile-executive .ref-portrait-popout {
+  position:relative;
+  overflow:visible;
+  isolation:isolate;
+  background:transparent;
+  border-radius:0;
+  box-shadow:none;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+.frame .ref-poster .ref-portrait-popout::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  display:block;
+  z-index:0;
+  pointer-events:none;
+  border-radius:45% 45% 28% 28% / 37% 37% 24% 24%;
+  background:
+    radial-gradient(ellipse at 30% 15%,rgba(226,250,191,.52),transparent 55%),
+    linear-gradient(155deg,#a5d575 0%,#7abf59 52%,#5caa48 100%);
+  box-shadow:inset 0 0 0 .15cqw rgba(31,112,43,.26),0 .18cqw .55cqw rgba(33,101,44,.10);
+}
+.frame .ref-poster .ref-portrait-popout img,
+.frame .ref-poster .ref-portrait-cutout.ref-portrait-popout img {
+  position:absolute;
+  display:block;
+  z-index:1;
+  left:0;
+  bottom:0;
+  top:auto;
+  width:100%;
+  height:115%;
+  min-width:0;
+  max-width:100%;
+  max-height:none;
+  border-radius:0;
+  object-fit:contain;
+  object-position:center bottom;
+}
+.frame .ref-poster .ref-profile {
+  overflow:visible;
+}
