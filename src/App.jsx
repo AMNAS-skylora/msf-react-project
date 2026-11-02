@@ -318,6 +318,92 @@ export default function App() {
       setBusy(-1);
     }
   }
+  const portraitGesture=useRef({role:null,index:-1,pointers:new Map(),lastPinchDistance:0});
+  const memberForEdit=(role,index)=>role==='leader'
+    ? people[index]
+    : (role===jointRole?joint:(jointGroups[role]||[]))[index];
+  const patchPortrait=(role,index,patch)=>{
+    if(role==='leader')update(index,patch);
+    else if(role===jointRole)updateJoint(index,patch);
+    else setJointGroups(groups=>({
+      ...groups,[role]:(groups[role]||[]).map((person,i)=>i===index?{...person,...patch}:person)
+    }));
+  };
+  function portraitPointerDown(event,role,index) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    event.preventDefault();
+    try{event.currentTarget.setPointerCapture(event.pointerId);}catch{}
+    const gesture=portraitGesture.current;
+    if(gesture.role!==role||gesture.index!==index){
+      gesture.pointers.clear();
+      gesture.lastPinchDistance=0;
+    }
+    gesture.role=role;
+    gesture.index=index;
+    gesture.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+    if(gesture.pointers.size===2){
+      const [one,two]=[...gesture.pointers.values()];
+      gesture.lastPinchDistance=Math.hypot(one.x-two.x,one.y-two.y);
+    }
+    setPhotoEdit({role,index});
+  }
+  function portraitPointerMove(event) {
+    const gesture=portraitGesture.current;
+    const previous=gesture.pointers.get(event.pointerId);
+    if(!previous)return;
+    event.preventDefault();
+    const current={x:event.clientX,y:event.clientY};
+    gesture.pointers.set(event.pointerId,current);
+    const rect=event.currentTarget.getBoundingClientRect();
+    if(gesture.pointers.size>=2) {
+      const [one,two]=[...gesture.pointers.values()];
+      const distance=Math.hypot(one.x-two.x,one.y-two.y);
+      if(gesture.lastPinchDistance>0) {
+        const factor=Math.max(.5,Math.min(2,distance/gesture.lastPinchDistance));
+        const member=memberForEdit(gesture.role,gesture.index);
+        const zoom=Math.max(.6,Math.min(4,(Number(member?.photoZoom)||1)*factor));
+        patchPortrait(gesture.role,gesture.index,{photoZoom:zoom});
+      }
+      gesture.lastPinchDistance=distance;
+    } else {
+      const dx=(current.x-previous.x)/Math.max(1,rect.width)*100;
+      const dy=(current.y-previous.y)/Math.max(1,rect.height)*100;
+      const member=memberForEdit(gesture.role,gesture.index);
+      patchPortrait(gesture.role,gesture.index,{
+        photoX:Math.max(-65,Math.min(65,(Number(member?.photoX)||0)+dx)),
+        photoY:Math.max(-65,Math.min(65,(Number(member?.photoY)||0)+dy)),
+      });
+    }
+  }
+  function portraitPointerUp(event) {
+    const gesture=portraitGesture.current;
+    gesture.pointers.delete(event.pointerId);
+    if(gesture.pointers.size<2)gesture.lastPinchDistance=0;
+  }
+  async function removeSelectedPortraitBackground() {
+    if(!photoEdit||busy!==-1)return;
+    const {role,index}=photoEdit;
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    setBusy('inline-bg');
+    setMessage('Removing background…');
+    try{
+      const photo=await removeBackgroundSource(member.photo);
+      patchPortrait(role,index,{photo,cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      setMessage('');
+    }catch(error){
+      setMessage('Background removal failed: '+(error?.message||'Try again.'));
+    }finally{setBusy(-1);}
+  }
+  function cropSelectedPortrait() {
+    if(!photoEdit)return;
+    const {role,index}=photoEdit;
+    const person=memberForEdit(role,index);
+    if(!person?.photo)return;
+    if(role==='leader')setCrop({i:index,src:person.photo,fromExisting:true});
+    else setCrop({role,index,src:person.photo,square:true,fromExisting:true});
+  }
   function savePortraitChanges(role,index,patch) {
     if(role==='leader')update(index,patch);
     else if(role===jointRole)updateJoint(index,patch);
@@ -409,6 +495,10 @@ export default function App() {
           pageCount={posterPageCount}
           membersFor={posterMembersFor}
           onLeaderClick={(index,person)=>person.photo?setPhotoEdit({role:'leader',index}):uploads.current[index]?.click()}
+          editingPhoto={photoEdit}
+          onPortraitPointerDown={portraitPointerDown}
+          onPortraitPointerMove={portraitPointerMove}
+          onPortraitPointerUp={portraitPointerUp}
           onMemberClick={(role,index)=>{
             const members=role===jointRole?joint:(jointGroups[role]||[]);
             if(members[index]?.photo){
