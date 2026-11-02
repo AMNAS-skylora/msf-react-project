@@ -4,8 +4,10 @@ import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
+import PortraitAdjustDialog from './PortraitAdjustDialog.jsx';
 import './styles.css';
 import './reference-poster.css';
+import './portrait-adjust.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
@@ -195,6 +197,9 @@ export default function App() {
   }
   function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
 
+  const [photoEdit,setPhotoEdit] = useState(null);
+  const [autoRemoveUpload,setAutoRemoveUpload]=useState(()=>{try{return localStorage.getItem('msf-auto-remove-bg')!=='false';}catch{return true;}});
+  useEffect(()=>{try{localStorage.setItem('msf-auto-remove-bg',String(autoRemoveUpload));}catch{}},[autoRemoveUpload]);
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
@@ -238,14 +243,17 @@ export default function App() {
     if(file.size>15*1024*1024){setMessage('Maximum photo size is 15 MB.');return;}
     try { setCrop({i,src:await toDataURL(file)}); } catch {setMessage('Unable to read photo.');}
   }
+  async function removeBackgroundSource(source) {
+    const { removeBackground } = await import('@imgly/background-removal');
+    const response = await fetch(source);
+    if (!response.ok) throw new Error('Photo could not be loaded');
+    const blob = await removeBackground(await response.blob());
+    return toDataURL(blob);
+  }
   async function removeBg(i) {
     setBusy(i);setMessage('Removing background. First run may download the AI model.');
     try {
-      const {removeBackground}=await import('@imgly/background-removal');
-      const response=await fetch(people[i].photo);
-      if(!response.ok)throw new Error('Photo could not be loaded');
-      const result=await removeBackground(await response.blob());
-      update(i,{photo:await toDataURL(result),cutout:true});
+      update(i,{photo:await removeBackgroundSource(people[i].photo),cutout:true,photoZoom:1,photoX:0,photoY:0});
       setMessage('Background removed. Transparent image ready.');
     }catch(error){setMessage('Background removal failed: '+(error?.message||'Try again online.'));}
     finally{setBusy(-1);}
@@ -256,15 +264,35 @@ export default function App() {
     setBusy('joint-'+i);
     setMessage('Removing member background. The AI model may need an internet connection.');
     try {
-      const { removeBackground }=await import('@imgly/background-removal');
-      const response=await fetch(member.photo);
-      if(!response.ok)throw new Error('Could not load the member image');
-      const result=await removeBackground(await response.blob());
-      updateJoint(i,{photo:await toDataURL(result),cutout:true});
+      updateJoint(i,{photo:await removeBackgroundSource(member.photo),cutout:true,photoZoom:1,photoX:0,photoY:0});
       setMessage('Background removed. The portrait now fits inside the green frame.');
     }catch(error){
       setMessage('Background removal failed: '+(error?.message||'Please try again.'));
     }finally{setBusy(-1);}
+  }
+  // Keep the original crop even if client-side AI removal is unavailable.
+  async function prepareUploadedPortrait(src) {
+    const transparent = await imageHasTransparency(src);
+    const original = {photo:src,cutout:transparent,photoZoom:1,photoX:0,photoY:0};
+    if (transparent || !autoRemoveUpload) return original;
+    setBusy('auto-bg');
+    setMessage('Automatically removing photo background…');
+    try {
+      const photo=await removeBackgroundSource(src);
+      setMessage('Background removed. Photo fitted to the green frame.');
+      return {...original,photo,cutout:true};
+    } catch(error) {
+      setMessage('Auto background removal unavailable. Your original photo has been kept; use Remove BG to retry.');
+      return original;
+    } finally {
+      setBusy(-1);
+    }
+  }
+  function savePortraitChanges(role,index,patch) {
+    if(role==='leader')update(index,patch);
+    else if(role===jointRole)updateJoint(index,patch);
+    else setJointGroups(group=>({...group,[role]:(group[role]||[]).map((p,i)=>i===index?{...p,...patch}:p)}));
+    setPhotoEdit(null);
   }
   async function imageHasTransparency(src){
     try {
