@@ -474,3 +474,29 @@
 .design-two-flag strong{height:50%;display:flex;align-items:center;justify-content:center;background:white;color:#008b36;font:bold italic 9cqw Georgia,serif}
 .design-two-footer{flex:none;align-self:center;background:#168b46;color:#fff;border-radius:999px 999px 0 0;padding:1% 5%;font:bold 2.8cqw Arial,sans-serif}
 @media(max-width:850px){.template-switcher{padding:0 12px;margin:10px auto 0}}
+
+/* Design 3 — compact olive-green committee layout inspired by supplied reference. */
+.frame.design-three{background:radial-gradient(ellipse at 10% 4%,#c2d982 0%,transparent 33%),radial-gradient(ellipse at 90% 10%,#d0e4a0 0%,transparent 35%),radial-gradient(ellipse at 90% 80%,#c7d98a 0%,transparent 45%),linear-gradient(135deg,#f8fbed,#f0f5e6 65%,#c7d79b)}
+.design-three .frame-bg{display:none}
+.design-three-content{position:absolute;inset:0;overflow:hidden;container-type:inline-size}
+.design-three-title{position:absolute;top:4%;left:7%;right:7%;text-align:center;font-family:'Noto Sans Malayalam',sans-serif;line-height:1.12;color:#608c32;display:flex;flex-direction:column;align-items:center}
+.design-three-title span{font-size:4.5cqw;font-weight:700}
+.design-three-title strong{font-size:7.4cqw;font-weight:900;color:#5d9235}
+.design-three-leaders{position:absolute;top:19%;left:11%;right:11%;height:23%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5%}
+.design-three-leader,.design-three-member{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.design-three-portrait{position:relative;width:100%;height:78%;border-radius:28% 28% 24% 24%;background:#a4c76c;overflow:visible}
+.design-three-portrait img{display:block;width:100%;height:100%;object-fit:cover;border-radius:26% 26% 22% 22%}
+.design-three-portrait button{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:transparent;border:0;color:#39783e}
+.design-three-role{position:absolute;z-index:2;left:-11%;bottom:10%;background:#6a9f35;color:white;border-radius:8px 8px 0 0;padding:7px 4px;font:500 2.3cqw Arial,sans-serif;writing-mode:vertical-rl;transform:rotate(180deg)}
+.design-three-name{display:flex;flex-direction:column;align-items:center;font:500 2.4cqw/1.08 Arial,sans-serif;color:#4c5545;padding-top:3px;overflow-wrap:anywhere}
+.design-three-committees{position:absolute;top:43%;left:15%;width:60%;bottom:2%;display:flex;flex-direction:column;gap:3%;overflow:hidden}
+.design-three-committee{min-height:0}
+.design-three-committee h2{position:relative;z-index:1;background:#6c9d36;color:#fff;border-radius:7px 7px 0 0;width:88%;margin:0 auto -1%;padding:1.5% 2%;font:500 2.3cqw Arial,sans-serif;text-align:center}
+.design-three-members{border:1px solid #8bb75d;border-bottom:0;border-radius:18px 18px 0 0;padding:4% 2% 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3%;align-items:start}
+.design-three-member-photo{width:100%;aspect-ratio:1/1.05;border-radius:26% 26% 20% 20%;background:#afcd74;color:#427e42;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.design-three-member-photo img{width:100%;height:100%;object-fit:cover}
+.design-three-member .design-three-name{font-size:1.9cqw}
+.design-three-flags{position:absolute;right:-8%;top:45%;width:31%;height:45%;display:flex;flex-direction:column;gap:12%;transform:rotate(-6deg)}
+.design-three-flags>div{height:37%;filter:drop-shadow(3px 4px 3px #375b2830);transform:skewY(8deg);display:flex;flex-direction:column}
+.design-three-flags span{height:50%;display:flex;align-items:center;justify-content:center;background:#078d36;color:#fff;font:bold 9cqw Georgia,serif}
+.design-three-flags strong{height:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:#078d36;font:bold italic 8cqw Georgia,serif}
