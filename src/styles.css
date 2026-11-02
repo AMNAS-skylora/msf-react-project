@@ -749,3 +749,27 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
 .frame .design-two-content,.frame .design-two-title,.frame .design-three-content,
 .frame .msf-congratulations-footer,.frame .poster-strength-mark{z-index:2}
 .frame .msf-congratulations-footer{z-index:20}
+
+/* Transparent portrait controls for leadership and committee member editing. */
+.editor-panel .cutout-fit-toggle{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:10px 0 4px;
+  padding:9px 11px;
+  border-radius:9px;
+  background:#edf7e8;
+  color:#2b6136;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+}
+.editor-panel .cutout-fit-toggle input[type=checkbox]{
+  width:17px;
+  height:17px;
+  min-width:17px;
+  flex:0 0 17px;
+  margin:0;
+  padding:0;
+  accent-color:#328240;
+}
