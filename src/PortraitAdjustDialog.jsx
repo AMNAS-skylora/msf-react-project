@@ -21,7 +21,7 @@ export default function PortraitAdjustDialog({
   const [source, setSource] = useState(person.photo);
   const [cutout, setCutout] = useState(!!person.cutout);
   const [mode, setMode] = useState(person.cutout && person.photoMode === 'popout' ? 'popout' : 'inside');
-  const [overhang, setOverhang] = useState(clamp(Number(person.photoPopout) || 15, 0, 40));
+  const [overhang, setOverhang] = useState(clamp(Number(person.photoPopout ?? 15), 0, 40));
   const [position, setPosition] = useState(() => positionOf(person));
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -161,7 +161,7 @@ export default function PortraitAdjustDialog({
         </div>
         <div className="portrait-adjust-toolbar">
           <button type="button" onClick={() => setPosition({ zoom: 1, x: 0, y: 0 })}><Maximize2 size={17}/> Fit center</button>
-          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setOverhang(clamp(Number(person.photoPopout)||15,0,40)); setError(''); }}><RotateCcw size={17}/> Reset</button>
+          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setOverhang(clamp(Number(person.photoPopout ?? 15),0,40)); setError(''); }}><RotateCcw size={17}/> Reset</button>
           <button type="button" onClick={onCrop}><Scissors size={17}/> Crop</button>
         </div>
         <div className="portrait-adjust-background">
