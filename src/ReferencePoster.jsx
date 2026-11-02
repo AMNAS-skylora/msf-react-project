@@ -86,7 +86,7 @@ function MsfFlag() {
 
 export default function ReferencePoster({
   people,
-  heading,
+  unitName,
   page,
   pageCount,
   membersFor,
@@ -96,7 +96,8 @@ export default function ReferencePoster({
   const firstPage = page === 0;
   const executives = membersFor('Executive Members');
   const executiveOffset = firstPage ? 0 : FIRST_EXECUTIVE_COUNT + (page - 1) * LATER_EXECUTIVE_COUNT;
-  const headingText = String(heading || 'ഇനി ഇവർ നയിക്കും').trim();
+  const placeName = String(unitName || '').trim() || 'ചോക്കാട്';
+  const headingText = 'ഇനി ഇവർ\\nനയിക്കും';
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
@@ -110,7 +111,7 @@ export default function ReferencePoster({
       {firstPage ? (
         <>
           <div className="ref-title">
-            <p>MSF ചോക്കാട് ഗ്രാമപഞ്ചായത്ത് കമ്മിറ്റി</p>
+            <p>MSF {placeName} യൂണിറ്റ് കമ്മിറ്റി</p>
             <h1>{headingText}</h1>
           </div>
 
