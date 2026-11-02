@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
+import ReferencePoster from './ReferencePoster.jsx';
 import './styles.css';
 
 const splitMalayalamHeading = value => {
@@ -127,7 +128,7 @@ function CropDialog({ src, onSave, onClose, square=false }) {
 }
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:'',photo:'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-  const [headerText,setHeaderText]=useState(()=>{try{return localStorage.getItem('msf-malayalam-heading')??'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}catch{return 'മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം';}});
+  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'?'ഇവർ നയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇവർ നയിക്കും';}});
   useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
@@ -143,8 +144,8 @@ export default function App() {
   const [posterPage,setPosterPage]=useState(0);
   const jointRows=(n,columns=4)=>{const rowCount=Math.ceil(n/columns);if(!rowCount)return [];const base=Math.floor(n/rowCount),extra=n%rowCount;return Array.from({length:rowCount},(_,i)=>base+(i<extra?1:0));};
   const executiveMembers=jointRole==='Executive Members'?joint:(jointGroups['Executive Members']||[]);
-  const posterPageCount=Math.max(1,Math.ceil(executiveMembers.length/EXECUTIVE_PAGE_SIZE));
-  const posterMembersFor=role=>{const all=role===jointRole?joint:(jointGroups[role]||[]);if(role==='Executive Members')return all.slice(posterPage*EXECUTIVE_PAGE_SIZE,(posterPage+1)*EXECUTIVE_PAGE_SIZE);return all.slice(0,COMMITTEE_LIMIT);};
+  const posterPageCount=1+Math.ceil(executiveMembers.length/EXECUTIVE_PAGE_SIZE);
+  const posterMembersFor=role=>{const all=role===jointRole?joint:(jointGroups[role]||[]);if(role==='Executive Members')return posterPage===0?[]:all.slice((posterPage-1)*EXECUTIVE_PAGE_SIZE,posterPage*EXECUTIVE_PAGE_SIZE);return all.slice(0,COMMITTEE_LIMIT);};
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
   async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
@@ -220,7 +221,7 @@ export default function App() {
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-    setHeaderText('മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം');
+    setHeaderText('ഇവർ നയിക്കും');
     setJoint([]);setJointGroups({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});setJointRole('Joint Secretaries');setPosterPage(0);setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
@@ -304,39 +305,22 @@ export default function App() {
   return <main className="app-shell">
     <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
     
-    {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Executive committee · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
+    {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
-      <section className="frame" ref={frameRef} aria-label="MSF poster frame">
-        
-        <div className="poster-strength-mark" aria-hidden="true"><span>Strength</span></div>
-        <div className="msf-congratulations-footer"><span>MSF ചോക്കാട് ഗ്രാമപഞ്ചായത്ത് കമ്മിറ്റിയുടെ</span><strong>ഹൃദയം നിറഞ്ഞ അഭിനന്ദനങ്ങൾ</strong></div>
-        <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
-        {template==='1'&&<header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>}
-        
-        {template==='1'&&people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
-          style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
-          onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
-          <img src={p.photo} alt={p.name} draggable={false}/>
-          {selected===i&&<>
-            <div className="photo-toolbar" onPointerDown={e=>e.stopPropagation()} onPointerMove={e=>e.stopPropagation()}>
-              <button type="button" onClick={e=>{e.stopPropagation();setCrop({i,src:p.photo})}} aria-label="Crop photo" title="Crop"><Crop size={17}/></button>
-              <button type="button" onClick={e=>{e.stopPropagation();editName(i)}} aria-label="Edit name" title="Edit name"><Pencil size={17}/></button>
-              <button type="button" aria-label="Close photo tools" onClick={e=>{e.stopPropagation();setSelected(null)}}>×</button>
-            </div>
-            <span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>
-          </>}
-        </div>})}
-        {template==='1'&&<div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>}
-        {template==='1'&&<div className="joint-sections">
-          {groupNames.map(role=>{const members=posterMembersFor(role);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")+(role==='Joint Secretaries'?" joint-secretaries-poster-section":"")+(role==='Vice Presidents'?" vice-presidents-poster-section":"")} style={{'--rows':jointRows(members.length,4).length}} key={role}>
-            <h2><span className="committee-heading-pill">{role.toUpperCase()}</span></h2>
-            {jointRows(members.length,4).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row} style={{"--member-count":count}}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
-              <button type="button" className="joint-square" onClick={()=>{if(role!==jointRole)changeGroup(role);setJointSelected(index);if(!p.photo){setMessage('Select Upload in '+role+' to add a photo.');}}} aria-label={'Select '+(p.name||'member')}>{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={18}/>}</button>
-              {jointRole===role&&jointSelected===index&&<button type="button" className="joint-crop-button" onClick={()=>p.photo?setCrop({joint:index,src:p.photo,square:true}):jointUploads.current[index]?.click()}><Crop size={13}/> Crop</button>}
-              <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
-            </div>})}</div>})}
-          </section>})}
-        </div>}
+      <section className="frame" ref={frameRef} aria-label="MSF poster preview">
+        <ReferencePoster
+          people={people}
+          heading={headerText}
+          page={posterPage}
+          pageCount={posterPageCount}
+          membersFor={posterMembersFor}
+          onLeaderClick={(index,person)=>person.photo?setCrop({i:index,src:person.photo}):uploads.current[index]?.click()}
+          onMemberClick={(role,index)=>{
+            if(role!==jointRole)changeGroup(role);
+            setJointSelected(index);
+            setMessage('Edit the selected member in the '+role+' editor.');
+          }}
+        />
       </section>
       <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
