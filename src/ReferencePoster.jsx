@@ -32,7 +32,7 @@ function Portrait({ person, onClick, role, type = 'member' }) {
     <div className={'ref-profile ref-profile-' + type}>
       <button
         type="button"
-        className={'ref-portrait' + (isCutout ? ' ref-portrait-cutout' : '')}
+        className={'ref-portrait' + (isCutout ? ' ref-portrait-cutout' : '') + (isCutout && person.photoMode === 'popout' ? ' ref-portrait-popout' : '')}
         onClick={onClick}
         aria-label={(person.photo ? 'Crop photo: ' : 'Upload photo: ') + (person.name || role)}
       >
