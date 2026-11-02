@@ -183,6 +183,8 @@ export default function App() {
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
+  const [template,setTemplate]=useState(()=>{try{return localStorage.getItem('msf-poster-template')==='2'?'2':'1';}catch{return '1';}});
+  useEffect(()=>{try{localStorage.setItem('msf-poster-template',template)}catch{}},[template]);
   const [exporting,setExporting]=useState(false);
   const [shareOpen,setShareOpen]=useState(false);
   const uploads=useRef([]);
@@ -281,11 +283,14 @@ export default function App() {
   }
   return <main className="app-shell">
     <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
+    <div className="template-switcher" role="group" aria-label="Poster design"><button type="button" className={template==='1'?'active':''} onClick={()=>setTemplate('1')}>Design 1</button><button type="button" className={template==='2'?'active':''} onClick={()=>{setTemplate('2');setSelected(null);}}>Design 2</button></div>
     <div className="workspace">
-      <section className="frame" ref={frameRef} aria-label="MSF poster frame">
+      <section className={"frame"+(template==='2'?" design-two":"")} ref={frameRef} aria-label="MSF poster frame">
+        {template==='2'&&<div className="design-two-wash" aria-hidden="true"/>}
         <img className="frame-bg" src={`${import.meta.env.BASE_URL}assets/msf-stage-background.svg`} alt="MSF green poster frame with flag"/>
-        <header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>
-        {people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
+        {template==='1'&&<header className="poster-msf-heading"><span className="poster-msf-logo">msf</span><span className="poster-malayalam-title">{splitMalayalamHeading(headerText).map((line,i)=><span className={"malayalam-heading-line line-"+(i+1)} key={i}>{line}</span>)}</span></header>}
+        {template==='2'&&<div className="design-two-title"><div>{splitMalayalamHeading(headerText)[0]}</div><div>{splitMalayalamHeading(headerText)[1]}</div></div>}
+        {template==='1'&&people.map((p,i)=>{const pos=position(p,i);return p.photo&&<div key={p.role} className={'canvas-photo'+(selected===i?' active':'')}
           style={{left:pos.x+'%',top:pos.y+'%',width:pos.w+'%',zIndex:selected===i?8:2}}
           onPointerDown={e=>dragStart(e,i)} onPointerMove={dragMove} onPointerUp={dragEnd} onPointerCancel={dragEnd} onWheel={e=>zoomPhoto(e,i)}>
           <img src={p.photo} alt={p.name} draggable={false}/>
@@ -298,8 +303,9 @@ export default function App() {
             <span className="photo-selection-handle" data-resize="true" aria-label="Resize photo"/>
           </>}
         </div>})}
-        <div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>
-        <div className="joint-sections">
+        {template==='1'&&<div className="canvas-labels">{people.map(p=><div className="canvas-label" key={p.role}><small>{p.role.toUpperCase()}</small><div className="name-lines">{nameLines(p).filter(Boolean).map((line,j)=><span key={j} className={(p.boldLine||'both')==='both'||(p.boldLine||'both')===(j===0?'top':'bottom')?'is-bold':'is-regular'}>{line.toUpperCase()}</span>)}</div></div>)}</div>}
+        {template==='2'&&<div className="design-two-content"><div className="design-two-leaders">{people.map((p,i)=><div className="design-two-leader" key={p.role}><div className="design-two-leader-photo"><span className="design-two-role">{p.role}</span>{p.photo?<img src={p.photo} alt={p.name}/>:<button type="button" onClick={()=>uploads.current[i]?.click()} aria-label={"Upload "+p.role+" photo"}><Camera size={28}/></button>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div><div className="design-two-lower"><div className="design-two-groups">{groupNames.map(role=>{const members=role===jointRole?joint:jointGroups[role]||[];if(!members.length)return null;return <section key={role} className="design-two-group"><h2>{role}</h2><div className="design-two-grid">{members.map((p,i)=><div className="design-two-member" key={i}><div className="design-two-member-photo">{p.photo?<img src={p.photo} alt={p.name}/>:<Camera size={20}/>}</div><div className="design-two-person-name">{nameLines(p).filter(Boolean).map((line,j)=><span key={j}>{line}</span>)}</div></div>)}</div></section>})}</div><div className="design-two-flags" aria-hidden="true"><div className="design-two-flag"><span>☪</span><strong>msf</strong></div><div className="design-two-flag"><span>☪</span><strong>msf</strong></div></div></div><div className="design-two-footer">msf · Leadership Committee</div></div>}
+        {template==='1'&&<div className="joint-sections">
           {groupNames.map(role=>{const members=role===jointRole?joint:(jointGroups[role]||[]);if(!members.length)return null;let start=0;return <section className={"joint-poster-section"+(role==='Executive Members'?" executive-poster-section":"")} style={{'--rows':jointRows(members.length,role==='Executive Members'?7:5).length}} key={role}>
             <h2><span className="committee-heading-pill">{role.toUpperCase()}</span></h2>
             {jointRows(members.length,role==='Executive Members'?7:5).map((count,row)=>{const rowStart=start;const items=members.slice(start,start+count);start+=count;return <div className="joint-poster-row" key={row}>{items.map((p,k)=>{const index=rowStart+k;return <div className="joint-poster-member" key={index}>
@@ -308,7 +314,7 @@ export default function App() {
               <div className="joint-member-name">{nameLines(p).filter(Boolean).map((line,i)=><span key={i} style={{fontWeight:(p.boldLine||'both')==='both'||p.boldLine===(i===0?'top':'bottom')?800:400}}>{line.toUpperCase()}</span>)}</div>
             </div>})}</div>})}
           </section>})}
-        </div>
+        </div>}
       </section>
       <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
