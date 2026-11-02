@@ -713,3 +713,12 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
   line-height:1.12;
   overflow-wrap:anywhere;
 }
+
+
+/* Center short officer rows naturally while preserving four-person single rows. */
+.frame .joint-sections .joint-poster-section:not(.executive-poster-section) .joint-poster-row{
+  grid-template-columns:repeat(var(--member-count,4),minmax(0,1fr));
+}
+.frame .executive-poster-section .joint-poster-row{
+  grid-template-columns:repeat(var(--member-count,6),minmax(0,1fr));
+}
