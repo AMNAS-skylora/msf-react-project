@@ -5,6 +5,7 @@ import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
 import './styles.css';
+import './reference-poster.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
