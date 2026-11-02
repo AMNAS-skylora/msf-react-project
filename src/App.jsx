@@ -5,6 +5,7 @@ import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
 import PortraitAdjustDialog from './PortraitAdjustDialog.jsx';
+import { removePortraitBackgroundFast, warmPortraitSegmenter } from './fastPortraitBackground.js';
 import './styles.css';
 import './reference-poster.css';
 import './portrait-frames.css';
@@ -158,7 +159,7 @@ export default function App() {
   }return all.slice(0,COMMITTEE_LIMIT);};
   useEffect(()=>{if(posterPage>=posterPageCount)setPosterPage(Math.max(0,posterPageCount-1));},[posterPage,posterPageCount]);
   const updateJoint=(i,patch)=>setJoint(current=>current.map((p,j)=>i===j?{...p,...patch}:p));
-  async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
+  async function uploadJoint(i,e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!file.type.startsWith('image/')||file.size>15*1024*1024){setMessage('Choose an image under 15 MB.');return;}try{warmPortraitSegmenter();setCrop({joint:i,src:await toDataURL(file),square:true});}catch{setMessage('Unable to read photo.');}}
   const drag=useRef(null);
   const touches=useRef(new Map());
   const frameRef=useRef(null);
@@ -199,7 +200,7 @@ export default function App() {
   function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
 
   const [photoEdit,setPhotoEdit] = useState(null);
-  const [autoRemoveUpload,setAutoRemoveUpload]=useState(()=>{try{return localStorage.getItem('msf-auto-remove-bg')!=='false';}catch{return true;}});
+  const [autoRemoveUpload,setAutoRemoveUpload]=useState(()=>{try{return localStorage.getItem('msf-auto-remove-bg')==='true';}catch{return false;}});
   useEffect(()=>{try{localStorage.setItem('msf-auto-remove-bg',String(autoRemoveUpload));}catch{}},[autoRemoveUpload]);
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
@@ -242,22 +243,24 @@ export default function App() {
     const file=e.target.files?.[0]; e.target.value=''; if(!file)return;
     if(!file.type.startsWith('image/')){setMessage('Choose an image file.');return;}
     if(file.size>15*1024*1024){setMessage('Maximum photo size is 15 MB.');return;}
+    warmPortraitSegmenter(); // start small model while user is cropping the photo
     try { setCrop({i,src:await toDataURL(file)}); } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
-    // Load the browser-only inference engine on demand, keeping initial page load small.
-    // IMG.LY 1.7 exports the processor as default; some versions also export a named alias.
-    const library = await import('@imgly/background-removal');
-    const processor = library.default || library.removeBackground;
-    if (typeof processor !== 'function') throw new Error('Background-removal engine did not initialize.');
-    const response = await fetch(source);
-    if (!response.ok) throw new Error('Photo could not be loaded.');
-    const blob = await processor(await response.blob(), {
-      device: 'cpu',
-      model: 'isnet_quint8',
-    });
-    if (!(blob instanceof Blob)) throw new Error('Background removal returned no photo.');
-    return toDataURL(blob);
+    try {
+      return await removePortraitBackgroundFast(source);
+    } catch (fastError) {
+      // Fallback for devices/browsers that cannot load MediaPipe.
+      // IMG.LY's model is larger and may be slower on a first run.
+      const library = await import('@imgly/background-removal');
+      const processor = library.default || library.removeBackground;
+      if (typeof processor !== 'function') throw fastError;
+      const response = await fetch(source);
+      if (!response.ok) throw fastError;
+      const blob = await processor(await response.blob(), {device:'cpu',model:'isnet_quint8'});
+      if (!(blob instanceof Blob)) throw fastError;
+      return toDataURL(blob);
+    }
   }
   async function removeBg(i) {
     setBusy(i);setMessage('Removing background. First run may download the AI model.');
@@ -436,7 +439,7 @@ export default function App() {
           <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>update(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
-        <section className="auto-removal-setting"><label><input type="checkbox" checked={autoRemoveUpload} onChange={event=>setAutoRemoveUpload(event.target.checked)}/> <span>Automatically remove background after photo upload</span></label><small>Processes photos on your device. Transparent PNG files are kept as-is. If removal fails, the original photo is saved.</small></section>
+        <section className="auto-removal-setting"><label><input type="checkbox" checked={autoRemoveUpload} onChange={event=>setAutoRemoveUpload(event.target.checked)}/> <span>Auto Remove BG on Upload</span></label></section>
         <section className="joint-editor"><h2>Committee Sections</h2>
           <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
           <h3>{jointRole}</h3>
