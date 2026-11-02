@@ -205,7 +205,7 @@ export default function App() {
       const db=request.result;
       const tx=db.transaction('draft','readonly');
       const get=tx.objectStore('draft').get('leadership');
-      get.onsuccess=()=>{if(active&&Array.isArray(get.result)&&get.result.length===3)setPeople(get.result.map((p,i)=>{const demo=MEMBERS.find(m=>m.role===INITIAL[i].role);return {...p,name:p.name===demo?.name?'':p.name,photo:p.photo=== (demo?imageUrl(demo):null)?'':p.photo};}));if(active)setReady(true);db.close();};
+      get.onsuccess=()=>{if(active&&Array.isArray(get.result)&&get.result.length===3)setPeople(get.result.map((p,i)=>{const demo=MEMBERS.find(m=>m.role===INITIAL[i].role);return {...p,role:INITIAL[i].role,name:p.name===demo?.name?'':p.name,photo:p.photo=== (demo?imageUrl(demo):null)?'':p.photo};}));if(active)setReady(true);db.close();};
       get.onerror=()=>{if(active)setReady(true);db.close();};
     };
     request.onerror=()=>{if(active)setReady(true);};
