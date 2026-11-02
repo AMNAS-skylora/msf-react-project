@@ -37,7 +37,12 @@ function Portrait({ person, onClick, role, type = 'member' }) {
         aria-label={(person.photo ? 'Crop photo: ' : 'Upload photo: ') + (person.name || role)}
       >
         {person.photo
-          ? <img src={person.photo} alt={person.name || role} draggable={false} />
+          ? <img
+            src={person.photo}
+            alt={person.name || role}
+            draggable={false}
+            style={{transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1})`}}
+          />
           : <Camera className="ref-camera-placeholder" size={22} aria-hidden="true" />}
       </button>
       {role && <span className="ref-profile-role">{role}</span>}
