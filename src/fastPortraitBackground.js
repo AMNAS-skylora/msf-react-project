@@ -53,7 +53,7 @@ export async function removePortraitBackgroundFast(source) {
   const [image, segmenter] = await Promise.all([loadImage(source), getSegmenter()]);
 
   // Keep full-resolution pixels for poster clarity, but bound memory on iPhone.
-  const maxSize = 1400;
+  const maxSize = 1100;
   const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
   const width = Math.max(1, Math.round(image.naturalWidth * scale));
   const height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -68,13 +68,19 @@ export async function removePortraitBackgroundFast(source) {
   // the canvas resolution and keep antialiased hair/shoulder edges.
   const result = segmenter.segment(sourceCanvas);
   try {
-    const mask = result.confidenceMasks?.[1];
+    const masks = result.confidenceMasks || [];
+    // Some MediaPipe selfie models expose only a single foreground mask.
+    const mask = masks.length > 1 ? masks[1] : masks[0];
     if (!mask) throw new Error('The photo does not contain a recognizable person');
     const values = mask.getAsFloat32Array();
     const mw = mask.width;
     const mh = mask.height;
     if (!values || !mw || !mh || values.length !== mw * mh) {
       throw new Error('Invalid portrait mask');
+    }
+    const foregroundPixels = values.reduce((sum,value)=>sum+(value>.5?1:0),0);
+    if(foregroundPixels < values.length * .002) {
+      throw new Error('No portrait subject was detected');
     }
     const maskCanvas = document.createElement('canvas');
     maskCanvas.width = mw;
