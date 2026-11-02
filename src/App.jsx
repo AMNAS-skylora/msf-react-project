@@ -130,8 +130,9 @@ function CropDialog({ src, onSave, onClose, square=false }) {
 }
 export default function App() {
   const [people,setPeople] = useState(INITIAL.map(({role,member})=>({role,name:'',photo:'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-  const [headerText,setHeaderText]=useState(()=>{try{return (saved=>!saved||(saved==='മമ്പാട്ടുമൂല യൂണിറ്റ് കമ്മിറ്റിക്ക് പുതിയ നേതൃത്വം'||saved==='ഇവർ നയിക്കും')?'ഇനി ഇവർ\nനയിക്കും':saved)(localStorage.getItem('msf-malayalam-heading'));}catch{return 'ഇനി ഇവർ\nനയിക്കും';}});
-  useEffect(()=>{try{localStorage.setItem('msf-malayalam-heading',headerText)}catch{}},[headerText]);
+  // The poster headline stays fixed; only the local unit's place name is editable.
+  const [unitName,setUnitName]=useState(()=>{try{return localStorage.getItem('msf-unit-place')??'ചോക്കാട്';}catch{return 'ചോക്കാട്';}});
+  useEffect(()=>{try{localStorage.setItem('msf-unit-place',unitName)}catch{}},[unitName]);
   const [ready,setReady]=useState(false);
   const [joint,setJoint]=useState([]);
   const [jointGroups,setJointGroups]=useState({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});
@@ -227,7 +228,7 @@ export default function App() {
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
-    setHeaderText('ഇനി ഇവർ\nനയിക്കും');
+    setUnitName('ചോക്കാട്');
     setJoint([]);setJointGroups({'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]});setJointRole('Joint Secretaries');setPosterPage(0);setMessage('All changes reset.');
   }
   const update=(i,patch)=>setPeople(current=>current.map((p,j)=>j===i?{...p,...patch}:p));
@@ -345,7 +346,7 @@ export default function App() {
       <section className="frame" ref={frameRef} aria-label="MSF poster preview">
         <ReferencePoster
           people={people}
-          heading={headerText}
+          unitName={unitName}
           page={posterPage}
           pageCount={posterPageCount}
           membersFor={posterMembersFor}
@@ -363,7 +364,7 @@ export default function App() {
           }}
         />
       </section>
-      <aside className="editor-panel"><section className="header-editor"><h2>Poster Heading</h2><label>Malayalam heading<textarea rows={2} maxLength={140} value={headerText} onChange={e=>setHeaderText(e.target.value)} placeholder={"ആദ്യ വരി\\nരണ്ടാം വരി"}/></label></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
+      <aside className="editor-panel"><section className="header-editor"><h2>Unit Name</h2><label htmlFor="msf-unit-place">സ്ഥലത്തിന്റെ പേര് മാത്രം<input id="msf-unit-place" type="text" maxLength={45} value={unitName} onChange={e=>setUnitName(e.target.value.replace(/[\\r\\n]/g,' ').replace(/\\s{2,}/g,' '))} placeholder="ഉദാ: ചോക്കാട് / മഞ്ഞപ്പെട്ടി"/></label><p className="unit-heading-preview">MSF {(unitName.trim()||'ചോക്കാട്')} യൂണിറ്റ് കമ്മിറ്റി</p><p className="unit-heading-note">പോസ്റ്ററിൽ സ്ഥിരമായി കാണുന്നത്: ഇനി ഇവർ നയിക്കും</p></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
