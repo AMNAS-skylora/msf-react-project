@@ -21,6 +21,7 @@ export default function PortraitAdjustDialog({
   const [source, setSource] = useState(person.photo);
   const [cutout, setCutout] = useState(!!person.cutout);
   const [mode, setMode] = useState(person.cutout && person.photoMode === 'popout' ? 'popout' : 'inside');
+  const [overhang, setOverhang] = useState(clamp(Number(person.photoPopout) || 15, 0, 40));
   const [position, setPosition] = useState(() => positionOf(person));
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -99,6 +100,7 @@ export default function PortraitAdjustDialog({
       photo: source,
       cutout,
       photoMode: cutout ? mode : 'inside',
+      photoPopout: overhang,
       photoZoom: position.zoom,
       photoX: position.x,
       photoY: position.y,
@@ -123,7 +125,7 @@ export default function PortraitAdjustDialog({
           onLostPointerCapture={pointerUp}
           aria-label="Drag photo to adjust position"
         >
-          <div className={'portrait-adjust-shape'+(cutout&&mode==='popout'?' portrait-adjust-popout':'')}>
+          <div className={'portrait-adjust-shape'+(cutout&&mode==='popout'?' portrait-adjust-popout':'')} style={{'--portrait-overhang':overhang+'%'}}>
             {source && <img
               src={source}
               alt="Adjust uploaded portrait"
@@ -143,6 +145,12 @@ export default function PortraitAdjustDialog({
           </div>
           {!cutout && <small>Remove the image background first to enable Pop out.</small>}
         </fieldset>
+        {cutout&&mode==='popout'&&<div className="portrait-adjust-control">
+          <div className="portrait-adjust-control-label"><label htmlFor="portrait-adjust-overhang">Extend above curve</label><span>{overhang}%</span></div>
+          <div className="portrait-adjust-zoom-row">
+            <input id="portrait-adjust-overhang" type="range" min="0" max="40" step="1" value={overhang} onChange={event=>setOverhang(Number(event.target.value))}/>
+          </div>
+        </div>}
         <div className="portrait-adjust-control">
           <div className="portrait-adjust-control-label"><label htmlFor="portrait-adjust-zoom">Zoom</label><span>{Math.round(position.zoom * 100)}%</span></div>
           <div className="portrait-adjust-zoom-row">
@@ -153,7 +161,7 @@ export default function PortraitAdjustDialog({
         </div>
         <div className="portrait-adjust-toolbar">
           <button type="button" onClick={() => setPosition({ zoom: 1, x: 0, y: 0 })}><Maximize2 size={17}/> Fit center</button>
-          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setError(''); }}><RotateCcw size={17}/> Reset</button>
+          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setOverhang(clamp(Number(person.photoPopout)||15,0,40)); setError(''); }}><RotateCcw size={17}/> Reset</button>
           <button type="button" onClick={onCrop}><Scissors size={17}/> Crop</button>
         </div>
         <div className="portrait-adjust-background">
