@@ -364,7 +364,7 @@ export default function App() {
           }}
         />
       </section>
-      <aside className="editor-panel"><section className="header-editor"><h2>Unit Name</h2><label htmlFor="msf-unit-place">സ്ഥലത്തിന്റെ പേര് മാത്രം<input id="msf-unit-place" type="text" maxLength={45} value={unitName} onChange={e=>setUnitName(e.target.value.replace(/[\\r\\n]/g,' ').replace(/\\s{2,}/g,' '))} placeholder="ഉദാ: ചോക്കാട് / മഞ്ഞപ്പെട്ടി"/></label><p className="unit-heading-preview">MSF {(unitName.trim()||'ചോക്കാട്')} യൂണിറ്റ് കമ്മിറ്റി</p><p className="unit-heading-note">പോസ്റ്ററിൽ സ്ഥിരമായി കാണുന്നത്: ഇനി ഇവർ നയിക്കും</p></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
+      <aside className="editor-panel"><section className="header-editor"><h2>Unit Name</h2><label htmlFor="msf-unit-place">സ്ഥലത്തിന്റെ പേര് മാത്രം<input id="msf-unit-place" type="text" maxLength={45} value={unitName} onChange={e=>setUnitName(e.target.value.replace(/[\r\n]/g,' ').replace(/\s{2,}/g,' '))} placeholder="ഉദാ: ചോക്കാട് / മഞ്ഞപ്പെട്ടി"/></label><p className="unit-heading-preview">MSF {(unitName.trim()||'ചോക്കാട്')} യൂണിറ്റ് കമ്മിറ്റി</p><p className="unit-heading-note">പോസ്റ്ററിൽ സ്ഥിരമായി കാണുന്നത്: ഇനി ഇവർ നയിക്കും</p></section><h1>Leadership photos</h1><button type="button" onClick={resetAll}>Reset all edits</button>
         {people.map((p,i)=><section className="person-editor" key={p.role}>
           <h2>{p.role}</h2>
           <div className="person-photo-preview">{p.photo&&<img src={p.photo} alt={p.role+" uploaded portrait"}/>}<span>{p.photo?"Uploaded photo":"No photo uploaded"}</span></div>
