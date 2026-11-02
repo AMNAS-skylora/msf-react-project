@@ -20,6 +20,7 @@ export default function PortraitAdjustDialog({
 }) {
   const [source, setSource] = useState(person.photo);
   const [cutout, setCutout] = useState(!!person.cutout);
+  const [mode, setMode] = useState(person.cutout && person.photoMode === 'popout' ? 'popout' : 'inside');
   const [position, setPosition] = useState(() => positionOf(person));
   const [working, setWorking] = useState(false);
   const [error, setError] = useState('');
@@ -84,6 +85,7 @@ export default function PortraitAdjustDialog({
       const transparent = await onRemoveBackground(source);
       setSource(transparent);
       setCutout(true);
+      setMode('popout');
       setPosition({ zoom: 1, x: 0, y: 0 });
     } catch (err) {
       setError('Background removal failed. Check internet connection or try a transparent PNG. ' + (err?.message || ''));
@@ -96,6 +98,7 @@ export default function PortraitAdjustDialog({
     onSave({
       photo: source,
       cutout,
+      photoMode: cutout ? mode : 'inside',
       photoZoom: position.zoom,
       photoX: position.x,
       photoY: position.y,
@@ -109,7 +112,7 @@ export default function PortraitAdjustDialog({
           <div><strong>Adjust portrait</strong><small>{label}</small></div>
           <button type="button" className="portrait-adjust-close" onClick={onClose} aria-label="Close"><X size={21}/></button>
         </div>
-        <p className="portrait-adjust-help">Drag to move · Pinch or use Zoom to resize. The green frame clips everything outside.</p>
+        <p className="portrait-adjust-help">Drag to move · Pinch or use Zoom to resize. Inside frame clips the photo to the curve. Pop out allows a transparent cutout to rise above it.</p>
         <div
           className="portrait-adjust-preview"
           ref={surfaceRef}
@@ -120,7 +123,7 @@ export default function PortraitAdjustDialog({
           onLostPointerCapture={pointerUp}
           aria-label="Drag photo to adjust position"
         >
-          <div className="portrait-adjust-shape">
+          <div className={'portrait-adjust-shape'+(cutout&&mode==='popout'?' portrait-adjust-popout':'')}>
             {source && <img
               src={source}
               alt="Adjust uploaded portrait"
@@ -132,6 +135,14 @@ export default function PortraitAdjustDialog({
           <div className="portrait-adjust-crosshair" aria-hidden="true"/>
         </div>
 
+        <fieldset className="portrait-adjust-modes">
+          <legend>Photo shape</legend>
+          <div className="portrait-adjust-mode-options">
+            <button type="button" className={mode==='inside'?'active':''} aria-pressed={mode==='inside'} onClick={()=>setMode('inside')}>Inside curved frame</button>
+            <button type="button" className={mode==='popout'?'active':''} aria-pressed={mode==='popout'} disabled={!cutout} onClick={()=>setMode('popout')}>Pop out above frame</button>
+          </div>
+          {!cutout && <small>Remove the image background first to enable Pop out.</small>}
+        </fieldset>
         <div className="portrait-adjust-control">
           <div className="portrait-adjust-control-label"><label htmlFor="portrait-adjust-zoom">Zoom</label><span>{Math.round(position.zoom * 100)}%</span></div>
           <div className="portrait-adjust-zoom-row">
@@ -142,11 +153,11 @@ export default function PortraitAdjustDialog({
         </div>
         <div className="portrait-adjust-toolbar">
           <button type="button" onClick={() => setPosition({ zoom: 1, x: 0, y: 0 })}><Maximize2 size={17}/> Fit center</button>
-          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setError(''); }}><RotateCcw size={17}/> Reset</button>
+          <button type="button" onClick={() => { setPosition(positionOf(person)); setSource(person.photo); setCutout(!!person.cutout); setMode(person.cutout && person.photoMode==='popout'?'popout':'inside'); setError(''); }}><RotateCcw size={17}/> Reset</button>
           <button type="button" onClick={onCrop}><Scissors size={17}/> Crop</button>
         </div>
         <div className="portrait-adjust-background">
-          <label><input type="checkbox" checked={cutout} onChange={e => setCutout(e.target.checked)}/> Transparent / removed background</label>
+          <label><input type="checkbox" checked={cutout} onChange={e => {setCutout(e.target.checked);if(!e.target.checked)setMode('inside');}}/> Transparent / removed background</label>
           <button type="button" disabled={working || !source} onClick={removeBackground}><Sparkles size={16}/> {working ? 'Removing…' : 'Remove BG'}</button>
         </div>
         {error && <p role="alert" className="portrait-adjust-error">{error}</p>}
