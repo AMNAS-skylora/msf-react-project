@@ -7,6 +7,7 @@ import ReferencePoster from './ReferencePoster.jsx';
 import PortraitAdjustDialog from './PortraitAdjustDialog.jsx';
 import './styles.css';
 import './reference-poster.css';
+import './portrait-frames.css';
 import './portrait-adjust.css';
 
 const splitMalayalamHeading = value => {
