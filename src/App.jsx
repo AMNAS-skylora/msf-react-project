@@ -8,7 +8,6 @@ import { removePortraitBackgroundFast, warmPortraitSegmenter } from './fastPortr
 import './styles.css';
 import './reference-poster.css';
 import './portrait-frames.css';
-import './portrait-adjust.css';
 import './inline-portrait-editor.css';
 
 const splitMalayalamHeading = value => {
