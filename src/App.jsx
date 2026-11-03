@@ -389,7 +389,98 @@ export default function App() {
       ...groups,[role]:(groups[role]||[]).map((person,i)=>i===index?{...person,...patch}:person)
     }));
   };
+  // Native touch tracking is necessary on iOS Safari: a second finger may
+  // start outside the small portrait button, so pointer capture on the button
+  // alone cannot reliably detect two-finger zoom.
+  const directTouch=useRef({active:false,cleanup:null});
+  function posterTouchStart(event) {
+    if(directTouch.current.active)return;
+    const button=event.target.closest?.('.ref-portrait');
+    const role=button?.dataset?.portraitRole;
+    const index=Number(button?.dataset?.portraitIndex);
+    if(!role||!Number.isInteger(index))return;
+    const member=memberForEdit(role,index);
+    const img=button.querySelector('img');
+    if(!member?.photo||!img)return;
+    const draft={
+      x:Number(member.photoX)||0,
+      y:Number(member.photoY)||0,
+      zoom:Math.max(.5,Math.min(4.5,Number(member.photoZoom)||1))
+    };
+    const gesture={
+      active:true,role,index,button,img,draft,moved:false,
+      lastCenter:null,lastDistance:0,cleanup:null
+    };
+    directTouch.current=gesture;
+    setPhotoEdit(current=>current?.role===role&&current?.index===index?current:{role,index});
+    const getTouches=ev=>Array.from(ev.touches||[]).slice(0,2);
+    const centerOf=touches=>({
+      x:touches.reduce((sum,t)=>sum+t.clientX,0)/touches.length,
+      y:touches.reduce((sum,t)=>sum+t.clientY,0)/touches.length
+    });
+    function rebase(ev) {
+      const touches=getTouches(ev);
+      gesture.lastCenter=touches.length?centerOf(touches):null;
+      gesture.lastDistance=touches.length===2
+        ?Math.max(1,Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY))
+        :0;
+    }
+    function touchMove(ev) {
+      if(!gesture.active)return;
+      if(ev.cancelable)ev.preventDefault();
+      const touches=getTouches(ev);
+      if(!touches.length)return;
+      const center=centerOf(touches);
+      const bounds=button.getBoundingClientRect();
+      if(gesture.lastCenter) {
+        const dx=center.x-gesture.lastCenter.x;
+        const dy=center.y-gesture.lastCenter.y;
+        gesture.draft.x=Math.max(-80,Math.min(80,gesture.draft.x+dx/Math.max(1,bounds.width)*100));
+        gesture.draft.y=Math.max(-80,Math.min(80,gesture.draft.y+dy/Math.max(1,bounds.height)*100));
+        if(dx||dy)gesture.moved=true;
+      }
+      if(touches.length===2) {
+        const distance=Math.max(1,Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY));
+        if(gesture.lastDistance>0){
+          const nextZoom=Math.max(.5,Math.min(4.5,gesture.draft.zoom*distance/gesture.lastDistance));
+          if(nextZoom!==gesture.draft.zoom)gesture.moved=true;
+          gesture.draft.zoom=nextZoom;
+        }
+        gesture.lastDistance=distance;
+      }else {
+        gesture.lastDistance=0;
+      }
+      gesture.lastCenter=center;
+      img.style.transform=`translate(${gesture.draft.x}%, ${gesture.draft.y}%) scale(${gesture.draft.zoom})`;
+    }
+    function touchEnd(ev) {
+      if(!gesture.active)return;
+      rebase(ev);
+      if((ev.touches||[]).length)return;
+      gesture.cleanup?.();
+      gesture.active=false;
+      directTouch.current={active:false,cleanup:null};
+      if(gesture.moved)patchPortrait(role,index,{
+        photoX:gesture.draft.x,photoY:gesture.draft.y,photoZoom:gesture.draft.zoom
+      });
+    }
+    const opts={capture:true,passive:false};
+    document.addEventListener('touchstart',rebase,opts);
+    document.addEventListener('touchmove',touchMove,opts);
+    document.addEventListener('touchend',touchEnd,opts);
+    document.addEventListener('touchcancel',touchEnd,opts);
+    gesture.cleanup=()=>{
+      document.removeEventListener('touchstart',rebase,true);
+      document.removeEventListener('touchmove',touchMove,true);
+      document.removeEventListener('touchend',touchEnd,true);
+      document.removeEventListener('touchcancel',touchEnd,true);
+    };
+    rebase(event.nativeEvent);
+  }
   function portraitPointerDown(event,role,index) {
+    // Native touch handling below supports two fingers even when the second
+    // touch starts beside the frame. Pointer gestures remain for mouse/pen.
+    if(event.pointerType==='touch')return;
     const member=memberForEdit(role,index);
     if(!member?.photo)return;
     event.preventDefault();
@@ -420,6 +511,7 @@ export default function App() {
     setPhotoEdit(current=>current?.role===role&&current?.index===index?current:{role,index});
   }
   function portraitPointerMove(event) {
+    if(event.pointerType==='touch')return;
     const gesture=portraitGesture.current;
     const previous=gesture.pointers.get(event.pointerId);
     if(!previous||!gesture.draft)return;
@@ -461,6 +553,7 @@ export default function App() {
     }
   }
   function portraitPointerUp(event) {
+    if(event.pointerType==='touch')return;
     const gesture=portraitGesture.current;
     if(!gesture.pointers.has(event.pointerId))return;
     gesture.pointers.delete(event.pointerId);
@@ -590,7 +683,7 @@ export default function App() {
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
       <div className="poster-edit-stage">
-      <section className="frame" ref={frameRef} aria-label="MSF poster preview">
+      <section className="frame" ref={frameRef} onTouchStart={posterTouchStart} aria-label="MSF poster preview">
         <ReferencePoster
           people={people}
           unitName={unitName}
