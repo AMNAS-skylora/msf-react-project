@@ -185,6 +185,16 @@ export default function ReferencePoster({
         </div>
       </section>
 
+      <footer className="ref-footer" aria-label="Congratulations">
+        <img
+          className="ref-footer-congratulations"
+          src="/background/congratulations.png"
+          alt="Congratulations"
+          draggable={false}
+          loading="eager"
+          decoding="sync"
+        />
+      </footer>
     </div>
   );
 }
