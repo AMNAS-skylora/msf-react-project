@@ -32,6 +32,8 @@ function Portrait({ person, onClick, role, type = 'member', selectionRole, selec
     <div className={'ref-profile ref-profile-' + type}>
       <button
         type="button"
+        data-portrait-role={selectionRole}
+        data-portrait-index={selectionIndex}
         className={'ref-portrait' + (isCutout ? ' ref-portrait-cutout' : '') + (isCutout && person.photoMode === 'popout' ? ' ref-portrait-popout' : '')}
         style={{'--portrait-overhang': Math.min(40,Math.max(0,Number(person.photoPopout ?? 15))) + '%'}}
         onClick={onClick}
