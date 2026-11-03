@@ -515,9 +515,9 @@
 }
 .frame .ref-poster .ref-executive-row .ref-profile-executive,
 .frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive {
-  flex:0 0 calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
-  width:calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
-  max-width:calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
+  flex:0 0 var(--exec-slot-width,11.49%);
+  width:var(--exec-slot-width,11.49%);
+  max-width:var(--exec-slot-width,11.49%);
 }
 .frame .ref-poster .ref-executive-three-rows .ref-executive-row {
   height:30%;
