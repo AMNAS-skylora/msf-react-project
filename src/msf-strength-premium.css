@@ -267,24 +267,18 @@
   line-height: 1.15;
 }
 
-/* Keep the uploaded original greeting artwork in the composition while
-   setting a legible editable-vector Malayalam greeting in front of it. */
+/* Footer contains only the Malayalam greeting: no artwork cover or green panel. */
 .frame .ref-poster .ref-footer {
   left: 9%;
   width: 82%;
   bottom: 1%;
-  height: 10%;
-  isolation: isolate;
+  height: auto;
+  min-height: 0;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
+  isolation: auto;
   overflow: visible;
-}
-.frame .ref-poster .ref-footer-congratulations {
-  position: absolute;
-  inset: 0;
-  opacity: .22;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
 }
 .frame .ref-poster .ref-footer-greeting {
   position: relative;
