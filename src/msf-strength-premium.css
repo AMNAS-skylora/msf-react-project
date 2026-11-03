@@ -1,0 +1,316 @@
+/*
+ * MSF STRENGTH — premium leadership poster composition.
+ * Artboard sizing is governed by the existing .frame (4:5) and container
+ * query units (1cqw = 10.8px on the 1080px export). This stylesheet affects
+ * only the existing .ref-poster design; other templates and the editor UI
+ * remain untouched.
+ */
+.frame .ref-poster {
+  --strength-forest: #103720;
+  --strength-gold: #F4CF38;
+  --strength-cream: #F6F0DA;
+  --strength-olive: #B5BD8B;
+  --strength-white: #FFFFFF;
+  background-color: var(--strength-forest);
+  /* Meeting photo stays in place: no blur, cropping or asset replacement.
+     A dark upper veil allows text to read; the middle shows the scene, and
+     the lower vignette grounds the small executive portraits. */
+  background-image:
+    linear-gradient(180deg,
+      rgba(6, 28, 15, .86) 0%,
+      rgba(16, 55, 32, .68) 29%,
+      rgba(16, 55, 32, .26) 50%,
+      rgba(10, 37, 21, .48) 75%,
+      rgba(4, 22, 12, .89) 100%),
+    radial-gradient(ellipse 95% 84% at 50% 53%,
+      rgba(4, 22, 12, 0) 43%,
+      rgba(4, 22, 12, .28) 100%),
+    url('/background/msf_background.png');
+  background-size: 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Preserve both provided transparent artworks: STRENGTH on the left,
+   and the MSF committee mark in its existing 15px top-right position. */
+.frame .ref-poster .ref-strength-wordmark {
+  position: absolute;
+  z-index: 6;
+  top: 1.45cqw;
+  left: 2.15cqw;
+  width: 30cqw;
+  height: 6.3cqw;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+  background: none;
+  filter: none;
+  pointer-events: none;
+  user-select: none;
+}
+.frame .ref-poster .ref-brand {
+  top: 1.388889cqw;
+  right: 1.388889cqw;
+  left: auto;
+  width: 16.203704cqw;
+  height: auto;
+}
+.frame .ref-poster .ref-brand-strength-logo {
+  transform: none;
+  object-fit: contain;
+  object-position: top right;
+}
+
+/* Readable hierarchy: committee name over the hero announcement.
+   This sits below branding, and clears the first leader portraits. */
+.frame .ref-poster.ref-first-page .ref-title {
+  top: 12.5%;
+  left: 6%;
+  width: 88%;
+  height: 18.5%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.296296cqw;
+  text-align: center;
+}
+.frame .ref-poster.ref-first-page .ref-title p {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  color: var(--strength-cream);
+  font: 600 2.15cqw/1.32 "Noto Sans Malayalam", "Nirmala UI", sans-serif;
+  letter-spacing: 0;
+  text-align: center;
+  overflow-wrap: normal;
+  text-shadow: 0 .13cqw .35cqw rgba(2, 19, 10, .43);
+}
+.frame .ref-poster.ref-first-page .ref-title h1 {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  color: var(--strength-gold);
+  font: 800 6.9cqw/1.08 "Noto Sans Malayalam", "Nirmala UI", sans-serif;
+  letter-spacing: -.05cqw;
+  white-space: pre-line;
+  overflow-wrap: normal;
+  text-align: center;
+  text-shadow: 0 .17cqw .44cqw rgba(2, 21, 11, .48);
+}
+
+/* Three large matching arches are still controlled by the original
+   React <Portrait> editor, so uploads/drag/zoom/cutout continue to work. */
+.frame .ref-poster.ref-first-page .ref-primary-leadership {
+  top: 31.9%;
+  left: 17.8%;
+  width: 64.4%;
+  height: 20.15%;
+  gap: 2.55%;
+  justify-content: center;
+  align-items: flex-start;
+}
+.frame .ref-poster.ref-first-page .ref-primary-leadership .ref-profile-leader {
+  flex: 0 0 31.6%;
+  width: 31.6%;
+  max-width: 31.6%;
+  height: 100%;
+  min-width: 0;
+}
+.frame .ref-poster.ref-first-page .ref-primary-leadership .ref-profile-leader .ref-portrait {
+  flex: 0 0 70%;
+  width: 95%;
+  height: 70%;
+  max-width: 95%;
+  min-height: 0;
+}
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-role {
+  padding: .58cqw 0 .08cqw;
+  color: var(--strength-cream);
+  font-size: 1.36cqw;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 .1cqw .3cqw rgba(0, 18, 8, .55);
+}
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-name,
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-name span {
+  color: var(--strength-white) !important;
+  font-size: 1.77cqw;
+  font-weight: 800;
+  line-height: 1.13;
+}
+
+/* Same dignified cream outline over a muted olive backing on ALL portraits.
+   Pop-out portraits retain their own clipping logic and transparent cutouts. */
+.frame .ref-poster .ref-portrait:not(.ref-portrait-popout) {
+  background: var(--strength-olive) !important;
+  box-shadow:
+    inset 0 0 0 .16cqw rgba(246, 240, 218, .82),
+    0 .20cqw .62cqw rgba(3, 20, 11, .25) !important;
+}
+.frame .ref-poster .ref-portrait-popout::before {
+  background: var(--strength-olive) !important;
+  box-shadow:
+    inset 0 0 0 .16cqw rgba(246, 240, 218, .82),
+    0 .20cqw .62cqw rgba(3, 20, 11, .25) !important;
+}
+.frame .ref-poster .ref-portrait .ref-camera-placeholder {
+  color: var(--strength-forest);
+}
+.frame .ref-poster .ref-portrait img {
+  object-position: 50% 24%;
+}
+.frame .ref-poster .ref-portrait-cutout img {
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+/* The two officer groups share one symmetrical horizontal band, not a
+   repetitive vertical grid. Fixed four-column widths prevent stretching. */
+.frame .ref-poster.ref-first-page .ref-officer-eight {
+  top: 52.7%;
+  left: 4.3%;
+  width: 91.4%;
+  height: 14.55%;
+  column-gap: 2%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-eight .ref-officer-four {
+  min-width: 0;
+}
+.frame .ref-poster.ref-first-page .ref-officer-eight .ref-officer-four .ref-officer-group-heading,
+.frame .ref-poster .ref-executive-section .ref-executive-heading {
+  flex: 0 0 2.45cqw;
+  height: 2.45cqw;
+  margin: 0 0 1.04cqw;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75cqw;
+  font: 600 1.851852cqw/1.2 Poppins, Inter, sans-serif;
+  letter-spacing: 0;
+  color: var(--strength-gold);
+  white-space: nowrap;
+  text-align: center;
+  text-shadow: 0 .1cqw .25cqw rgba(0, 17, 9, .36);
+}
+.frame .ref-poster .ref-officer-eight .ref-officer-group-heading::before,
+.frame .ref-poster .ref-officer-eight .ref-officer-group-heading::after,
+.frame .ref-poster .ref-executive-section .ref-executive-heading::before,
+.frame .ref-poster .ref-executive-section .ref-executive-heading::after {
+  content: "";
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  height: .138889cqw;
+  background: rgba(246, 240, 218, .75);
+  border: 0;
+}
+.frame .ref-poster .ref-officer-eight .ref-officer-four .ref-member-row {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.7%;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-portrait {
+  height: 66%;
+  flex: 0 0 66%;
+  width: 98%;
+  max-width: 98%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-profile-name {
+  padding: .47cqw .08cqw 0;
+  min-height: 0;
+  font-size: 1.25cqw;
+  font-weight: 700;
+  line-height: 1.14;
+}
+
+/* The executive band has enough room for all existing rows without
+   colliding with the 11%-high original congratulations artwork. */
+.frame .ref-poster.ref-first-page .ref-main-executives {
+  top: 68.2%;
+  left: 4.3%;
+  width: 91.4%;
+  height: 19.5%;
+}
+.frame .ref-poster .ref-executive-section .ref-executive-grid {
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  gap: 3.1%;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.frame .ref-poster .ref-executive-section .ref-executive-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  gap: 1.15%;
+}
+.frame .ref-poster .ref-executive-section .ref-executive-row .ref-profile-executive {
+  flex: 0 0 var(--exec-slot-width, 11.49%);
+  width: var(--exec-slot-width, 11.49%);
+  max-width: var(--exec-slot-width, 11.49%);
+}
+.frame .ref-poster .ref-main-executives .ref-executive-row .ref-profile-executive .ref-profile-name {
+  padding-top: .34cqw;
+  min-height: 0;
+  font-weight: 700;
+  font-size: 1.18cqw;
+  line-height: 1.15;
+}
+
+/* Keep the uploaded original greeting artwork in the composition while
+   setting a legible editable-vector Malayalam greeting in front of it. */
+.frame .ref-poster .ref-footer {
+  left: 9%;
+  width: 82%;
+  bottom: 1%;
+  height: 10%;
+  isolation: isolate;
+  overflow: visible;
+}
+.frame .ref-poster .ref-footer-congratulations {
+  position: absolute;
+  inset: 0;
+  opacity: .22;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.frame .ref-poster .ref-footer-greeting {
+  position: relative;
+  z-index: 1;
+  display: block;
+  color: var(--strength-cream);
+  font: 800 4.6cqw/1.17 "Noto Sans Malayalam", "Nirmala UI", sans-serif;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 .14cqw .33cqw rgba(0, 14, 7, .50);
+}
+
+/* Continuation pages retain the same photographic atmosphere, matching
+   text palette and centered portrait grid; no member positions are changed. */
+.frame .ref-poster.ref-continuation-page .ref-extra-header small,
+.frame .ref-poster.ref-continuation-page .ref-extra-header p {
+  color: var(--strength-cream);
+}
+.frame .ref-poster.ref-continuation-page .ref-extra-header h1 {
+  color: var(--strength-gold);
+  text-shadow: 0 .13cqw .32cqw rgba(0, 15, 8, .48);
+}
+.frame .ref-poster.ref-continuation-page .ref-extra-executives {
+  top: 29%;
+  height: 57%;
+}
+
+/* No aspect-ratio or viewport breakpoints: the complete 1080×1350 design
+   scales as one image inside the existing .frame on every device. */
