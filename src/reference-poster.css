@@ -468,28 +468,42 @@
   transform: scale(1.55);
   transform-origin: center center;
 }
+/* Main-page heading only: the committee name sits above the Malayalam
+   headline. cqw follows the fixed poster artboard, so 1.296296cqw is 14px
+   at 1080px export width, and stays proportional in the mobile preview. */
 .frame .ref-poster.ref-first-page .ref-title {
   top: 17.25%;
   left: 8%;
   width: 84%;
   height: 17%;
+  padding: .35cqw 0 0;
   align-items: center;
   justify-content: flex-start;
-  gap: .55cqw;
+  gap: 1.296296cqw; /* 14px, within the requested 12-16px */
 }
 .frame .ref-poster.ref-first-page .ref-title p {
   width: 100%;
   max-width: 100%;
+  margin: 0;
+  color: #F6F0DA;
+  font-family: "Noto Sans Malayalam", "Nirmala UI", sans-serif;
+  font-weight: 600;
   font-size: 2cqw;
-  text-align: center;
   line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 .12cqw .32cqw rgba(0, 38, 20, .65);
 }
 .frame .ref-poster.ref-first-page .ref-title h1 {
   width: 100%;
+  margin: 0;
+  color: #F4CF38;
+  font-family: "Noto Sans Malayalam", "Nirmala UI", sans-serif;
   font-size: 6.8cqw;
   line-height: 1.08;
   letter-spacing: -.1cqw;
   text-align: center;
+  text-shadow: 0 .14cqw .30cqw rgba(0, 38, 20, .75);
 }
 
 /* During PNG capture, remove only the CSS poster/frame backgrounds from the
