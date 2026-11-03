@@ -1,0 +1,105 @@
+/* Image preview is the real generated PNG, not a link or a DOM mock-up. */
+.poster-share-overlay{
+  position:fixed;
+  inset:0;
+  z-index:2200;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:max(12px,env(safe-area-inset-top,12px)) 12px max(12px,env(safe-area-inset-bottom,12px));
+  background:rgba(10,31,20,.78);
+  overscroll-behavior:contain;
+}
+.poster-share-dialog{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:min(100%,460px);
+  max-height:96dvh;
+  overflow:auto;
+  padding:14px;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 18px 60px rgba(0,0,0,.3);
+  color:#163d29;
+  box-sizing:border-box;
+  font-family:Inter,"Noto Sans Malayalam",sans-serif;
+  -webkit-overflow-scrolling:touch;
+}
+.poster-share-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:32px;
+  gap:8px;
+}
+.poster-share-heading strong{font-size:15px;font-weight:800}
+.poster-share-dialog button{
+  cursor:pointer;
+  min-height:40px;
+  padding:9px 12px;
+  border:1px solid #c5dcca;
+  border-radius:10px;
+  font-family:inherit;
+  font-weight:700;
+  font-size:13px;
+  color:#24593a;
+  background:#f2f8f3;
+}
+.poster-share-dialog button:disabled{opacity:.45;cursor:not-allowed}
+.poster-share-image{
+  display:block;
+  width:auto;
+  max-width:100%;
+  max-height:min(65dvh,590px);
+  height:auto;
+  aspect-ratio:4/5;
+  object-fit:contain;
+  align-self:center;
+  box-shadow:0 4px 16px #153f261f;
+  background:#e0f0d1;
+  border-radius:4px;
+}
+.poster-share-pagination{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+}
+.poster-share-pagination span{
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.poster-share-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.poster-share-actions button{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  white-space:nowrap;
+}
+.poster-share-actions .poster-share-native{
+  background:#11783d;
+  border-color:#11783d;
+  color:white;
+}
+@media(max-width:580px){
+  .poster-share-overlay{padding:8px}
+  .poster-share-dialog{
+    padding:11px;
+    width:min(100%,390px);
+    max-height:calc(100dvh - 16px);
+    border-radius:13px;
+    gap:8px;
+  }
+  .poster-share-image{max-height:66dvh}
+  .poster-share-dialog button{min-height:42px}
+  .poster-share-heading strong{font-size:14px}
+}
