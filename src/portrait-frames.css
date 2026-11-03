@@ -641,3 +641,30 @@
   color: #315E2A;
   opacity: .9;
 }
+
+
+/* Muted olive palette — photo frames and decorative accents */
+/* Use the same neutral olive for all three primary leaders, Vice Presidents,
+   Joint Secretaries and Executive Members. Keep arch shapes and sizes intact. */
+.frame .ref-poster {
+  --msf-frame-olive: #A5AD70;
+}
+.frame .ref-poster .ref-portrait:not(.ref-portrait-popout),
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait:not(.ref-portrait-popout) {
+  background: var(--msf-frame-olive);
+  box-shadow: inset 0 0 0 .12cqw rgba(41, 62, 30, .17);
+}
+.frame .ref-poster .ref-portrait-popout::before,
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait-popout::before {
+  background: var(--msf-frame-olive);
+  box-shadow: inset 0 0 0 .12cqw rgba(41, 62, 30, .17);
+}
+.frame .ref-poster .ref-portrait .ref-camera-placeholder {
+  color: #3E5536;
+  opacity: .9;
+}
+/* Decorative rules pick up the same muted-olive palette. */
+.frame .ref-poster .ref-officer-group-heading,
+.frame .ref-poster .ref-executive-heading {
+  border-bottom-color: var(--msf-frame-olive);
+}
