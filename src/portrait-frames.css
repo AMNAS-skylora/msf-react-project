@@ -591,3 +591,12 @@
   line-clamp:2;
   overflow:hidden;
 }
+
+/* Compact officer photo frames; retain name baseline and two-line labels. */
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-portrait {
+  height:59%;
+  flex-basis:59%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-profile-name {
+  padding-top:.3cqw;
+}
