@@ -1,7 +1,8 @@
 import { Camera } from 'lucide-react';
 import { strengthLogo } from './strength-mark.js';
 
-const FIRST_EXECUTIVE_COUNT = 8;
+const FIRST_EXECUTIVE_COUNT = 16;
+const EXECUTIVE_ROW_SIZE = 8;
 const LATER_EXECUTIVE_COUNT = 16;
 
 function splitName(person = {}) {
@@ -82,6 +83,7 @@ export default function ReferencePoster({
 }) {
   const firstPage = page === 0;
   const executives = membersFor('Executive Members');
+  const executiveRows = Array.from({length: Math.ceil(executives.length / EXECUTIVE_ROW_SIZE)}, (_,row) => executives.slice(row * EXECUTIVE_ROW_SIZE,(row+1)*EXECUTIVE_ROW_SIZE));
   const executiveOffset = firstPage ? 0 : FIRST_EXECUTIVE_COUNT + (page - 1) * LATER_EXECUTIVE_COUNT;
   const placeName = String(unitName || '').trim() || 'ചോക്കാട്';
   const headingText = 'ഇനി ഇവർ\nനയിക്കും';
@@ -156,21 +158,28 @@ export default function ReferencePoster({
         className={'ref-executive-section ' + (firstPage ? 'ref-main-executives' : 'ref-extra-executives')}
         aria-label="Executive Members"
       >
-        <SectionHeading>Executive Members</SectionHeading>
-        <div className="ref-executive-grid">
-          {executives.map((person, i) => (
-            <Portrait
-              key={executiveOffset + i}
-              person={person}
-              type="executive"
-              selectionRole="Executive Members"
-              selectionIndex={executiveOffset + i}
-              editingPhoto={editingPhoto}
-              onPortraitPointerDown={onPortraitPointerDown}
-              onPortraitPointerMove={onPortraitPointerMove}
-              onPortraitPointerUp={onPortraitPointerUp}
-              onClick={() => onMemberClick('Executive Members', executiveOffset + i)}
-            />
+        <h2 className="ref-officer-group-heading ref-executive-heading">Executive Members</h2>
+        <div className={'ref-executive-grid'+(executiveRows.length>1?' ref-executive-two-rows':' ref-executive-one-row')}>
+          {executiveRows.map((row,rowIndex) => (
+            <div className="ref-executive-row" key={rowIndex}>
+              {row.map((person,i) => {
+                const memberIndex=executiveOffset+rowIndex*EXECUTIVE_ROW_SIZE+i;
+                return (
+                  <Portrait
+                    key={memberIndex}
+                    person={person}
+                    type="executive"
+                    selectionRole="Executive Members"
+                    selectionIndex={memberIndex}
+                    editingPhoto={editingPhoto}
+                    onPortraitPointerDown={onPortraitPointerDown}
+                    onPortraitPointerMove={onPortraitPointerMove}
+                    onPortraitPointerUp={onPortraitPointerUp}
+                    onClick={() => onMemberClick('Executive Members', memberIndex)}
+                  />
+                );
+              })}
+            </div>
           ))}
         </div>
       </section>
