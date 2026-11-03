@@ -445,3 +445,45 @@
   box-shadow:none;
   filter:none;
 }
+
+/* Center the new local MSF logo at the very top, and move the Malayalam
+   heading down slightly with less dominant typography. Poster-only rules:
+   export coordinates and committee photo positioning remain untouched. */
+.frame .ref-poster .ref-brand {
+  top: 1.1%;
+  left: 18%;
+  width: 64%;
+  height: 7.7%;
+  align-items: center;
+  justify-content: center;
+}
+.frame .ref-poster .ref-brand-strength-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  margin: 0 auto;
+}
+.frame .ref-poster.ref-first-page .ref-title {
+  top: 11.6%;
+  left: 8%;
+  width: 84%;
+  height: 18%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .55cqw;
+}
+.frame .ref-poster.ref-first-page .ref-title p {
+  width: 100%;
+  max-width: 100%;
+  font-size: 2.1cqw;
+  text-align: center;
+  line-height: 1.3;
+}
+.frame .ref-poster.ref-first-page .ref-title h1 {
+  width: 100%;
+  font-size: 7.05cqw;
+  line-height: 1.1;
+  letter-spacing: -.1cqw;
+  text-align: center;
+}
