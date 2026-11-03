@@ -278,7 +278,7 @@
   left:4%;
   width:92%;
   top:51%;
-  height:23.6%;
+  height:19.4%;
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   align-items:stretch;
@@ -295,7 +295,7 @@
   position:relative;
 }
 .frame .ref-poster .ref-officer-group-heading {
-  flex:0 0 11%;
+  flex:0 0 14%;
   width:100%;
   min-height:0;
   margin:0 0 1.4%;
@@ -316,7 +316,7 @@
   align-items:start;
   column-gap:2%;
   width:100%;
-  height:86%;
+  height:83%;
   flex:1 1 auto;
   min-height:0;
 }
@@ -335,8 +335,8 @@
 .frame .ref-poster .ref-officer-four .ref-profile-committee .ref-portrait {
   width:100%;
   max-width:100%;
-  height:76%;
-  flex:0 0 76%;
+  height:74%;
+  flex:0 0 74%;
   aspect-ratio:auto;
   min-height:0;
   margin:0 auto;
@@ -352,9 +352,9 @@
 .frame .ref-poster .ref-officer-four .ref-profile-committee .ref-profile-name {
   width:100%;
   max-width:100%;
-  min-height:0;
+  min-height:2.85cqw;
   margin:0;
-  padding:.65cqw .06cqw 0;
+  padding:.7cqw .06cqw 0;
   align-items:center;
   justify-content:flex-start;
   text-align:center;
@@ -368,4 +368,11 @@
   max-width:100%;
   display:block;
   text-align:center;
+}
+
+/* Bring executive members up as the 8-person officer row becomes shorter.
+   This preserves the poster's 4:5 composition and avoids a large empty gap. */
+.frame .ref-poster .ref-main-executives {
+  top:71.4%;
+  height:22.1%;
 }
