@@ -384,16 +384,24 @@
 
 /* Top-left branding: use the user's transparent Strength lettering artwork.
    Replace the earlier msf wordmark + committee heading rather than stacking them. */
+/* Only the original transparent STRENGTH lettering (no Malayalam slogan,
+   paper strip, or generated background), anchored to the poster top-left.
+   These percentages scale with the fixed 1080 x 1350 export artboard. */
 .frame .ref-brand {
   position:absolute;
   z-index:6;
-  top:2.9%;
-  left:5.0%;
-  width:34%;
-  height:6.6%;
+  top:2.3%;
+  left:4.4%;
+  width:38%;
+  height:7.1%;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:flex-start;
+  margin:0;
+  padding:0;
+  background:none;
+  border:0;
+  box-shadow:none;
   pointer-events:none;
 }
 .frame .ref-brand-strength-logo{
@@ -403,8 +411,10 @@
   max-width:100%;
   max-height:100%;
   object-fit:contain;
-  object-position:left center;
+  object-position:left top;
   background:transparent;
   border:0;
+  border-radius:0;
   box-shadow:none;
+  filter:none;
 }
