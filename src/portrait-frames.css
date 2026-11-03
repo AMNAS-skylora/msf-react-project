@@ -267,3 +267,105 @@
   font-size:1.42cqw;
   line-height:1.1;
 }
+
+/* Reference-inspired eight-person band:
+   Vice Presidents (up to 4) and Joint Secretaries (up to 4)
+   share ONE horizontal row, not two vertically stacked sections.
+   Width/height are relative to the 4:5 poster, so PNG matches preview. */
+.frame .ref-poster .ref-officer-eight {
+  position:absolute;
+  z-index:3;
+  left:4%;
+  width:92%;
+  top:51%;
+  height:23.6%;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;
+  column-gap:1.6%;
+  isolation:isolate;
+}
+.frame .ref-poster .ref-officer-four {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+  min-width:0;
+  height:100%;
+  position:relative;
+}
+.frame .ref-poster .ref-officer-group-heading {
+  flex:0 0 11%;
+  width:100%;
+  min-height:0;
+  margin:0 0 1.4%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  color:#195a37;
+  font:700 1.64cqw/1.15 Inter,Arial,sans-serif;
+  letter-spacing:.015cqw;
+  white-space:nowrap;
+  border-bottom:.09cqw solid rgba(25,105,58,.25);
+}
+.frame .ref-poster .ref-officer-four .ref-member-row {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  justify-content:stretch;
+  align-items:start;
+  column-gap:2%;
+  width:100%;
+  height:86%;
+  flex:1 1 auto;
+  min-height:0;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee {
+  display:flex;
+  flex-direction:column;
+  flex:initial;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  height:100%;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-portrait {
+  width:100%;
+  max-width:100%;
+  height:76%;
+  flex:0 0 76%;
+  aspect-ratio:auto;
+  min-height:0;
+  margin:0 auto;
+  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-portrait-popout {
+  border-radius:0;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-portrait-popout::before,
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-photo-selection-ring {
+  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-profile-name {
+  width:100%;
+  max-width:100%;
+  min-height:0;
+  margin:0;
+  padding:.65cqw .06cqw 0;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+  font:700 1.27cqw/1.12 Inter,"Noto Sans Malayalam",Arial,sans-serif;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-wrap:balance;
+}
+.frame .ref-poster .ref-officer-four .ref-profile-committee .ref-profile-name span {
+  width:100%;
+  max-width:100%;
+  display:block;
+  text-align:center;
+}
