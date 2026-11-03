@@ -93,18 +93,23 @@ function drawFittedImage(ctx,image,dest,css){
 // cannot reliably distinguish a correct render from a missing render.
 // Verify that the SVG capture decodes; missing photos are composited below.
 
-// Use the exact CSS poster image in the native-canvas fallback as well.
+// Load the actual poster CSS background as a separate, full-resolution layer.
+// A missing image must cause an explicit error instead of a blank exported PNG.
 async function loadPosterBackground(frame){
   const poster=frame.querySelector('.ref-poster');
-  if(!poster)return null;
-  const background=getComputedStyle(poster).backgroundImage;
-  const match=background.match(/url\(["']?([^"')]+)["']?\)/);
-  if(!match)return null;
-  return new Promise(resolve=>{
-    const img=new Image();
-    img.onload=()=>resolve(img.naturalWidth>0?img:null);
-    img.onerror=()=>resolve(null);
-    img.src=match[1];
+  if(!poster)throw new Error('Poster artwork was not found.');
+  const css=getComputedStyle(poster).backgroundImage;
+  const match=css.match(/url\(["']?([^"')]+)["']?\)/);
+  const source=match?.[1] || '/background/msf_background.png';
+  const image=new Image();
+  image.decoding='async';
+  // Same-origin /public image: never fetch an unrelated remote asset.
+  return new Promise((resolve,reject)=>{
+    image.onload=()=>image.naturalWidth && image.naturalHeight
+      ? resolve(image)
+      : reject(new Error('Poster background image is empty.'));
+    image.onerror=()=>reject(new Error('Poster background did not load: '+source));
+    image.src=source;
   });
 }
 
@@ -120,14 +125,8 @@ async function nativeArtworkSnapshot(frame,rect,dimensions){
   if(!ctx)throw new Error('Canvas is unavailable in this browser.');
   const scaleX=WIDTH/rect.width;
   const scaleY=HEIGHT/rect.height;
-  const backgroundImage=await loadPosterBackground(frame);
-  if(backgroundImage){
-    // Match background-size:100% 100% at the selected export resolution.
-    ctx.drawImage(backgroundImage,0,0,WIDTH,HEIGHT);
-  }else{
-    ctx.fillStyle='#fff9ea';
-    ctx.fillRect(0,0,WIDTH,HEIGHT);
-  }
+  // Intentionally transparent. The original background image is drawn
+  // behind this artwork after SVG capture or native fallback finishes.
 
   for(const button of frame.querySelectorAll('.ref-portrait')){
     const r=rectRelative(button.getBoundingClientRect(),rect,scaleX,scaleY);
@@ -223,14 +222,14 @@ async function artworkSnapshot(frame,rect,dimensions){
         pixelRatio:scale,
         width:rect.width,
         height:rect.height,
-        backgroundColor:'#ffffff',
+        backgroundColor:'transparent',
         cacheBust:false,
         filter:node=>{
           if(node.tagName?.toLowerCase()==='img')return false;
           if(node.classList&&[...HIDDEN_CLASSES].some(cls=>node.classList.contains(cls)))return false;
           return true;
         },
-        style:{boxShadow:'none'},
+        style:{boxShadow:'none',background:'transparent'},
       });
       if(!blob)throw new Error('The poster artwork was not rendered.');
       const {image,dispose}=await loadBlobImage(blob);
@@ -244,6 +243,13 @@ async function artworkSnapshot(frame,rect,dimensions){
         // areas of the intentionally minimal poster layout.
         if(!snapshotContainsArtwork(context,frame,rect,dimensions)){
           throw new Error('Browser returned empty SVG poster artwork.');
+        }
+        // If Safari rasterizes an opaque white frame despite our CSS
+        // overrides, it would cover the background we paint underneath.
+        // Fall back to drawing artwork directly on a transparent canvas.
+        const corners=[[0,0],[WIDTH-1,0],[0,HEIGHT-1],[WIDTH-1,HEIGHT-1]];
+        if(corners.every(([x,y])=>context.getImageData(x,y,1,1).data[3]>250)){
+          throw new Error('Browser returned opaque artwork instead of transparent artwork.');
         }
         return test;
       }finally{dispose();}
@@ -272,13 +278,27 @@ export async function makeReliablePosterBlob(frame,options={}){
   const bounds=frame.getBoundingClientRect();
   if(bounds.width<=0||bounds.height<=0)throw new Error('Poster has an invalid size.');
   const scaleX=WIDTH/bounds.width,scaleY=HEIGHT/bounds.height;
-  // Reuse the artwork canvas instead of allocating another full-size canvas.
-  // This is important at 3240 × 4050, especially on memory-limited iPhones.
-  const canvas=await artworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT});
+  const backgroundImage=await loadPosterBackground(frame);
+  // Keep the generated design, typography and portrait shapes above the
+  // background, but NEVER let SVG-to-PNG decide whether to include the JPG/PNG
+  // background. That image is always composited separately from its real asset.
+  frame.classList.add('msf-export-transparent-background');
+  let canvas;
+  try{
+    canvas=await artworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT});
+  }finally{
+    frame.classList.remove('msf-export-transparent-background');
+  }
   const context=canvas.getContext('2d');
   if(!context)throw new Error('Your browser cannot export an image.');
   context.imageSmoothingEnabled=true;
   context.imageSmoothingQuality='high';
+  // Destination-over puts the original background behind every transparent
+  // pixel of the text, green arches and headings. It does not cover photos.
+  context.save();
+  context.globalCompositeOperation='destination-over';
+  context.drawImage(backgroundImage,0,0,WIDTH,HEIGHT);
+  context.restore();
 
   // Restore the real photos as native canvas pixels. Transparent removed-BG
   // cutouts retain their alpha and sit on top of the green arch background.
