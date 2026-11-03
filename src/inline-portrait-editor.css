@@ -110,3 +110,20 @@
   .inline-photo-toolbar-heading small{font-size:10px}
   .inline-photo-toolbar button{min-height:40px;font-size:12px}
 }
+
+/* Editing state owns touch gestures; neither iOS rubber-band scrolling nor
+   browser pinch-to-zoom should move the underlying poster page. */
+html.msf-portrait-editing,
+body.msf-portrait-editing {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
+}
+body.msf-portrait-editing .poster-edit-stage,
+body.msf-portrait-editing .poster-edit-stage .frame,
+body.msf-portrait-editing .ref-portrait {
+  touch-action: none !important;
+  overscroll-behavior: none;
+}
+body.msf-portrait-editing .inline-photo-toolbar-buttons {
+  touch-action: pan-x;
+}
