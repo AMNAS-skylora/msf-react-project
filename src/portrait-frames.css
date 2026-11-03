@@ -600,3 +600,14 @@
 .frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-profile-name {
   padding-top:.3cqw;
 }
+
+/* Emphasize the three primary leaders without changing the arch silhouette. */
+.frame .ref-poster.ref-first-page .ref-profile-leader .ref-portrait {
+  width:98%;
+  max-width:98%;
+  flex-basis:71%;
+  height:71%;
+}
+.frame .ref-poster.ref-first-page .ref-profile-leader .ref-profile-role {
+  font-weight:700;
+}
