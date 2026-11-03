@@ -133,17 +133,9 @@ async function nativeArtworkSnapshot(frame,rect,dimensions){
     if(r.w<=0||r.h<=0)continue;
     ctx.save();
     clipArch(ctx,r);
-    const isPrimaryLeader=!!button.closest('.ref-primary-leadership .ref-profile-leader');
-    if(isPrimaryLeader){
-      // Match the yellow leadership frame in the browser preview.
-      ctx.fillStyle='#F4CF38';
-    }else{
-      const gradient=ctx.createLinearGradient(r.x,r.y,r.x+r.w,r.y+r.h);
-      gradient.addColorStop(0,'#b6db88');
-      gradient.addColorStop(.55,'#93c662');
-      gradient.addColorStop(1,'#78b751');
-      ctx.fillStyle=gradient;
-    }
+    // In Safari's native-canvas fallback, match the visible poster palette.
+    // All member groups use the same solid muted-olive arch fill.
+    ctx.fillStyle='#A5AD70';
     ctx.fillRect(r.x,r.y,r.w,r.h);
     ctx.restore();
   }
