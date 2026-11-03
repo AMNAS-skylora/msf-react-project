@@ -708,3 +708,109 @@
   text-shadow: 0 .12cqw .38cqw rgba(17, 53, 28, .82),
                0 0 .11cqw rgba(17, 53, 28, .85);
 }
+
+
+/* MSF three-section refinement: Poppins titles and balanced cream rule */
+/* The poster is a 1080px-wide artboard. 1cqw = 10.8px at export size;
+   using cqw instead of viewport px keeps typography proportional on phones. */
+.frame .ref-poster {
+  --msf-committee-heading-size: 1.851852cqw; /* 20px at 1080px */
+  --msf-committee-divider: .138889cqw;     /* 1.5px at 1080px */
+  --msf-committee-heading-gap: .740741cqw; /* 8px at 1080px */
+  --msf-committee-photo-gap: 1.111111cqw;  /* 12px at 1080px */
+}
+
+/* Exactly these three committee headings. Do not touch primary leadership. */
+.frame .ref-poster .ref-officer-eight .ref-officer-group-heading,
+.frame .ref-poster .ref-executive-section .ref-executive-heading,
+.frame .ref-poster .ref-extra-executives .ref-executive-heading {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 2.45cqw;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 2.45cqw;
+  min-height: 0;
+  gap: var(--msf-committee-heading-gap);
+  margin: 0 0 var(--msf-committee-photo-gap);
+  padding: 0;
+  border: 0;
+  font-family: "Poppins", Inter, Arial, sans-serif;
+  font-size: var(--msf-committee-heading-size);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: #F4CF38;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* True symmetrical dividers on the text baseline, rather than an underline. */
+.frame .ref-poster .ref-officer-eight .ref-officer-group-heading::before,
+.frame .ref-poster .ref-officer-eight .ref-officer-group-heading::after,
+.frame .ref-poster .ref-executive-section .ref-executive-heading::before,
+.frame .ref-poster .ref-executive-section .ref-executive-heading::after {
+  content: "";
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--msf-committee-divider);
+  border: 0;
+  background: rgba(246, 240, 218, .75);
+  pointer-events: none;
+}
+
+/* Reserve a compact 12px gap directly beneath each heading before frames. */
+.frame .ref-poster .ref-officer-eight .ref-officer-four .ref-member-row {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  align-items: start;
+  column-gap: 2%;
+}
+
+/* Prevent the executive heading and grid from competing for fixed heights.
+   Preserve the member row algorithm and each photo's existing arch geometry. */
+.frame .ref-poster .ref-executive-section {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+.frame .ref-poster .ref-executive-section .ref-executive-grid,
+.frame .ref-poster .ref-extra-executives .ref-executive-grid {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  gap: 4%;
+}
+.frame .ref-poster .ref-executive-section .ref-executive-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 1.15%;
+}
+/* Use the existing exact 8/10-column per-row widths. Partial second/third
+   rows must remain centered without stretching a member photo. */
+.frame .ref-poster .ref-executive-section .ref-executive-row .ref-profile-executive {
+  flex: 0 0 var(--exec-slot-width, 11.49%);
+  width: var(--exec-slot-width, 11.49%);
+  max-width: var(--exec-slot-width, 11.49%);
+  min-width: 0;
+}
+
+/* Main page: the executive band ends above the existing congratulations art
+   (footer begins at 88.1%). Vice/Joint and primary leader bounds are retained. */
+.frame .ref-poster.ref-first-page .ref-main-executives {
+  top: 67.8%;
+  height: 20.1%;
+}
