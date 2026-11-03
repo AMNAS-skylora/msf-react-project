@@ -276,10 +276,16 @@
   min-height: 0;
   background: transparent !important;
   background-image: none !important;
+  border: none;
   box-shadow: none;
   isolation: auto;
   overflow: visible;
 }
+/* Never display the removed congratulations artwork. */
+.frame .ref-poster .ref-footer-congratulations {
+  display: none !important;
+}
+
 .frame .ref-poster .ref-footer-greeting {
   position: relative;
   z-index: 1;
