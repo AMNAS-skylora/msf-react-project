@@ -153,3 +153,38 @@
 .frame .ref-poster .ref-portrait-popout .ref-photo-selection-ring{
   border-radius:45% 45% 28% 28% / 37% 37% 24% 24%;
 }
+
+/* Reference shape: one clean green arch with a smooth rounded crown,
+   vertical sides and a straight bottom edge.
+   This is the same shape for leaders and every committee portrait. */
+.frame .ref-poster .ref-portrait,
+.frame .ref-poster .ref-profile-committee .ref-portrait,
+.frame .ref-poster .ref-profile-executive .ref-portrait {
+  border-radius: 49% 49% 0 0 / 39% 39% 0 0;
+  background:
+    radial-gradient(ellipse at 30% 12%,rgba(224,246,182,.42),transparent 53%),
+    linear-gradient(150deg,#afd67e 0%,#93c662 56%,#78b751 100%);
+  box-shadow: inset 0 0 0 1px rgba(34,101,41,.2);
+}
+.frame .ref-poster .ref-portrait-popout,
+.frame .ref-poster .ref-profile-committee .ref-portrait-popout,
+.frame .ref-poster .ref-profile-executive .ref-portrait-popout {
+  background:transparent;
+  border-radius:0;
+  box-shadow:none;
+  clip-path:polygon(0 -42%,100% -42%,100% 100%,0 100%);
+  -webkit-clip-path:polygon(0 -42%,100% -42%,100% 100%,0 100%);
+}
+.frame .ref-poster .ref-portrait-popout::before {
+  border-radius:49% 49% 0 0 / 39% 39% 0 0;
+  background:
+    radial-gradient(ellipse at 30% 12%,rgba(224,246,182,.42),transparent 53%),
+    linear-gradient(150deg,#afd67e 0%,#93c662 56%,#78b751 100%);
+  box-shadow:inset 0 0 0 1px rgba(34,101,41,.2);
+}
+.frame .ref-poster .ref-portrait .ref-photo-selection-ring {
+  border-radius:49% 49% 0 0 / 39% 39% 0 0;
+}
+.frame .ref-poster .ref-portrait-popout .ref-photo-selection-ring {
+  border-radius:49% 49% 0 0 / 39% 39% 0 0;
+}
