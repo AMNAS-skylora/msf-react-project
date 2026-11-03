@@ -4,8 +4,8 @@
 // canvas using the same rect, object-fit and arch clipping as the preview.
 import { toBlob } from 'html-to-image';
 
-const WIDTH=1080;
-const HEIGHT=1350;
+const BASE_WIDTH=1080;
+const BASE_HEIGHT=1350;
 const HIDDEN_CLASSES=new Set(['photo-toolbar','photo-selection-handle','joint-crop-button','ref-camera-placeholder','ref-photo-selection-ring']);
 
 function rectRelative(rect,frame,scaleX,scaleY){
@@ -96,7 +96,8 @@ function drawFittedImage(ctx,image,dest,css){
 // iOS Safari can refuse SVG foreignObject rasterization altogether.
 // A native-canvas fallback still yields a usable, complete image with all
 // leadership photographs, names, the poster grid and rounded green arches.
-function nativeArtworkSnapshot(frame,rect){
+function nativeArtworkSnapshot(frame,rect,dimensions){
+  const {width:WIDTH,height:HEIGHT}=dimensions;
   const canvas=document.createElement('canvas');
   canvas.width=WIDTH;
   canvas.height=HEIGHT;
@@ -180,7 +181,8 @@ function nativeArtworkSnapshot(frame,rect){
 // Probe a real on-poster frame instead of random white-background points.
 // SVG rasterization sometimes succeeds but returns a blank white bitmap on
 // iOS Safari. The green arch remains visible after images are filtered out.
-function snapshotContainsArtwork(context,frame,rect){
+function snapshotContainsArtwork(context,frame,rect,dimensions){
+  const {width:WIDTH,height:HEIGHT}=dimensions;
   const sx=WIDTH/rect.width,sy=HEIGHT/rect.height;
   const targets=[...frame.querySelectorAll('.ref-portrait')].slice(0,8);
   if(!targets.length)return true;
@@ -199,7 +201,8 @@ function snapshotContainsArtwork(context,frame,rect){
   return false;
 }
 
-async function artworkSnapshot(frame,rect){
+async function artworkSnapshot(frame,rect,dimensions){
+  const {width:WIDTH,height:HEIGHT}=dimensions;
   const scale=WIDTH/rect.width;
   let lastError;
   for(let attempt=0;attempt<2;attempt++){
@@ -227,7 +230,7 @@ async function artworkSnapshot(frame,rect){
         // A real arch must be painted; a white-only SVG snapshot is broken.
         // The check is anchored to known portrait positions, not random white
         // areas of the intentionally minimal poster layout.
-        if(!snapshotContainsArtwork(context,frame,rect)){
+        if(!snapshotContainsArtwork(context,frame,rect,dimensions)){
           throw new Error('Browser returned empty SVG poster artwork.');
         }
         return test;
@@ -238,11 +241,18 @@ async function artworkSnapshot(frame,rect){
   // Never block the user's download just because Safari cannot draw HTML
   // into an SVG. Keep every photo by using a native HTML5 canvas instead.
   console.warn('Using native poster export fallback:',lastError);
-  return nativeArtworkSnapshot(frame,rect);
+  return nativeArtworkSnapshot(frame,rect,dimensions);
 }
 
-export async function makeReliablePosterBlob(frame){
+export async function makeReliablePosterBlob(frame,options={}){
   if(!frame)throw new Error('Poster preview is not available.');
+  const WIDTH=Number(options.width)||BASE_WIDTH;
+  const HEIGHT=Number(options.height)||BASE_HEIGHT;
+  const mime=options.mime==='image/jpeg'?'image/jpeg':'image/png';
+  const quality=Math.max(.9,Math.min(.99,Number(options.quality)||.96));
+  if(WIDTH<BASE_WIDTH || WIDTH>3240 || HEIGHT!==WIDTH*BASE_HEIGHT/BASE_WIDTH){
+    throw new Error('Unsupported poster export dimensions.');
+  }
   if(document.fonts?.ready)await document.fonts.ready;
   const images=[...frame.querySelectorAll('img')];
   await Promise.all(images.map(waitForImage));
@@ -250,12 +260,13 @@ export async function makeReliablePosterBlob(frame){
   const bounds=frame.getBoundingClientRect();
   if(bounds.width<=0||bounds.height<=0)throw new Error('Poster has an invalid size.');
   const scaleX=WIDTH/bounds.width,scaleY=HEIGHT/bounds.height;
-  const artwork=await artworkSnapshot(frame,bounds);
-  const canvas=document.createElement('canvas');
-  canvas.width=WIDTH;canvas.height=HEIGHT;
-  const context=canvas.getContext('2d',{alpha:false});
-  if(!context)throw new Error('Your browser cannot export a PNG image.');
-  context.drawImage(artwork,0,0,WIDTH,HEIGHT);
+  // Reuse the artwork canvas instead of allocating another full-size canvas.
+  // This is important at 3240 × 4050, especially on memory-limited iPhones.
+  const canvas=await artworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT});
+  const context=canvas.getContext('2d');
+  if(!context)throw new Error('Your browser cannot export an image.');
+  context.imageSmoothingEnabled=true;
+  context.imageSmoothingQuality='high';
 
   // Restore the real photos as native canvas pixels. Transparent removed-BG
   // cutouts retain their alpha and sit on top of the green arch background.
@@ -286,8 +297,11 @@ export async function makeReliablePosterBlob(frame){
   }
 
   const result=await new Promise((resolve,reject)=>{
-    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG encoding failed')),'image/png');
+    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Poster image encoding failed')),mime,quality);
   });
   if(!result.size)throw new Error('Exported image was empty.');
+  if(result.type && result.type!==mime){
+    throw new Error('This browser does not support the selected export format.');
+  }
   return result;
 }
