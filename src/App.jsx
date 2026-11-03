@@ -4,6 +4,7 @@ import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucid
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
+import { EXECUTIVE_MEMBERS_PER_PAGE } from './executiveLayout.js';
 import { removePortraitBackgroundQuality } from './qualityPortraitBackground.js';
 import './styles.css';
 import './reference-poster.css';
@@ -26,8 +27,8 @@ const splitMalayalamHeading = value => {
   return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
 const INITIAL = ['President', 'General Secretary', 'Treasurer'].map(role=>({role}));
-const EXECUTIVE_FIRST_PAGE_SIZE = 16;
-const EXECUTIVE_PAGE_SIZE = 16;
+const EXECUTIVE_FIRST_PAGE_SIZE = EXECUTIVE_MEMBERS_PER_PAGE;
+const EXECUTIVE_PAGE_SIZE = EXECUTIVE_MEMBERS_PER_PAGE;
 const COMMITTEE_LIMIT = 4;
 const loadImage = src => new Promise((resolve, reject) => {
   const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
