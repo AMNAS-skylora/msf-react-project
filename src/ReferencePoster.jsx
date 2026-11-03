@@ -241,14 +241,6 @@ export default function ReferencePoster({
       </section>
 
       <footer className="ref-footer" aria-label="Congratulations">
-        <img
-          className="ref-footer-congratulations"
-          src="/background/congratulations.png"
-          alt="Congratulations"
-          draggable={false}
-          loading="eager"
-          decoding="sync"
-        />
         <span className="ref-footer-greeting">അഭിവാദ്യങ്ങൾ</span>
       </footer>
     </div>
