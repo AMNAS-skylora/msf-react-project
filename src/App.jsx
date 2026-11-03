@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { Camera, Crop, Download, Pencil, WandSparkles } from 'lucide-react';
+import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
@@ -405,7 +405,7 @@ export default function App() {
     const draft={
       x:Number(member.photoX)||0,
       y:Number(member.photoY)||0,
-      zoom:Math.max(.5,Math.min(4.5,Number(member.photoZoom)||1))
+      zoom:Math.max(.25,Math.min(4.5,Number(member.photoZoom)||1))
     };
     const gesture={
       active:true,role,index,button,img,draft,moved:false,
@@ -442,7 +442,7 @@ export default function App() {
       if(touches.length===2) {
         const distance=Math.max(1,Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY));
         if(gesture.lastDistance>0){
-          const nextZoom=Math.max(.5,Math.min(4.5,gesture.draft.zoom*distance/gesture.lastDistance));
+          const nextZoom=Math.max(.25,Math.min(4.5,gesture.draft.zoom*distance/gesture.lastDistance));
           if(nextZoom!==gesture.draft.zoom)gesture.moved=true;
           gesture.draft.zoom=nextZoom;
         }
@@ -491,7 +491,7 @@ export default function App() {
       gesture.role=role;
       gesture.index=index;
       gesture.draft={
-        zoom:Math.max(.6,Math.min(4,Number(member.photoZoom)||1)),
+        zoom:Math.max(.25,Math.min(4.5,Number(member.photoZoom)||1)),
         x:Number(member.photoX)||0,
         y:Number(member.photoY)||0
       };
@@ -530,7 +530,7 @@ export default function App() {
       const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
       const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
       if(gesture.pinchDistance){
-        gesture.draft.zoom=Math.max(.6,Math.min(4,gesture.pinchZoom*distance/gesture.pinchDistance));
+        gesture.draft.zoom=Math.max(.25,Math.min(4.5,gesture.pinchZoom*distance/gesture.pinchDistance));
       }
       if(gesture.lastCenter){
         move(center.x-gesture.lastCenter.x,center.y-gesture.lastCenter.y);
@@ -575,6 +575,15 @@ export default function App() {
     gesture.moved=false;
     gesture.pinchDistance=0;
     gesture.lastCenter=null;
+  }
+  // One-tap zoom for small photo frames where two-finger pinch is awkward.
+  // Work on the photo only; the green arched shape stays at its original size.
+  function zoomSelectedPortrait(role,index,direction) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const current=Math.max(.25,Math.min(4.5,Number(member.photoZoom)||1));
+    const next=Math.max(.25,Math.min(4.5,Math.round((current+direction*.15)*100)/100));
+    patchPortrait(role,index,{photoZoom:next});
   }
   async function removeSelectedPortraitBackground() {
     if(!photoEdit||busy!==-1)return;
@@ -776,6 +785,17 @@ export default function App() {
         <div className="inline-photo-toolbar-heading">
           <span>{person.name||role} <small>· Drag / pinch photo</small></span>
           <button type="button" className="inline-photo-done" onClick={()=>setPhotoEdit(null)}>Done</button>
+        </div>
+        <div className="inline-photo-zoom" role="group" aria-label="Change photo size">
+          <button type="button" onClick={()=>zoomSelectedPortrait(role,index,-1)}
+            disabled={(Number(person.photoZoom)||1)<=.25} aria-label="Make photo smaller">
+            <Minus size={19}/> <span>Smaller</span>
+          </button>
+          <strong aria-live="polite">{Math.round((Number(person.photoZoom)||1)*100)}%</strong>
+          <button type="button" onClick={()=>zoomSelectedPortrait(role,index,1)}
+            disabled={(Number(person.photoZoom)||1)>=4.5} aria-label="Make photo bigger">
+            <Plus size={19}/> <span>Bigger</span>
+          </button>
         </div>
         <div className="inline-photo-toolbar-buttons">
           <button type="button" className={person.photoMode!=='popout'?'is-active':''}
