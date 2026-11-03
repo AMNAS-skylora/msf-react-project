@@ -89,17 +89,9 @@ function drawFittedImage(ctx,image,dest,css){
   }
 }
 
-function posterLooksBlank(ctx){
-  // A successful MSF artwork capture contains a green poster background.
-  // In Safari, a failed first SVG rasterization is often solid white.
-  const points=[[.02,.02],[.25,.15],[.75,.15],[.5,.48],[.12,.55],[.85,.65],[.5,.85],[.96,.96]];
-  let colored=0;
-  for(const [x,y] of points){
-    const px=ctx.getImageData(Math.floor(x*WIDTH),Math.floor(y*HEIGHT),1,1).data;
-    if(px[3]>0&&!(px[0]>245&&px[1]>245&&px[2]>245))colored++;
-  }
-  return colored<2;
-}
+// The MSF design intentionally has large white areas, so color sampling
+// cannot reliably distinguish a correct render from a missing render.
+// Verify that the SVG capture decodes; missing photos are composited below.
 
 async function artworkSnapshot(frame,rect){
   const scale=WIDTH/rect.width;
@@ -126,7 +118,7 @@ async function artworkSnapshot(frame,rect){
         test.width=WIDTH;test.height=HEIGHT;
         const context=test.getContext('2d',{willReadFrequently:true});
         context.drawImage(image,0,0,WIDTH,HEIGHT);
-        if(posterLooksBlank(context))throw new Error('Poster background was blank.');
+        // Valid white artboards must never be rejected by a color heuristic.
         return test;
       }finally{dispose();}
     }catch(error){lastError=error;}
