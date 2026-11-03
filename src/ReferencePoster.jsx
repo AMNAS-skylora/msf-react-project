@@ -1,9 +1,6 @@
 import { Camera } from 'lucide-react';
 import { strengthLogo } from './strength-mark.js';
-
-const FIRST_EXECUTIVE_COUNT = 16;
-const EXECUTIVE_ROW_SIZE = 8;
-const LATER_EXECUTIVE_COUNT = 16;
+import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
 function splitName(person = {}) {
   if (person.nameLayout === 'manual') {
@@ -83,8 +80,10 @@ export default function ReferencePoster({
 }) {
   const firstPage = page === 0;
   const executives = membersFor('Executive Members');
-  const executiveRows = Array.from({length: Math.ceil(executives.length / EXECUTIVE_ROW_SIZE)}, (_,row) => executives.slice(row * EXECUTIVE_ROW_SIZE,(row+1)*EXECUTIVE_ROW_SIZE));
-  const executiveOffset = firstPage ? 0 : FIRST_EXECUTIVE_COUNT + (page - 1) * LATER_EXECUTIVE_COUNT;
+  const executiveRows = splitExecutiveRows(executives);
+  const executiveColumns = executives.length > 16 ? 10 : 8;
+  const executiveRowClass = ['', 'ref-executive-one-row', 'ref-executive-two-rows', 'ref-executive-three-rows'][executiveRows.length] || '';
+  const executiveOffset = firstPage ? 0 : page * EXECUTIVE_MEMBERS_PER_PAGE;
   const placeName = String(unitName || '').trim() || 'ചോക്കാട്';
   const headingText = 'ഇനി ഇവർ\nനയിക്കും';
 
@@ -159,11 +158,13 @@ export default function ReferencePoster({
         aria-label="Executive Members"
       >
         <h2 className="ref-officer-group-heading ref-executive-heading">Executive Members</h2>
-        <div className={'ref-executive-grid'+(executiveRows.length>1?' ref-executive-two-rows':' ref-executive-one-row')}>
+        <div className={'ref-executive-grid '+executiveRowClass}
+          style={{'--exec-columns': executiveColumns, '--exec-total-gap': (executiveColumns - 1) * 1.15 + '%'}}>
           {executiveRows.map((row,rowIndex) => (
             <div className="ref-executive-row" key={rowIndex}>
               {row.map((person,i) => {
-                const memberIndex=executiveOffset+rowIndex*EXECUTIVE_ROW_SIZE+i;
+                const priorCount=executiveRows.slice(0,rowIndex).reduce((sum,previous)=>sum+previous.length,0);
+                const memberIndex=executiveOffset+priorCount+i;
                 return (
                   <Portrait
                     key={memberIndex}
