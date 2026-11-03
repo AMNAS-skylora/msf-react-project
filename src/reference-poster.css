@@ -450,7 +450,7 @@
    heading down slightly with less dominant typography. Poster-only rules:
    export coordinates and committee photo positioning remain untouched. */
 .frame .ref-poster .ref-brand {
-  top: .8%;
+  top: 3.7%;
   left: 12%;
   width: 76%;
   height: 10.5%;
@@ -469,7 +469,7 @@
   transform-origin: center center;
 }
 .frame .ref-poster.ref-first-page .ref-title {
-  top: 14.2%;
+  top: 17.25%;
   left: 8%;
   width: 84%;
   height: 17%;
