@@ -2,6 +2,7 @@
 // same poster rendered at 1080 CSS pixels, even with a transformed photo.
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
+import {readFileSync} from 'node:fs';
 import {setTimeout as delay} from 'node:timers/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
@@ -102,6 +103,43 @@ try{
   assert(bounds,'Frame not visible');
   assert(Math.abs(bounds.width-1080)<1,'Preview is not 1080px wide: '+bounds.width);
   assert(Math.abs(bounds.height-1350)<1,'Preview is not 1350px high: '+bounds.height);
+
+  // Logo position is specified in poster coordinates, not device pixels.
+  const logo=page.locator('.ref-brand-strength-logo');
+  const logoBounds=await logo.boundingBox();
+  assert(logoBounds,'MSF logo missing from the poster.');
+  const brand=await page.locator('.ref-brand').boundingBox();
+  assert(brand,'MSF logo container missing.');
+  const relTop=brand.y-bounds.y;
+  const relRight=bounds.x+bounds.width-(brand.x+brand.width);
+  console.log('MSF logo artboard position:',{top:relTop,right:relRight,width:brand.width,height:logoBounds.height});
+  assert(Math.abs(relTop-15)<1,'Logo should be 15px from the top.');
+  assert(Math.abs(relRight-15)<1,'Logo should be 15px from the right.');
+  assert(Math.abs(brand.width-175)<1,'Logo container should be 175px wide.');
+  assert(logoBounds.x>=bounds.x&&logoBounds.y>=bounds.y&&
+    logoBounds.x+logoBounds.width<=bounds.x+bounds.width+1&&
+    logoBounds.y+logoBounds.height<=bounds.y+bounds.height+1,
+    'Logo is clipped by poster boundary.');
+
+  const logoPng=PNG.sync.read(readFileSync('public/background/logo.png'));
+  const pixelCount=logoPng.width*logoPng.height;
+  let transparent=0;
+  let minX=logoPng.width,minY=logoPng.height,maxX=-1,maxY=-1;
+  for(let y=0;y<logoPng.height;y++){
+    for(let x=0;x<logoPng.width;x++){
+      const alpha=logoPng.data[(y*logoPng.width+x)*4+3];
+      if(alpha<8){transparent++;continue;}
+      minX=Math.min(minX,x);minY=Math.min(minY,y);
+      maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+    }
+  }
+  console.log('Logo alpha bounding box:',{
+    sourceWidth:logoPng.width,sourceHeight:logoPng.height,
+    transparentRatio:transparent/pixelCount,
+    visibleWidth:maxX-minX+1,visibleHeight:maxY-minY+1,
+    trim:{left:minX,top:minY,right:logoPng.width-maxX-1,bottom:logoPng.height-maxY-1},
+  });
+
   console.log('Capturing preview screenshot');
   const screenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
   console.log('Rendering 1080x1350 PNG export');
