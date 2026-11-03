@@ -226,6 +226,7 @@ export default function App() {
   const [shareOpen,setShareOpen]=useState(false);
   const [shareFiles,setShareFiles]=useState([]);
   const [shareIndex,setShareIndex]=useState(0);
+  const [shareError,setShareError]=useState('');
   useEffect(()=>()=>{shareFiles.forEach(item=>URL.revokeObjectURL(item.url));},[shareFiles]);
   const uploads=useRef([]);
   const nameInputs=useRef([]);
@@ -755,6 +756,10 @@ export default function App() {
     if(exporting||!validateCommitteeLimits())return;
     setExporting(true);
     setMessage('');
+    // Exit photo-adjust mode before capture, restoring iOS scroll and
+    // leaving the share preview free to receive normal touch events.
+    flushSync(()=>setPhotoEdit(null));
+    await waitForPaint();
     try{
       const blobs=await exportAllPages();
       blobs.forEach((blob,i)=>saveBlob(
@@ -770,6 +775,10 @@ export default function App() {
     if(exporting||!validateCommitteeLimits())return;
     setExporting(true);
     setMessage('');
+    // Exit photo-adjust mode before capture, restoring iOS scroll and
+    // leaving the share preview free to receive normal touch events.
+    flushSync(()=>setPhotoEdit(null));
+    await waitForPaint();
     try{
       const blobs=await exportAllPages();
       const items=blobs.map((blob,i)=>{
@@ -777,6 +786,7 @@ export default function App() {
         const file=new File([blob],filename,{type:'image/png'});
         return {file,url:URL.createObjectURL(file)};
       });
+      setShareError('');
       setShareFiles(items);
       setShareIndex(Math.min(posterPage,items.length-1));
       setShareOpen(true);
@@ -787,6 +797,7 @@ export default function App() {
   function closeSharePreview(){
     setShareOpen(false);
     setShareFiles([]);
+    setShareError('');
     setShareIndex(0);
   }
   function sharePreparedPoster(){
@@ -798,14 +809,14 @@ export default function App() {
       // navigator.share, so Safari retains the required user activation.
       if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){
         navigator.share({files,title:'MSF Poster'}).catch(error=>{
-          if(error?.name!=='AbortError')setMessage('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+          if(error?.name!=='AbortError')setShareError('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
         });
       }else{
         saveBlob(chosen.file,chosen.file.name);
-        setMessage('PNG downloaded. Attach it as an image in WhatsApp or another app.');
+        setShareError('Sharing is not available here. PNG downloaded; attach it as an image.');
       }
     }catch(error){
-      setMessage('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+      setShareError('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
     }
   }
   return <main className="app-shell">
@@ -957,6 +968,7 @@ export default function App() {
           <button type="button" disabled={shareIndex>=shareFiles.length-1}
             onClick={()=>setShareIndex(index=>Math.min(shareFiles.length-1,index+1))}>Next</button>
         </div>}
+        {shareError&&<p className="poster-share-error" role="alert">{shareError}</p>}
         <div className="poster-share-actions">
           <button type="button" onClick={()=>saveBlob(shareFiles[shareIndex].file,shareFiles[shareIndex].file.name)}>
             <Download size={17}/> Download PNG
