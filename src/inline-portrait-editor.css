@@ -138,3 +138,38 @@ body.msf-portrait-editing .inline-photo-toolbar-buttons{
 body.msf-portrait-editing .inline-photo-toolbar-buttons>button{
   flex:1 1 auto;
 }
+
+/* Dedicated zoom buttons for precise sizing when pinch-to-shrink is difficult. */
+.inline-photo-zoom {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  width:100%;
+  margin-bottom:9px;
+}
+.inline-photo-zoom button {
+  min-height:46px;
+  background:#f0f8f2;
+  color:#14683d;
+  border:1px solid #b2d6bc;
+  font-weight:800;
+  gap:8px;
+}
+.inline-photo-zoom button:active:not(:disabled) {
+  background:#ccead3;
+}
+.inline-photo-zoom strong {
+  color:#21633d;
+  font-size:14px;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:580px) {
+  .inline-photo-zoom {
+    grid-template-columns:minmax(0,1fr) 57px minmax(0,1fr);
+    gap:6px;
+  }
+  .inline-photo-zoom button {min-height:44px;gap:5px;font-size:12px}
+  .inline-photo-zoom strong {font-size:13px}
+}
