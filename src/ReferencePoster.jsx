@@ -129,6 +129,7 @@ export default function ReferencePoster({
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
+      <img className="ref-strength-wordmark" src={strengthLogo} alt="STRENGTH" draggable={false} />
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
@@ -153,7 +154,7 @@ export default function ReferencePoster({
       {firstPage ? (
         <>
           <div className="ref-title">
-            <p>MSF {placeName} യൂണിറ്റ് കമ്മിറ്റി</p>
+            <p>MSF {placeName} പഞ്ചായത്ത് കമ്മിറ്റി</p>
             <h1>{headingText}</h1>
           </div>
 
@@ -248,6 +249,7 @@ export default function ReferencePoster({
           loading="eager"
           decoding="sync"
         />
+        <span className="ref-footer-greeting">അഭിവാദ്യങ്ങൾ</span>
       </footer>
     </div>
   );
