@@ -120,44 +120,28 @@ export default function ReferencePoster({
             ))}
           </section>
 
-          <section className="ref-member-section ref-vice-section" aria-label="Vice Presidents">
-            <SectionHeading>Vice Presidents</SectionHeading>
-            <div className="ref-member-row">
-              {membersFor('Vice Presidents').map((person, i) => (
-                <Portrait
-                  key={i}
-                  person={person}
-                  type="committee"
-                  selectionRole="Vice Presidents"
-                  selectionIndex={i}
-                  editingPhoto={editingPhoto}
-                  onPortraitPointerDown={onPortraitPointerDown}
-                  onPortraitPointerMove={onPortraitPointerMove}
-                  onPortraitPointerUp={onPortraitPointerUp}
-                  onClick={() => onMemberClick('Vice Presidents', i)}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="ref-member-section ref-joint-section" aria-label="Joint Secretaries">
-            <SectionHeading>Joint Secretaries</SectionHeading>
-            <div className="ref-member-row">
-              {membersFor('Joint Secretaries').map((person, i) => (
-                <Portrait
-                  key={i}
-                  person={person}
-                  type="committee"
-                  selectionRole="Joint Secretaries"
-                  selectionIndex={i}
-                  editingPhoto={editingPhoto}
-                  onPortraitPointerDown={onPortraitPointerDown}
-                  onPortraitPointerMove={onPortraitPointerMove}
-                  onPortraitPointerUp={onPortraitPointerUp}
-                  onClick={() => onMemberClick('Joint Secretaries', i)}
-                />
-              ))}
-            </div>
+          <section className="ref-officer-eight" aria-label="Vice Presidents and Joint Secretaries, eight portraits in one row">
+            {['Vice Presidents', 'Joint Secretaries'].map(role => (
+              <div className="ref-officer-four" key={role}>
+                <h2 className="ref-officer-group-heading">{role}</h2>
+                <div className="ref-member-row">
+                  {membersFor(role).slice(0, 4).map((person, i) => (
+                    <Portrait
+                      key={i}
+                      person={person}
+                      type="committee"
+                      selectionRole={role}
+                      selectionIndex={i}
+                      editingPhoto={editingPhoto}
+                      onPortraitPointerDown={onPortraitPointerDown}
+                      onPortraitPointerMove={onPortraitPointerMove}
+                      onPortraitPointerUp={onPortraitPointerUp}
+                      onClick={() => onMemberClick(role, i)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </section>
         </>
       ) : (
