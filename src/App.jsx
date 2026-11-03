@@ -357,8 +357,15 @@ export default function App() {
       if(event.cancelable)event.preventDefault();
     };
     document.addEventListener('touchmove',preventPageTouchScroll,{passive:false,capture:true});
+    // Safari also dispatches legacy gesture events during a two-finger pinch.
+    // Block browser-level scaling while the selected photo handles that pinch.
+    const preventBrowserPinch=event=>{if(event.cancelable)event.preventDefault();};
+    document.addEventListener('gesturestart',preventBrowserPinch,{passive:false});
+    document.addEventListener('gesturechange',preventBrowserPinch,{passive:false});
     return()=>{
       document.removeEventListener('touchmove',preventPageTouchScroll,true);
+      document.removeEventListener('gesturestart',preventBrowserPinch);
+      document.removeEventListener('gesturechange',preventBrowserPinch);
       html.classList.remove('msf-portrait-editing');
       body.classList.remove('msf-portrait-editing');
       html.style.overflow=original.htmlOverflow;
