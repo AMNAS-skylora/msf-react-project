@@ -446,22 +446,22 @@
 .frame .ref-poster .ref-main-executives .ref-executive-row .ref-profile-executive .ref-portrait,
 .frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive .ref-portrait {
   display:flex;
-  width:100%;
-  max-width:100%;
-  height:76%;
-  max-height:none;
-  flex:0 0 76%;
-  margin:0;
+  width:78%;
+  max-width:78%;
+  height:auto;
+  max-height:70%;
+  flex:0 0 auto;
+  margin:0 auto;
   min-height:0;
-  aspect-ratio:auto;
-  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+  aspect-ratio:1 / 1;
+  border-radius:49% 49% 0 0 / 39% 39% 0 0;
 }
 .frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait-popout {
   border-radius:0;
 }
 .frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait-popout::before,
 .frame .ref-poster .ref-executive-row .ref-profile-executive .ref-photo-selection-ring {
-  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+  border-radius:49% 49% 0 0 / 39% 39% 0 0;
 }
 .frame .ref-poster .ref-executive-row .ref-profile-executive .ref-profile-name,
 .frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive .ref-profile-name {
