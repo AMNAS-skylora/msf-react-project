@@ -127,3 +127,14 @@ body.msf-portrait-editing .ref-portrait {
 body.msf-portrait-editing .inline-photo-toolbar-buttons {
   touch-action: pan-x;
 }
+
+/* All actions remain accessible even on narrow iPhones without scrolling
+   the toolbar while the background page is locked. */
+body.msf-portrait-editing .inline-photo-toolbar-buttons{
+  flex-wrap:wrap;
+  overflow:visible;
+  touch-action:none;
+}
+body.msf-portrait-editing .inline-photo-toolbar-buttons>button{
+  flex:1 1 auto;
+}
