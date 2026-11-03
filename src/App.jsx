@@ -12,6 +12,7 @@ import './reference-poster.css';
 import './portrait-frames.css';
 import './inline-portrait-editor.css';
 import './poster-share-preview.css';
+import './msf-strength-premium.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
