@@ -348,8 +348,13 @@ try{
   }));
   assert.deepEqual(populated.groups.map(g=>g.frames.length),[4,4]);
   assert.deepEqual(populated.rows.map(r=>r.frames.length),[10,10,8]);
-  assert(populated.groups[0].names[0].startsWith('Vice President Member 01'));
-  assert(populated.rows[2].names[7].startsWith('Executive Member 28'));
+  // The portrait renderer deliberately splits long names into multiple
+  // <span> lines; textContent joins those spans without a space.
+  const normalizedName=value=>value.replace(/\s+/g,'');
+  assert(normalizedName(populated.groups[0].names[0])==='VicePresidentMember01',
+    'Vice President member 1 was renamed or reordered.');
+  assert(normalizedName(populated.rows[2].names[7])==='ExecutiveMember28',
+    'Executive member 28 was renamed or reordered.');
   for(const g of populated.groups){
     const widths=g.frames.map(f=>f.width),heights=g.frames.map(f=>f.height);
     assert(Math.max(...widths)-Math.min(...widths)<1,'Officer frame widths differ');
