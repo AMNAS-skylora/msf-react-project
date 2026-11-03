@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
-import { toBlob } from 'html-to-image';
+import { makeReliablePosterBlob } from './reliablePosterExport.js';
 import ReferencePoster from './ReferencePoster.jsx';
 import { EXECUTIVE_MEMBERS_PER_PAGE } from './executiveLayout.js';
 import { removePortraitBackgroundQuality } from './qualityPortraitBackground.js';
@@ -10,6 +10,7 @@ import './styles.css';
 import './reference-poster.css';
 import './portrait-frames.css';
 import './inline-portrait-editor.css';
+import './poster-share-preview.css';
 
 const splitMalayalamHeading = value => {
   const text=String(value||'').trim();
@@ -223,6 +224,9 @@ export default function App() {
   useEffect(()=>{try{localStorage.setItem('msf-poster-template',template)}catch{}},[template]);
   const [exporting,setExporting]=useState(false);
   const [shareOpen,setShareOpen]=useState(false);
+  const [shareFiles,setShareFiles]=useState([]);
+  const [shareIndex,setShareIndex]=useState(0);
+  useEffect(()=>()=>{shareFiles.forEach(item=>URL.revokeObjectURL(item.url));},[shareFiles]);
   const uploads=useRef([]);
   const nameInputs=useRef([]);
   useEffect(()=>{
@@ -726,30 +730,16 @@ export default function App() {
     return false;
   }
   async function makePosterBlob(){
-    if(!frameRef.current)throw new Error('Poster preview is not ready.');
-    await document.fonts.ready;
-    const images=[...frameRef.current.querySelectorAll('img')];
-    await Promise.all(images.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});})));
-    const node=frameRef.current;
-    const blob=await toBlob(node,{
-      pixelRatio:1080/node.getBoundingClientRect().width,
-      cacheBust:false,
-      width:node.getBoundingClientRect().width,
-      height:node.getBoundingClientRect().height,
-      backgroundColor:'#ffffff',
-      filter:element=>!element.classList || !['photo-toolbar','photo-selection-handle','joint-crop-button','ref-camera-placeholder','ref-photo-selection-ring'].some(cls=>element.classList.contains(cls)),
-      style:{boxShadow:'none'}
-    });
-    if(!blob)throw new Error('Could not create poster image.');
-    const previewUrl=URL.createObjectURL(blob);
-    try{const exported=await loadImage(previewUrl);if(exported.naturalWidth!==1080||exported.naturalHeight!==1350)throw new Error(`PNG must be 1080 × 1350 px; received ${exported.naturalWidth} × ${exported.naturalHeight} px.`);}finally{URL.revokeObjectURL(previewUrl);}
-    return blob;
+    return makeReliablePosterBlob(frameRef.current);
   }
-  function saveBlob(blob){
+  function saveBlob(blob,filename='msf-poster.png'){
     const url=URL.createObjectURL(blob);
     const link=document.createElement('a');
-    link.href=url;link.download='msf-poster.png';
-    document.body.appendChild(link);link.click();link.remove();
+    link.href=url;
+    link.download=filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
     setTimeout(()=>URL.revokeObjectURL(url),30000);
   }
   const waitForPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
@@ -763,26 +753,60 @@ export default function App() {
   }
   async function download(){
     if(exporting||!validateCommitteeLimits())return;
-    setExporting(true);setMessage('');
-    try{const blobs=await exportAllPages();blobs.forEach((blob,i)=>{const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);});if(blobs.length>1)setMessage(`${blobs.length} poster pages downloaded.`);}
-    catch(error){flushSync(()=>setPosterPage(0));setMessage('Download failed: '+(error?.message||'Please try again.'));}
-    finally{setExporting(false);}
+    setExporting(true);
+    setMessage('');
+    try{
+      const blobs=await exportAllPages();
+      blobs.forEach((blob,i)=>saveBlob(
+        blob,
+        blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png'
+      ));
+      setMessage(blobs.length>1?`${blobs.length} complete poster PNG files downloaded.`:'Poster PNG downloaded with all photos.');
+    }catch(error){
+      setMessage('Download failed: '+(error?.message||'Please try again.'));
+    }finally{setExporting(false);}
   }
   async function sharePoster(){
     if(exporting||!validateCommitteeLimits())return;
-    setExporting(true);setMessage('');
+    setExporting(true);
+    setMessage('');
     try{
       const blobs=await exportAllPages();
-      const files=blobs.map((blob,i)=>new File([blob],blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png',{type:'image/png'}));
-      if(navigator.share && navigator.canShare?.({files})){
-        await navigator.share({files,title:'MSF Poster'});
+      const items=blobs.map((blob,i)=>{
+        const filename=blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png';
+        const file=new File([blob],filename,{type:'image/png'});
+        return {file,url:URL.createObjectURL(file)};
+      });
+      setShareFiles(items);
+      setShareIndex(Math.min(posterPage,items.length-1));
+      setShareOpen(true);
+    }catch(error){
+      setMessage('Unable to prepare image for sharing: '+(error?.message||'Please try again.'));
+    }finally{setExporting(false);}
+  }
+  function closeSharePreview(){
+    setShareOpen(false);
+    setShareFiles([]);
+    setShareIndex(0);
+  }
+  function sharePreparedPoster(){
+    const chosen=shareFiles[shareIndex];
+    if(!chosen)return;
+    const files=[chosen.file];
+    try{
+      // Called synchronously from a user tap; no async PNG rendering before
+      // navigator.share, so Safari retains the required user activation.
+      if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){
+        navigator.share({files,title:'MSF Poster'}).catch(error=>{
+          if(error?.name!=='AbortError')setMessage('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+        });
       }else{
-        files.forEach((file,i)=>saveBlob(blobs[i]));
-        setMessage(blobs.length>1?`${blobs.length} poster pages downloaded. Attach the PNGs to share.`:'Image downloaded. Open WhatsApp or Facebook and attach the PNG to share.');
+        saveBlob(chosen.file,chosen.file.name);
+        setMessage('PNG downloaded. Attach it as an image in WhatsApp or another app.');
       }
     }catch(error){
-      if(error?.name!=='AbortError')setMessage('Share failed: '+(error?.message||'Please try again.'));
-    }finally{setExporting(false);setShareOpen(false);}
+      setMessage('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+    }
   }
   return <main className="app-shell">
     <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
@@ -917,6 +941,30 @@ export default function App() {
         </div>}
       </div>;
     })()}
+    {shareOpen&&shareFiles.length>0&&<div className="poster-share-overlay" role="presentation"
+      onMouseDown={event=>{if(event.target===event.currentTarget)closeSharePreview();}}>
+      <section className="poster-share-dialog" role="dialog" aria-modal="true" aria-label="Share poster image">
+        <div className="poster-share-heading">
+          <strong>Poster PNG Ready</strong>
+          <button type="button" onClick={closeSharePreview} aria-label="Close image preview">Close</button>
+        </div>
+        <img className="poster-share-image" src={shareFiles[shareIndex]?.url}
+          alt={`Generated poster page ${shareIndex+1} with all uploaded photos`}/>
+        {shareFiles.length>1&&<div className="poster-share-pagination">
+          <button type="button" disabled={shareIndex<=0}
+            onClick={()=>setShareIndex(index=>Math.max(0,index-1))}>Previous</button>
+          <span>Page {shareIndex+1} of {shareFiles.length}</span>
+          <button type="button" disabled={shareIndex>=shareFiles.length-1}
+            onClick={()=>setShareIndex(index=>Math.min(shareFiles.length-1,index+1))}>Next</button>
+        </div>}
+        <div className="poster-share-actions">
+          <button type="button" onClick={()=>saveBlob(shareFiles[shareIndex].file,shareFiles[shareIndex].file.name)}>
+            <Download size={17}/> Download PNG
+          </button>
+          <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image</button>
+        </div>
+      </section>
+    </div>}
     {crop&&<CropDialog
       src={crop.src}
       square={!!crop.square}
