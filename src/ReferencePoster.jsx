@@ -240,7 +240,7 @@ export default function ReferencePoster({
         </div>
       </section>
 
-      <footer className="ref-footer" aria-label="Congratulations">
+      <footer className="ref-footer" aria-label="അഭിവാദ്യങ്ങൾ">
         <span className="ref-footer-greeting">അഭിവാദ്യങ്ങൾ</span>
       </footer>
     </div>
