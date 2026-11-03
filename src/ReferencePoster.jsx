@@ -2,6 +2,46 @@ import { Camera } from 'lucide-react';
 import { strengthLogo } from './strength-mark.js';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
+// Recolor only the *existing transparent logo ink*, not its lettering,
+// layout, alpha, underline, or background. The source PNG contains dark
+// lettering and bright green lettering: map those ink families to the
+// approved Warm Cream / Light Lime brand palette in the same pixel positions.
+// A same-origin canvas remains a PNG/data URL, which our preview/PNG exporter
+// captures without recomposing individual text elements.
+function applyCommitteeLogoPalette(event) {
+  const image = event.currentTarget;
+  if (image.dataset.paletteApplied || image.dataset.fallbackApplied ||
+      !image.naturalWidth || !image.naturalHeight) return;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext('2d', {willReadFrequently: true});
+    if (!context) return;
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      if (pixels.data[i + 3] === 0) continue;
+      const red = pixels.data[i];
+      const green = pixels.data[i + 1];
+      const blue = pixels.data[i + 2];
+      // Distinguish the original saturated green ink from black/dark ink.
+      const lightLime = green > 26 && green > red * 1.18 && green > blue * 1.4;
+      pixels.data[i] = lightLime ? 0xD8 : 0xF6;
+      pixels.data[i + 1] = lightLime ? 0xEB : 0xF0;
+      pixels.data[i + 2] = lightLime ? 0x8B : 0xDA;
+      // Preserve source alpha exactly for clean edges and no green box.
+    }
+    context.putImageData(pixels, 0, 0);
+    image.dataset.paletteApplied = 'true';
+    image.src = canvas.toDataURL('image/png');
+  } catch (error) {
+    // A browser that cannot process canvas should still display the original
+    // user's logo, rather than dropping the MSF branding.
+    console.warn('MSF logo palette adjustment unavailable:', error);
+  }
+}
+
 function splitName(person = {}) {
   if (person.nameLayout === 'manual') {
     return [person.line1 || '', person.line2 || ''].filter(Boolean);
@@ -96,8 +136,9 @@ export default function ReferencePoster({
         <img
           className="ref-brand-strength-logo"
           src="/background/logo.png"
-          alt="MSF logo"
+          alt="MSF Chokakad Panchayath Committee logo"
           draggable={false}
+          onLoad={applyCommitteeLogoPalette}
           onError={event => {
             // The user's local logo file may not have been committed yet.
             // Show the existing Strength asset instead of a broken image.
