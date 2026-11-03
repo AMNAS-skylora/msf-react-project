@@ -318,7 +318,60 @@ export default function App() {
       setBusy(-1);
     }
   }
-  const portraitGesture=useRef({role:null,index:-1,pointers:new Map(),lastPinchDistance:0});
+  const portraitGesture=useRef({
+    role:null,index:-1,pointers:new Map(),image:null,
+    draft:null,moved:false,pinchDistance:0,pinchZoom:1,lastCenter:null
+  });
+  // iOS Safari can scroll the body during a touch gesture even when the
+  // portrait itself has touch-action:none. Freeze the document while a
+  // photo is selected, preserving its original scroll offset.
+  useEffect(()=>{
+    if(!photoEdit)return;
+    const html=document.documentElement;
+    const body=document.body;
+    const scrollX=window.scrollX;
+    const scrollY=window.scrollY;
+    const original={
+      htmlOverflow:html.style.overflow,
+      bodyOverflow:body.style.overflow,
+      bodyPosition:body.style.position,
+      bodyTop:body.style.top,
+      bodyLeft:body.style.left,
+      bodyRight:body.style.right,
+      bodyWidth:body.style.width,
+      bodyTouchAction:body.style.touchAction
+    };
+    html.classList.add('msf-portrait-editing');
+    body.classList.add('msf-portrait-editing');
+    html.style.overflow='hidden';
+    body.style.overflow='hidden';
+    body.style.position='fixed';
+    body.style.top=`-${scrollY}px`;
+    body.style.left='0';
+    body.style.right='0';
+    body.style.width='100%';
+    body.style.touchAction='none';
+    const preventPageTouchScroll=event=>{
+      // The fixed toolbar can still scroll sideways to reveal its buttons.
+      if(event.target?.closest?.('.inline-photo-toolbar-buttons'))return;
+      if(event.cancelable)event.preventDefault();
+    };
+    document.addEventListener('touchmove',preventPageTouchScroll,{passive:false,capture:true});
+    return()=>{
+      document.removeEventListener('touchmove',preventPageTouchScroll,true);
+      html.classList.remove('msf-portrait-editing');
+      body.classList.remove('msf-portrait-editing');
+      html.style.overflow=original.htmlOverflow;
+      body.style.overflow=original.bodyOverflow;
+      body.style.position=original.bodyPosition;
+      body.style.top=original.bodyTop;
+      body.style.left=original.bodyLeft;
+      body.style.right=original.bodyRight;
+      body.style.width=original.bodyWidth;
+      body.style.touchAction=original.bodyTouchAction;
+      window.scrollTo(scrollX,scrollY);
+    };
+  },[!!photoEdit]);
   const memberForEdit=(role,index)=>role==='leader'
     ? people[index]
     : (role===jointRole?joint:(jointGroups[role]||[]))[index];
@@ -333,53 +386,95 @@ export default function App() {
     const member=memberForEdit(role,index);
     if(!member?.photo)return;
     event.preventDefault();
-    try{event.currentTarget.setPointerCapture(event.pointerId);}catch{}
     const gesture=portraitGesture.current;
-    if(gesture.role!==role||gesture.index!==index){
+    // Select before modifying, but never open another editor or navigate.
+    if(gesture.role!==role||gesture.index!==index||!gesture.draft){
       gesture.pointers.clear();
-      gesture.lastPinchDistance=0;
+      gesture.role=role;
+      gesture.index=index;
+      gesture.draft={
+        zoom:Math.max(.6,Math.min(4,Number(member.photoZoom)||1)),
+        x:Number(member.photoX)||0,
+        y:Number(member.photoY)||0
+      };
+      gesture.image=event.currentTarget.querySelector('img');
+      gesture.moved=false;
+      gesture.pinchDistance=0;
+      gesture.lastCenter=null;
     }
-    gesture.role=role;
-    gesture.index=index;
+    try{event.currentTarget.setPointerCapture(event.pointerId);}catch{}
     gesture.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
     if(gesture.pointers.size===2){
-      const [one,two]=[...gesture.pointers.values()];
-      gesture.lastPinchDistance=Math.hypot(one.x-two.x,one.y-two.y);
+      const [a,b]=[...gesture.pointers.values()];
+      gesture.pinchDistance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+      gesture.pinchZoom=gesture.draft.zoom;
+      gesture.lastCenter={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
     }
-    setPhotoEdit({role,index});
+    setPhotoEdit(current=>current?.role===role&&current?.index===index?current:{role,index});
   }
   function portraitPointerMove(event) {
     const gesture=portraitGesture.current;
     const previous=gesture.pointers.get(event.pointerId);
-    if(!previous)return;
+    if(!previous||!gesture.draft)return;
     event.preventDefault();
-    const current={x:event.clientX,y:event.clientY};
-    gesture.pointers.set(event.pointerId,current);
-    const rect=event.currentTarget.getBoundingClientRect();
-    if(gesture.pointers.size>=2) {
-      const [one,two]=[...gesture.pointers.values()];
-      const distance=Math.hypot(one.x-two.x,one.y-two.y);
-      if(gesture.lastPinchDistance>0) {
-        const factor=Math.max(.5,Math.min(2,distance/gesture.lastPinchDistance));
-        const member=memberForEdit(gesture.role,gesture.index);
-        const zoom=Math.max(.6,Math.min(4,(Number(member?.photoZoom)||1)*factor));
-        patchPortrait(gesture.role,gesture.index,{photoZoom:zoom});
+    const next={x:event.clientX,y:event.clientY};
+    gesture.pointers.set(event.pointerId,next);
+    const bounds=event.currentTarget.getBoundingClientRect();
+    const width=Math.max(1,bounds.width);
+    const height=Math.max(1,bounds.height);
+    const move=(dx,dy)=>{
+      gesture.draft.x=Math.max(-65,Math.min(65,gesture.draft.x+dx/width*100));
+      gesture.draft.y=Math.max(-65,Math.min(65,gesture.draft.y+dy/height*100));
+    };
+    if(gesture.pointers.size>=2){
+      const [a,b]=[...gesture.pointers.values()];
+      const distance=Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));
+      const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+      if(gesture.pinchDistance){
+        gesture.draft.zoom=Math.max(.6,Math.min(4,gesture.pinchZoom*distance/gesture.pinchDistance));
       }
-      gesture.lastPinchDistance=distance;
-    } else {
-      const dx=(current.x-previous.x)/Math.max(1,rect.width)*100;
-      const dy=(current.y-previous.y)/Math.max(1,rect.height)*100;
-      const member=memberForEdit(gesture.role,gesture.index);
-      patchPortrait(gesture.role,gesture.index,{
-        photoX:Math.max(-65,Math.min(65,(Number(member?.photoX)||0)+dx)),
-        photoY:Math.max(-65,Math.min(65,(Number(member?.photoY)||0)+dy)),
-      });
+      if(gesture.lastCenter){
+        move(center.x-gesture.lastCenter.x,center.y-gesture.lastCenter.y);
+      }
+      gesture.lastCenter=center;
+      gesture.moved=true;
+    }else{
+      const dx=next.x-previous.x;
+      const dy=next.y-previous.y;
+      if(dx||dy){
+        move(dx,dy);
+        gesture.moved=true;
+      }
+    }
+    // Change only this image during the gesture. Persist a single state
+    // update on pointer release instead of re-saving large photos each frame.
+    if(gesture.image){
+      const {x,y,zoom}=gesture.draft;
+      gesture.image.style.transform=`translate(${x}%, ${y}%) scale(${zoom})`;
     }
   }
   function portraitPointerUp(event) {
     const gesture=portraitGesture.current;
+    if(!gesture.pointers.has(event.pointerId))return;
     gesture.pointers.delete(event.pointerId);
-    if(gesture.pointers.size<2)gesture.lastPinchDistance=0;
+    if(gesture.pointers.size===1){
+      // One remaining finger continues dragging from the last position.
+      gesture.pinchDistance=0;
+      gesture.lastCenter=null;
+      return;
+    }
+    if(gesture.pointers.size>1)return;
+    if(gesture.moved&&gesture.draft){
+      const {zoom,x,y}=gesture.draft;
+      patchPortrait(gesture.role,gesture.index,{photoZoom:zoom,photoX:x,photoY:y});
+    }
+    gesture.role=null;
+    gesture.index=-1;
+    gesture.image=null;
+    gesture.draft=null;
+    gesture.moved=false;
+    gesture.pinchDistance=0;
+    gesture.lastCenter=null;
   }
   async function removeSelectedPortraitBackground() {
     if(!photoEdit||busy!==-1)return;
