@@ -219,7 +219,8 @@ try{
     });
     return {title:sel('.ref-title'),leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
-      footer:sel('.ref-footer'),logo:sel('.ref-strength-wordmark'),
+      footer:sel('.ref-footer'),logo:sel('.ref-brand-strength-logo'),
+      removedWordmark:poster.querySelector('.ref-strength-wordmark')===null,
       background:getComputedStyle(poster).backgroundImage,
       mainTitle:poster.querySelector('.ref-title h1')?.textContent,
       committee:poster.querySelector('.ref-title p')?.textContent,
@@ -235,6 +236,7 @@ try{
     officerGroups:geometry.officerGroups,executiveRows:geometry.executiveRows,
     portraitCount:geometry.frameBounds.length,
   }));
+  assert(geometry.removedWordmark,'Removed STRENGTH wordmark reappeared');
   assert(geometry.background.includes('msf_background.png'),'Original meeting photo removed');
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
