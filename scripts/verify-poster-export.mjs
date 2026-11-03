@@ -163,9 +163,12 @@ try{
     const ctx=canvas.getContext('2d');
     ctx.drawImage(img,0,0);
     const bytes=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-    const result={cream:0,lime:0,transparent:0,other:0,paletteApplied:img.dataset.paletteApplied};
+    const result={cream:0,lime:0,transparent:0,antialiased:0,other:0,paletteApplied:img.dataset.paletteApplied};
     for(let i=0;i<bytes.length;i+=4){
       if(bytes[i+3]===0){result.transparent++;continue;}
+      // PNG round-trips premultiply RGB at partial-alpha pixels. Check exact
+      // palette only on fully opaque ink while preserving anti-aliased edges.
+      if(bytes[i+3]<255){result.antialiased++;continue;}
       if(bytes[i]===0xF6&&bytes[i+1]===0xF0&&bytes[i+2]===0xDA){result.cream++;continue;}
       if(bytes[i]===0xD8&&bytes[i+1]===0xEB&&bytes[i+2]===0x8B){result.lime++;continue;}
       result.other++;
