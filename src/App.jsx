@@ -244,8 +244,54 @@ export default function App() {
     const request=indexedDB.open('msf-poster-editor',1);
     request.onsuccess=()=>{const db=request.result;const tx=db.transaction('draft','readwrite');tx.objectStore('draft').put(people,'leadership');tx.oncomplete=()=>db.close();};
   },[people,ready]);
-  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('msf-joint-members')||'null');if(saved){const groups=saved.groups||{'Vice Presidents':[], 'Joint Secretaries':[], 'Executive Members':[]};if(Array.isArray(saved.members))groups[saved.role==='Joint Presidents'?'Vice Presidents':(saved.role||'Joint Secretaries')]=saved.members;setJointGroups(groups);setJoint(groups['Joint Secretaries']||[]);setJointRole('Joint Secretaries');}}catch{}setJointReady(true);},[]);
-  useEffect(()=>{if(!jointReady)return;const groups={...jointGroups,[jointRole]:joint};try{localStorage.setItem('msf-joint-members',JSON.stringify({groups}));}catch{}},[joint,jointRole,jointGroups,jointReady]);
+  // Photos, especially original + cutout pairs, can exceed localStorage quota.
+  // Store complete committee drafts in IndexedDB instead; import older drafts
+  // once, without clearing user data.
+  useEffect(()=>{
+    let active=true;
+    const legacy=()=>{
+      try{return JSON.parse(localStorage.getItem('msf-joint-members')||'null');}
+      catch{return null;}
+    };
+    const applySaved=saved=>{
+      if(!active)return;
+      if(saved){
+        const groups={...{'Vice Presidents':[],'Joint Secretaries':[],'Executive Members':[]},...(saved.groups||{})};
+        if(Array.isArray(saved.members)){
+          groups[saved.role==='Joint Presidents'?'Vice Presidents':(saved.role||'Joint Secretaries')]=saved.members;
+        }
+        setJointGroups(groups);
+        setJoint(groups['Joint Secretaries']||[]);
+        setJointRole('Joint Secretaries');
+      }
+      setJointReady(true);
+    };
+    const request=indexedDB.open('msf-poster-editor',1);
+    request.onupgradeneeded=()=>{
+      if(!request.result.objectStoreNames.contains('draft'))request.result.createObjectStore('draft');
+    };
+    request.onsuccess=()=>{
+      const db=request.result;
+      const tx=db.transaction('draft','readonly');
+      const get=tx.objectStore('draft').get('committees');
+      get.onsuccess=()=>{const result=get.result;db.close();applySaved(result||legacy());};
+      get.onerror=()=>{db.close();applySaved(legacy());};
+    };
+    request.onerror=()=>applySaved(legacy());
+    return()=>{active=false;};
+  },[]);
+  useEffect(()=>{
+    if(!jointReady)return;
+    const groups={...jointGroups,[jointRole]:joint};
+    const request=indexedDB.open('msf-poster-editor',1);
+    request.onsuccess=()=>{
+      const db=request.result;
+      const tx=db.transaction('draft','readwrite');
+      tx.objectStore('draft').put({groups},'committees');
+      tx.oncomplete=()=>db.close();
+      tx.onerror=()=>db.close();
+    };
+  },[joint,jointRole,jointGroups,jointReady]);
   function resetAll(){
     if(!window.confirm('Reset all names and photos to the original values?'))return;
     setPeople(INITIAL.map(({role,member})=>({role,name:member?.name||'',photo:member?imageUrl(member):'',cutout:false,x:8+INITIAL.findIndex(v=>v.role===role)*30,y:63,w:27})));
