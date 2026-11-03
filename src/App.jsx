@@ -4,7 +4,6 @@ import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucid
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
-import { removePortraitBackgroundFast, warmPortraitSegmenter } from './fastPortraitBackground.js';
 import { removePortraitBackgroundQuality } from './qualityPortraitBackground.js';
 import './styles.css';
 import './reference-poster.css';
@@ -171,7 +170,6 @@ export default function App() {
       // Upload is immediate. Crop remains an optional action in Adjust photo.
       updateJoint(i,await prepareUploadedPortrait(src));
       setPhotoEdit({role:jointRole,index:i});
-      if(autoRemoveUpload)warmPortraitSegmenter();
     }catch {setMessage('Unable to read photo.');}
   }
   const drag=useRef(null);
@@ -214,8 +212,6 @@ export default function App() {
   function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
 
   const [photoEdit,setPhotoEdit] = useState(null);
-  const [autoRemoveUpload,setAutoRemoveUpload]=useState(()=>{try{return localStorage.getItem('msf-auto-remove-bg')==='true';}catch{return false;}});
-  useEffect(()=>{try{localStorage.setItem('msf-auto-remove-bg',String(autoRemoveUpload));}catch{}},[autoRemoveUpload]);
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
@@ -308,7 +304,6 @@ export default function App() {
       // Keep the entire image; do not force a crop step on upload.
       update(i,await prepareUploadedPortrait(src));
       setPhotoEdit({role:'leader',index:i});
-      if(autoRemoveUpload)warmPortraitSegmenter();
     } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
@@ -345,9 +340,11 @@ export default function App() {
     }finally{setBusy(-1);}
   }
   // Keep the original crop even if client-side AI removal is unavailable.
+  // Upload/Crop only stores the image. AI removal is never started without
+  // a deliberate click on one of the 'Remove BG' buttons.
   async function prepareUploadedPortrait(src) {
     const transparent=await imageHasTransparency(src);
-    const original={
+    return {
       photo:src,
       originalPhoto:src,
       originalCutout:transparent,
@@ -355,17 +352,6 @@ export default function App() {
       photoMode:'inside',
       photoZoom:1,photoX:0,photoY:0
     };
-    if(transparent||!autoRemoveUpload)return original;
-    setBusy('auto-bg');
-    setMessage('Removing background…');
-    try{
-      const photo=await removeBackgroundSource(src);
-      setMessage('Background removed.');
-      return {...original,photo,cutout:true,photoMode:'popout',photoY:-12};
-    }catch(error){
-      setMessage('Original photo saved. Background removal was unavailable.');
-      return original;
-    }finally{setBusy(-1);}
   }
   const portraitGesture=useRef({
     role:null,index:-1,pointers:new Map(),image:null,
@@ -833,7 +819,6 @@ export default function App() {
           <label className="cutout-fit-toggle"><input type="checkbox" checked={!!p.cutout} onChange={e=>update(i,{cutout:e.target.checked})}/> Fit transparent photo inside green frame</label>
           <input ref={el=>uploads.current[i]=el} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e=>upload(i,e)}/>
         </section>)}
-        <section className="auto-removal-setting"><label><input type="checkbox" checked={autoRemoveUpload} onChange={event=>setAutoRemoveUpload(event.target.checked)}/> <span>Auto Remove BG on Upload</span></label></section>
         <section className="joint-editor"><h2>Committee Sections</h2>
           <div className="joint-group-tabs">{groupNames.map(role=><button type="button" key={role} className={jointRole===role?"active":""} onClick={()=>changeGroup(role)}>{role} ({(role===jointRole?joint:jointGroups[role]||[]).length})</button>)}</div>
           <h3>{jointRole}</h3>
