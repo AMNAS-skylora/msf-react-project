@@ -491,3 +491,12 @@
   letter-spacing: -.1cqw;
   text-align: center;
 }
+
+/* During PNG capture, remove only the CSS poster/frame backgrounds from the
+   DOM snapshot. The exact user background PNG is drawn beneath the artwork
+   directly on the export canvas, preventing Safari from omitting it. */
+.frame.msf-export-transparent-background,
+.frame.msf-export-transparent-background .ref-poster {
+  background-image: none !important;
+  background-color: transparent !important;
+}
