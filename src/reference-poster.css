@@ -15,12 +15,13 @@
   isolation: isolate;
   color: #172333;
   font-family: Inter, "Noto Sans Malayalam", sans-serif;
-  background-color: #fcfefd;
-  background-image:
-    linear-gradient(to right, rgba(18,60,104,.039) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(18,60,104,.039) 1px, transparent 1px),
-    linear-gradient(145deg, #ffffff, #f9fbf9 65%, #ffffff);
-  background-size: 5.2cqw 5.2cqw, 5.2cqw 5.2cqw, 100% 100%;
+  /* Reuse the user's exact local file, without recreating or overlaying it.
+     Vite serves public/background/msf_background.png at this root URL. */
+  background-color: #fff9ea;
+  background-image: url('/background/msf_background.png');
+  background-size: 100% 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .frame .ref-background-corner {
@@ -30,8 +31,9 @@
   pointer-events: none;
   width: 48%;
   height: 27%;
-  opacity: .7;
-  filter: blur(.25cqw);
+  /* Avoid covering or changing the custom flag/foliage image. */
+  display: none;
+  opacity: 0;
 }
 .frame .ref-corner-top {
   top: -12%;
