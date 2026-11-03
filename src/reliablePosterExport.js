@@ -141,9 +141,27 @@ async function nativeArtworkSnapshot(frame,rect,dimensions){
   }
   for(const heading of frame.querySelectorAll('.ref-officer-group-heading,.ref-executive-heading')){
     const r=rectRelative(heading.getBoundingClientRect(),rect,scaleX,scaleY);
-    // Keep the divider cream in the Safari native-canvas export, too.
-    ctx.fillStyle='#F6F0DA';
-    ctx.fillRect(r.x,r.y+r.h-Math.max(1,scaleY*.8),r.w,Math.max(1,scaleY*.8));
+    const css=getComputedStyle(heading);
+    // Match the symmetric ::before/::after CSS dividers in the rare Safari
+    // native-canvas fallback instead of drawing the obsolete bottom underline.
+    const fontSize=(parseFloat(css.fontSize)||20)*scaleX;
+    ctx.save();
+    ctx.font=`${css.fontWeight||600} ${fontSize}px ${css.fontFamily||'Poppins, sans-serif'}`;
+    const textWidth=ctx.measureText(heading.textContent?.trim()||'').width;
+    const gap=8*(WIDTH/BASE_WIDTH);
+    const halfLine=Math.max(0,(r.w-textWidth)/2-gap);
+    const centerY=r.y+r.h/2;
+    ctx.strokeStyle='rgba(246,240,218,.75)';
+    ctx.lineWidth=1.5*(WIDTH/BASE_WIDTH);
+    if(halfLine>0){
+      ctx.beginPath();
+      ctx.moveTo(r.x,centerY);
+      ctx.lineTo(r.x+halfLine,centerY);
+      ctx.moveTo(r.x+r.w-halfLine,centerY);
+      ctx.lineTo(r.x+r.w,centerY);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   const selectors=[
