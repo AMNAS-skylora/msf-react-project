@@ -865,3 +865,53 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
   .poster-export-quality-label select{width:100%;max-width:none}
   .poster-export-actions>button{min-height:44px;width:100%}
 }
+
+/* MSF poster preview: fill the available viewport width rather than holding
+   the design to the old 520/700px cap. Poster coordinates and all output PNG
+   dimensions remain unchanged; only the on-screen preview gets larger. */
+.workspace {
+  width: 100%;
+  max-width: 1840px;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 20px;
+  padding: 18px;
+}
+.workspace .poster-edit-stage {
+  width: min(100%, 1040px);
+  max-width: 100%;
+  min-width: 0;
+}
+.workspace .poster-edit-stage > .frame {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  margin: 0 auto;
+}
+@media (max-width: 1100px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 12px;
+  }
+  .workspace .editor-panel {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 600px) {
+  .workspace {
+    padding: 5px;
+    gap: 10px;
+  }
+  .workspace .poster-edit-stage {
+    width: 100%;
+  }
+  .workspace .poster-edit-stage > .frame {
+    width: 100%;
+    max-width: 100%;
+  }
+}
