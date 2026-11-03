@@ -538,3 +538,31 @@
   line-height:1.1;
   min-height:0;
 }
+
+/* First-page vertical rhythm: allow more breathing room for the heading while
+   keeping leadership, vice/joint officers and executives in a compact stack.
+   Reserve the last 11% of the poster for the enlarged congratulations artwork.
+   The continuation page is intentionally unchanged. */
+.frame .ref-poster.ref-first-page .ref-primary-leadership {
+  top: 32%;
+  height: 19.2%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-eight {
+  top: 51.3%;
+  height: 15.8%;
+}
+.frame .ref-poster.ref-first-page .ref-main-executives {
+  top: 67.6%;
+  height: 20%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-officer-group-heading {
+  flex-basis: 12%;
+  margin-bottom: .9%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-portrait {
+  height: 69%;
+  flex-basis: 69%;
+}
+.frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-profile-name {
+  padding-top: .55cqw;
+}
