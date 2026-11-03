@@ -103,3 +103,14 @@
   .poster-share-dialog button{min-height:42px}
   .poster-share-heading strong{font-size:14px}
 }
+
+.poster-share-error{
+  margin:0;
+  padding:9px 11px;
+  border-radius:8px;
+  color:#8e2e16;
+  background:#fff1e9;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+}
