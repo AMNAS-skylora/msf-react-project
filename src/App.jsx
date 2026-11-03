@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
@@ -212,6 +212,9 @@ export default function App() {
   function editName(i){nameInputs.current[i]?.scrollIntoView({behavior:'smooth',block:'center'});nameInputs.current[i]?.focus({preventScroll:true});}
 
   const [photoEdit,setPhotoEdit] = useState(null);
+  const [showPhotoTools,setShowPhotoTools] = useState(false);
+  const [photoFocusTick,setPhotoFocusTick] = useState(0);
+  const posterStageRef=useRef(null);
   const [crop,setCrop] = useState(null);
   const [busy,setBusy] = useState(-1);
   const [message,setMessage] = useState('');
@@ -428,6 +431,33 @@ export default function App() {
   // start outside the small portrait button, so pointer capture on the button
   // alone cannot reliably detect two-finger zoom.
   const directTouch=useRef({active:false,cleanup:null});
+  // Keep the selected member's portrait visible above the small editing dock.
+  // Reposition ONLY the preview stage; its fixed-resolution export frame and
+  // all saved photo coordinates remain unchanged.
+  useLayoutEffect(()=>{
+    const stage=posterStageRef.current;
+    if(!stage)return;
+    stage.style.transform='none';
+    if(!photoEdit || crop)return;
+    // Avoid shifting a portrait underneath the finger during the first touch.
+    if(directTouch.current.active)return;
+    const button=[...(frameRef.current?.querySelectorAll('.ref-portrait[data-portrait-role]')||[])]
+      .find(node=>node.dataset.portraitRole===photoEdit.role &&
+                  Number(node.dataset.portraitIndex)===photoEdit.index);
+    if(!button)return;
+    const toolbar=document.querySelector('.inline-photo-toolbar');
+    const rect=button.getBoundingClientRect();
+    const dockTop=toolbar?.getBoundingClientRect().top ?? window.innerHeight-125;
+    const visualTop=window.visualViewport?.offsetTop||0;
+    const upper=Math.max(12,visualTop+12);
+    const lower=Math.max(upper+85,Math.min(window.innerHeight-15,dockTop-14));
+    if(rect.top>=upper && rect.bottom<=lower)return;
+    const target=upper+(lower-upper)*.48;
+    const distance=target-(rect.top+rect.height/2);
+    stage.style.transform=`translate3d(0,${Math.round(distance)}px,0)`;
+    return()=>{stage.style.transform='none';};
+  },[photoEdit?.role,photoEdit?.index,showPhotoTools,photoFocusTick,!!crop]);
+  useEffect(()=>{setShowPhotoTools(false);},[photoEdit?.role,photoEdit?.index]);
   function posterTouchStart(event) {
     if(directTouch.current.active)return;
     const button=event.target.closest?.('.ref-portrait');
@@ -498,6 +528,7 @@ export default function App() {
       if(gesture.moved)patchPortrait(role,index,{
         photoX:gesture.draft.x,photoY:gesture.draft.y,photoZoom:gesture.draft.zoom
       });
+      setPhotoFocusTick(tick=>tick+1);
     }
     const opts={capture:true,passive:false};
     document.addEventListener('touchstart',rebase,opts);
@@ -757,7 +788,7 @@ export default function App() {
     
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
-      <div className="poster-edit-stage">
+      <div className={'poster-edit-stage'+(photoEdit?' is-editing':'')} ref={posterStageRef}>
       <section className="frame" ref={frameRef} onTouchStart={posterTouchStart} aria-label="MSF poster preview">
         <ReferencePoster
           people={people}
@@ -848,8 +879,14 @@ export default function App() {
       if(!person?.photo)return null;
       return <div className="inline-photo-toolbar" role="toolbar" aria-label="Photo position controls">
         <div className="inline-photo-toolbar-heading">
-          <span>{person.name||role} <small>· Drag / pinch photo</small></span>
-          <button type="button" className="inline-photo-done" onClick={()=>setPhotoEdit(null)}>Done</button>
+          <span>{person.name||role}</span>
+          <div className="inline-photo-toolbar-actions">
+            <button type="button" className="inline-photo-more" aria-expanded={showPhotoTools}
+              onClick={()=>setShowPhotoTools(current=>!current)}>
+              {showPhotoTools?'Less':'Tools'}
+            </button>
+            <button type="button" className="inline-photo-done" onClick={()=>setPhotoEdit(null)}>Done</button>
+          </div>
         </div>
         <div className="inline-photo-zoom" role="group" aria-label="Change photo size">
           <button type="button" onClick={()=>zoomSelectedPortrait(role,index,-1)}
@@ -868,7 +905,7 @@ export default function App() {
           <button type="button" onClick={()=>raiseSelectedPortrait(role,index,1)}
             disabled={(Number(person.photoY)||0)>=80} aria-label="Lower photo downwards">↓ Lower</button>
         </div>
-        <div className="inline-photo-toolbar-buttons">
+        {showPhotoTools&&<div className="inline-photo-toolbar-buttons">
           <button type="button" className={person.photoMode!=='popout'?'is-active':''}
             onClick={()=>patchPortrait(role,index,{photoMode:'inside'})}>Inside</button>
           <button type="button" disabled={!person.cutout} className={person.photoMode==='popout'?'is-active':''}
@@ -876,7 +913,7 @@ export default function App() {
           <button type="button" onClick={cropSelectedPortrait}>Crop</button>
           <button type="button" disabled={busy!==-1} onClick={removeSelectedPortraitBackground}>{busy==='inline-bg'?'Removing…':'Remove BG'}</button>
           <button type="button" onClick={()=>resetSelectedPortrait(role,index)} title="Restore the original uploaded photo, background and position">Reset photo</button>
-        </div>
+        </div>}
       </div>;
     })()}
     {crop&&<CropDialog
