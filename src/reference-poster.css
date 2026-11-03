@@ -500,3 +500,52 @@
   background-image: none !important;
   background-color: transparent !important;
 }
+
+/* Main committee Instagram handle: reads bottom-to-top in the left gutter. */
+.frame .ref-poster .ref-instagram-vertical {
+  position:absolute;
+  z-index:4;
+  left:1.1%;
+  top:37%;
+  width:2.5%;
+  height:43%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.65cqw;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  color:#111;
+  font:700 1.36cqw/1.15 Inter,Arial,sans-serif;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.frame .ref-poster .ref-instagram-glyph {
+  position:relative;
+  display:inline-flex;
+  width:1.65cqw;
+  height:1.65cqw;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  border:.19cqw solid currentColor;
+  border-radius:.46cqw;
+  font-size:0;
+}
+.frame .ref-poster .ref-instagram-glyph::before {
+  content:'';
+  width:.68cqw;
+  height:.68cqw;
+  border:.16cqw solid currentColor;
+  border-radius:50%;
+}
+.frame .ref-poster .ref-instagram-glyph::after {
+  content:'';
+  position:absolute;
+  right:.22cqw;
+  top:.22cqw;
+  width:.22cqw;
+  height:.22cqw;
+  background:currentColor;
+  border-radius:50%;
+}
