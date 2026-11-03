@@ -93,6 +93,90 @@ function drawFittedImage(ctx,image,dest,css){
 // cannot reliably distinguish a correct render from a missing render.
 // Verify that the SVG capture decodes; missing photos are composited below.
 
+// iOS Safari can refuse SVG foreignObject rasterization altogether.
+// A native-canvas fallback still yields a usable, complete image with all
+// leadership photographs, names, the poster grid and rounded green arches.
+function nativeArtworkSnapshot(frame,rect){
+  const canvas=document.createElement('canvas');
+  canvas.width=WIDTH;
+  canvas.height=HEIGHT;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('Canvas is unavailable in this browser.');
+  const scaleX=WIDTH/rect.width;
+  const scaleY=HEIGHT/rect.height;
+  ctx.fillStyle='#fcfefd';
+  ctx.fillRect(0,0,WIDTH,HEIGHT);
+  const grid=WIDTH*.052;
+  ctx.strokeStyle='rgba(18,60,104,0.05)';
+  ctx.lineWidth=1;
+  for(let x=0;x<=WIDTH;x+=grid){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,HEIGHT);ctx.stroke();
+  }
+  for(let y=0;y<=HEIGHT;y+=grid){
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(WIDTH,y);ctx.stroke();
+  }
+
+  for(const button of frame.querySelectorAll('.ref-portrait')){
+    const r=rectRelative(button.getBoundingClientRect(),rect,scaleX,scaleY);
+    if(r.w<=0||r.h<=0)continue;
+    ctx.save();
+    clipArch(ctx,r);
+    const gradient=ctx.createLinearGradient(r.x,r.y,r.x+r.w,r.y+r.h);
+    gradient.addColorStop(0,'#b6db88');
+    gradient.addColorStop(.55,'#93c662');
+    gradient.addColorStop(1,'#78b751');
+    ctx.fillStyle=gradient;
+    ctx.fillRect(r.x,r.y,r.w,r.h);
+    ctx.restore();
+  }
+  for(const heading of frame.querySelectorAll('.ref-officer-group-heading,.ref-executive-heading')){
+    const r=rectRelative(heading.getBoundingClientRect(),rect,scaleX,scaleY);
+    ctx.fillStyle='rgba(25,105,58,.25)';
+    ctx.fillRect(r.x,r.y+r.h-1,r.w,1);
+  }
+
+  const selectors=[
+    '.ref-title p','.ref-title h1',
+    '.ref-officer-group-heading','.ref-executive-heading',
+    '.ref-section-heading span',
+    '.ref-extra-header small','.ref-extra-header h1','.ref-extra-header p',
+    '.ref-profile-role','.ref-profile-name span',
+    '.ref-footer-organization','.ref-footer-message'
+  ];
+  const visited=new Set();
+  for(const element of frame.querySelectorAll(selectors.join(','))){
+    if(visited.has(element))continue;
+    visited.add(element);
+    const css=getComputedStyle(element);
+    if(css.display==='none'||css.visibility==='hidden')continue;
+    const r=rectRelative(element.getBoundingClientRect(),rect,scaleX,scaleY);
+    if(r.w<1||r.h<1)continue;
+    const raw=element.textContent||'';
+    if(!raw.trim())continue;
+    const lines=raw.split(/\n/).map(line=>line.trim()).filter(Boolean);
+    const fontSize=(parseFloat(css.fontSize)||12)*scaleX;
+    const lineHeight=(parseFloat(css.lineHeight)||fontSize/scaleX*1.15)*scaleY;
+    const weight=css.fontWeight||'700';
+    ctx.save();
+    ctx.fillStyle=css.color||'#173d29';
+    ctx.font=`${weight} ${fontSize}px ${css.fontFamily||'sans-serif'}`;
+    ctx.textAlign=css.textAlign==='center'?'center':css.textAlign==='right'?'right':'left';
+    ctx.textBaseline='middle';
+    const x=ctx.textAlign==='center'?r.x+r.w/2:ctx.textAlign==='right'?r.x+r.w:r.x;
+    lines.forEach((line,index)=>{
+      let size=fontSize;
+      while(ctx.measureText(line).width>r.w && size>Math.max(8,fontSize*.57)){
+        size-=1;
+        ctx.font=`${weight} ${size}px ${css.fontFamily||'sans-serif'}`;
+      }
+      const y=r.y+Math.min(r.h/2,Math.max(lineHeight/2,8))+index*lineHeight;
+      ctx.fillText(line,x,y,Math.max(r.w,1));
+    });
+    ctx.restore();
+  }
+  return canvas;
+}
+
 async function artworkSnapshot(frame,rect){
   const scale=WIDTH/rect.width;
   let lastError;
@@ -124,7 +208,10 @@ async function artworkSnapshot(frame,rect){
     }catch(error){lastError=error;}
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   }
-  throw lastError||new Error('Could not render poster background.');
+  // Never block the user's download just because Safari cannot draw HTML
+  // into an SVG. Keep every photo by using a native HTML5 canvas instead.
+  console.warn('Using native poster export fallback:',lastError);
+  return nativeArtworkSnapshot(frame,rect);
 }
 
 export async function makeReliablePosterBlob(frame){
