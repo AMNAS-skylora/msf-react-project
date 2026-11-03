@@ -114,3 +114,34 @@
   font-weight:600;
   line-height:1.4;
 }
+
+/* A real anchor preserves the user's download tap on iPhone Safari. */
+.poster-share-actions .poster-share-download{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:40px;
+  padding:9px 12px;
+  border:1px solid #b8d8c1;
+  border-radius:10px;
+  background:#eaf7ed;
+  color:#175e39;
+  font-size:13px;
+  font-weight:750;
+  text-decoration:none;
+  line-height:1.25;
+  white-space:nowrap;
+  box-sizing:border-box;
+}
+.poster-share-help{
+  margin:0;
+  color:#3c6650;
+  font-size:12px;
+  line-height:1.45;
+  font-family:Inter,"Noto Sans Malayalam",sans-serif;
+}
+.poster-share-help strong{color:#186039}
+@media(max-width:580px){
+  .poster-share-actions .poster-share-download{min-height:42px}
+}
