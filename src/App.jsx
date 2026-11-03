@@ -224,6 +224,7 @@ export default function App() {
   useEffect(()=>{try{localStorage.setItem('msf-poster-template',template)}catch{}},[template]);
   const [exporting,setExporting]=useState(false);
   const [shareOpen,setShareOpen]=useState(false);
+  const [shareIntent,setShareIntent]=useState('share');
   const [shareFiles,setShareFiles]=useState([]);
   const [shareIndex,setShareIndex]=useState(0);
   const [shareError,setShareError]=useState('');
@@ -752,26 +753,12 @@ export default function App() {
     setMessage(`Please reduce ${exceeded.map(([role,members])=>`${role} (${members.length})`).join(', ')} to 4 members before exporting. Your saved member data is unchanged.`);
     return false;
   }
+  // Avoid iOS asynchronous blob clicks: render first, then a real download link.
   async function download(){
-    if(exporting||!validateCommitteeLimits())return;
-    setExporting(true);
-    setMessage('');
-    // Exit photo-adjust mode before capture, restoring iOS scroll and
-    // leaving the share preview free to receive normal touch events.
-    flushSync(()=>setPhotoEdit(null));
-    await waitForPaint();
-    try{
-      const blobs=await exportAllPages();
-      blobs.forEach((blob,i)=>saveBlob(
-        blob,
-        blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png'
-      ));
-      setMessage(blobs.length>1?`${blobs.length} complete poster PNG files downloaded.`:'Poster PNG downloaded with all photos.');
-    }catch(error){
-      setMessage('Download failed: '+(error?.message||'Please try again.'));
-    }finally{setExporting(false);}
+    return sharePoster('download');
   }
-  async function sharePoster(){
+  async function sharePoster(intent='share'){
+    setShareIntent(intent);
     if(exporting||!validateCommitteeLimits())return;
     setExporting(true);
     setMessage('');
@@ -820,7 +807,7 @@ export default function App() {
     }
   }
   return <main className="app-shell">
-    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={sharePoster} disabled={exporting}>Share Poster</button></div></div>
+    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={()=>sharePoster('share')} disabled={exporting}>Share Poster</button></div></div>
     
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
@@ -956,7 +943,7 @@ export default function App() {
       onMouseDown={event=>{if(event.target===event.currentTarget)closeSharePreview();}}>
       <section className="poster-share-dialog" role="dialog" aria-modal="true" aria-label="Share poster image">
         <div className="poster-share-heading">
-          <strong>Poster PNG Ready</strong>
+          <strong>{shareIntent==='download'?'Download PNG Ready':'Poster PNG Ready'}</strong>
           <button type="button" onClick={closeSharePreview} aria-label="Close image preview">Close</button>
         </div>
         <img className="poster-share-image" src={shareFiles[shareIndex]?.url}
@@ -969,10 +956,14 @@ export default function App() {
             onClick={()=>setShareIndex(index=>Math.min(shareFiles.length-1,index+1))}>Next</button>
         </div>}
         {shareError&&<p className="poster-share-error" role="alert">{shareError}</p>}
+        <p className="poster-share-help">PNG തയ്യാറായി. ചിത്രം പരിശോധിച്ച് <strong>Download PNG</strong> അമർത്തുക. iPhone-ൽ ചിത്രം Photos-ലേക്ക് Save ചെയ്യാൻ <strong>Share Image</strong> ഉപയോഗിക്കാം.</p>
         <div className="poster-share-actions">
-          <button type="button" onClick={()=>saveBlob(shareFiles[shareIndex].file,shareFiles[shareIndex].file.name)}>
+          <a className="poster-share-download"
+            href={shareFiles[shareIndex]?.url}
+            download={shareFiles[shareIndex]?.file.name}
+            aria-label="Download the displayed PNG image">
             <Download size={17}/> Download PNG
-          </button>
+          </a>
           <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image</button>
         </div>
       </section>
