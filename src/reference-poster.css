@@ -304,48 +304,29 @@
   font-size: 1.25cqw;
   line-height: 1.08;
 }
-.frame .ref-footer {
+/* Plain Malayalam greeting, without the removed congratulations artwork. */
+.frame .ref-poster .ref-footer {
   position: absolute;
   z-index: 4;
-  /* Give the transparent congratulations artwork real visual height.
-     The previous 4.5% strip made the original lettering appear tiny. */
   bottom: 0.9%;
   left: 6%;
   width: 88%;
-  height: 11%;
+  min-height: 5%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: .25cqw;
-  color: #17282d;
-}
-.frame .ref-footer-organization {
-  font: 900 2.15cqw/1.15 Inter, sans-serif;
-  color: #163629;
-  letter-spacing: .08cqw;
-}
-.frame .ref-footer-message {
-  font: 700 1.45cqw/1.2 "Noto Sans Malayalam", sans-serif;
-  color: #385344;
-}
-
-.frame .ref-poster .ref-footer {
-  background: transparent;
-  border: none;
+  background: none;
+  border: 0;
+  box-shadow: none;
   padding: 0;
-  justify-content: center;
-  align-items: center;
 }
 .frame .ref-poster .ref-footer-greeting {
-  display: block;
   font-family: "Noto Sans Malayalam", "Manjari", sans-serif;
   font-size: 3.2cqw;
   font-weight: 800;
   line-height: 1.2;
   color: #f4ffdf;
-  text-align: center;
 }
 .frame .ref-extra-header {
   position: absolute;
