@@ -31,22 +31,9 @@
   background-position: center;
 }
 
-/* Preserve both provided transparent artworks: STRENGTH on the left,
-   and the MSF committee mark in its existing 15px top-right position. */
+/* STRENGTH wordmark removed from the poster header. */
 .frame .ref-poster .ref-strength-wordmark {
-  position: absolute;
-  z-index: 6;
-  top: 1.45cqw;
-  left: 2.15cqw;
-  width: 30cqw;
-  height: 6.3cqw;
-  display: block;
-  object-fit: contain;
-  object-position: left center;
-  background: none;
-  filter: none;
-  pointer-events: none;
-  user-select: none;
+  display: none !important;
 }
 .frame .ref-poster .ref-brand {
   top: 1.388889cqw;
