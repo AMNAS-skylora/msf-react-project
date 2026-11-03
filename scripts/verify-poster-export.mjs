@@ -185,6 +185,83 @@ try{
   assert(logoPalette.transparent>100,'Transparent logo background was lost.');
   assert(logoPalette.other < (logoPalette.cream+logoPalette.lime+logoPalette.other)*.01,
     'Unapproved colored pixels remain in the visible logo ink.');
+  // Premium MSF geometry: verify the generated sections still fit inside
+  // the fixed poster artboard and the original member order/slots survive.
+  const geometry=await page.evaluate(()=>{
+    const poster=document.querySelector('.ref-poster.ref-first-page');
+    if(!poster)throw new Error('Main MSF poster was not rendered');
+    const root=poster.getBoundingClientRect();
+    const sel=(selector)=>{
+      const element=poster.querySelector(selector);
+      if(!element)throw new Error('Missing poster section: '+selector);
+      const rect=element.getBoundingClientRect();
+      return {left:rect.left-root.left,right:rect.right-root.left,
+        top:rect.top-root.top,bottom:rect.bottom-root.top,
+        width:rect.width,height:rect.height};
+    };
+    const frameBounds=[...poster.querySelectorAll('.ref-portrait')].map(e=>{
+      const r=e.getBoundingClientRect();
+      return {x:r.left-root.left,y:r.top-root.top,
+        right:r.right-root.left,bottom:r.bottom-root.top};
+    });
+    const leaderFrames=[...poster.querySelectorAll('.ref-primary-leadership .ref-portrait')]
+      .map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}));
+    const officerGroups=[...poster.querySelectorAll('.ref-officer-four')]
+      .map(e=>({name:e.querySelector('h2')?.textContent,
+        members:e.querySelectorAll('.ref-profile-committee').length}));
+    const executiveRows=[...poster.querySelectorAll('.ref-executive-row')].map(row=>{
+      const r=row.getBoundingClientRect(),cards=[...row.querySelectorAll('.ref-profile-executive')];
+      const first=cards[0]?.getBoundingClientRect();
+      const last=cards[cards.length-1]?.getBoundingClientRect();
+      return {count:cards.length,leftGap:first?first.left-r.left:0,
+        rightGap:last?r.right-last.right:0,
+        widths:cards.map(c=>c.getBoundingClientRect().width)};
+    });
+    return {title:sel('.ref-title'),leaders:sel('.ref-primary-leadership'),
+      officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
+      footer:sel('.ref-footer'),logo:sel('.ref-strength-wordmark'),
+      background:getComputedStyle(poster).backgroundImage,
+      mainTitle:poster.querySelector('.ref-title h1')?.textContent,
+      committee:poster.querySelector('.ref-title p')?.textContent,
+      leaderFrames,officerGroups,executiveRows,frameBounds,
+      posterWidth:root.width,posterHeight:root.height,
+      footerText:poster.querySelector('.ref-footer-greeting')?.textContent,
+      titleColor:getComputedStyle(poster.querySelector('.ref-title h1')).color
+    };
+  });
+  console.log('Premium MSF geometry:',JSON.stringify({
+    title:geometry.title,leaders:geometry.leaders,officers:geometry.officers,
+    executives:geometry.executives,footer:geometry.footer,
+    officerGroups:geometry.officerGroups,executiveRows:geometry.executiveRows,
+    portraitCount:geometry.frameBounds.length,
+  }));
+  assert(geometry.background.includes('msf_background.png'),'Original meeting photo removed');
+  assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
+  assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
+  assert(geometry.committee?.includes('പഞ്ചായത്ത് കമ്മിറ്റി'),'Panchayat committee title missing');
+  assert.equal(geometry.footerText,'അഭിവാദ്യങ്ങൾ');
+  assert.equal(geometry.titleColor,'rgb(244, 207, 56)');
+  assert(geometry.title.bottom<=geometry.leaders.top+1,'Main title overlaps the primary leaders');
+  assert(geometry.leaders.bottom<=geometry.officers.top+1,'Primary leaders overlap vice/joint section');
+  assert(geometry.officers.bottom<=geometry.executives.top+1,'Vice/joint officers overlap executives');
+  assert(geometry.executives.bottom<=geometry.footer.top+1,'Executive rows overlap greeting');
+  assert(geometry.leaderFrames.length===3,'Three primary leaders must remain');
+  assert(Math.max(...geometry.leaderFrames.map(r=>r.width))-
+    Math.min(...geometry.leaderFrames.map(r=>r.width))<1,
+    'Leadership portrait widths are inconsistent');
+  assert(geometry.officerGroups.map(g=>g.name).join('|')==='Vice Presidents|Joint Secretaries',
+    'Officer group names/order changed');
+  for(const row of geometry.executiveRows){
+    assert(Math.abs(row.leftGap-row.rightGap)<3,
+      'Executive row is not centered');
+    assert(Math.max(...row.widths)-Math.min(...row.widths)<1,
+      'Executive frame widths differ within a row');
+  }
+  for(const p of geometry.frameBounds){
+    assert(p.x>=-1 && p.y>=-1 && p.right<=geometry.posterWidth+1 &&
+      p.bottom<=geometry.posterHeight+1,
+      'A portrait frame extends outside the poster');
+  }
   console.log('Capturing preview screenshot');
   const screenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
   console.log('Rendering 1080x1350 PNG export');
