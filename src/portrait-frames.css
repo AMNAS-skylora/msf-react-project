@@ -566,3 +566,28 @@
 .frame .ref-poster.ref-first-page .ref-officer-four .ref-profile-committee .ref-profile-name {
   padding-top: .55cqw;
 }
+
+
+/* Executive names: reserve two readable lines and separate them from portraits.
+   Keep the section heading clear of the officer names above it. */
+.frame .ref-poster .ref-main-executives {
+  top:69.2%;
+  height:22.1%;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait {
+  max-height:64%;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-profile-name,
+.frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive .ref-profile-name {
+  box-sizing:border-box;
+  min-height:2.9cqw;
+  padding:.28cqw .08cqw 0;
+  line-height:1.16;
+  white-space:normal;
+  overflow-wrap:break-word;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
+}
