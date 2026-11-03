@@ -323,7 +323,7 @@ export default function App() {
     setMessage('Removing background…');
     try {
       const transparent=await removeBackgroundSource(source);
-      update(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      update(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:-12});
       setMessage('Background removed.');
     }catch(error){
       setMessage('Background removal failed: '+(error?.message||'Please try again.'));
@@ -338,7 +338,7 @@ export default function App() {
     setMessage('Removing background…');
     try{
       const transparent=await removeBackgroundSource(source);
-      updateJoint(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      updateJoint(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:-12});
       setMessage('Background removed.');
     }catch(error){
       setMessage('Background removal failed: '+(error?.message||'Please try again.'));
@@ -361,7 +361,7 @@ export default function App() {
     try{
       const photo=await removeBackgroundSource(src);
       setMessage('Background removed.');
-      return {...original,photo,cutout:true,photoMode:'popout'};
+      return {...original,photo,cutout:true,photoMode:'popout',photoY:-12};
     }catch(error){
       setMessage('Original photo saved. Background removal was unavailable.');
       return original;
@@ -634,6 +634,15 @@ export default function App() {
     const next=Math.max(.25,Math.min(4.5,Math.round((current+direction*.15)*100)/100));
     patchPortrait(role,index,{photoZoom:next});
   }
+  // Move the transparent subject without moving or resizing the green arch.
+  // The percentage is applied to the photo itself and saved to the member.
+  function raiseSelectedPortrait(role,index,direction) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const current=Number(member.photoY)||0;
+    const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
+    patchPortrait(role,index,{photoY:next});
+  }
   async function removeSelectedPortraitBackground() {
     if(!photoEdit||busy!==-1)return;
     const {role,index}=photoEdit;
@@ -647,7 +656,7 @@ export default function App() {
       const transparent=await removeBackgroundSource(source);
       patchPortrait(role,index,{
         photo:transparent,...(original?{originalPhoto:original}:{}),
-        cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0
+        cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:-12
       });
       setMessage('');
     }catch(error){
@@ -867,6 +876,12 @@ export default function App() {
             disabled={(Number(person.photoZoom)||1)>=4.5} aria-label="Make photo bigger">
             <Plus size={19}/> <span>Bigger</span>
           </button>
+        </div>
+        <div className="inline-photo-height" role="group" aria-label="Move the photo vertically">
+          <button type="button" onClick={()=>raiseSelectedPortrait(role,index,-1)}
+            disabled={(Number(person.photoY)||0)<=-80} aria-label="Raise photo upwards">↑ Raise</button>
+          <button type="button" onClick={()=>raiseSelectedPortrait(role,index,1)}
+            disabled={(Number(person.photoY)||0)>=80} aria-label="Lower photo downwards">↓ Lower</button>
         </div>
         <div className="inline-photo-toolbar-buttons">
           <button type="button" className={person.photoMode!=='popout'?'is-active':''}
