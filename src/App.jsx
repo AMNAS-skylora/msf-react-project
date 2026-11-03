@@ -5,6 +5,7 @@ import { MEMBERS, imageUrl } from './data/committee.js';
 import { toBlob } from 'html-to-image';
 import ReferencePoster from './ReferencePoster.jsx';
 import { removePortraitBackgroundFast, warmPortraitSegmenter } from './fastPortraitBackground.js';
+import { removePortraitBackgroundQuality } from './qualityPortraitBackground.js';
 import './styles.css';
 import './reference-poster.css';
 import './portrait-frames.css';
@@ -265,58 +266,60 @@ export default function App() {
     } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
-    try {
-      return await removePortraitBackgroundFast(source);
-    } catch (fastError) {
-      // Fallback for devices/browsers that cannot load MediaPipe.
-      // IMG.LY's model is larger and may be slower on a first run.
-      const library = await import('@imgly/background-removal');
-      const processor = library.default || library.removeBackground;
-      if (typeof processor !== 'function') throw fastError;
-      const response = await fetch(source);
-      if (!response.ok) throw fastError;
-      const blob = await processor(await response.blob(), {device:'cpu',model:'isnet_quint8'});
-      if (!(blob instanceof Blob)) throw fastError;
-      return toDataURL(blob);
-    }
+    return removePortraitBackgroundQuality(source);
   }
   async function removeBg(i) {
-    setBusy(i);setMessage('Removing background. First run may download the AI model.');
+    const member=people[i];
+    if(!member?.photo||busy!==-1)return;
+    const original=member.originalPhoto||(!member.cutout?member.photo:null);
+    const source=original||member.photo;
+    setBusy(i);
+    setMessage('Removing background…');
     try {
-      update(i,{photo:await removeBackgroundSource(people[i].photo),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
-      setMessage('Background removed. Transparent image ready.');
-    }catch(error){setMessage('Background removal failed: '+(error?.message||'Try again online.'));}
-    finally{setBusy(-1);}
+      const transparent=await removeBackgroundSource(source);
+      update(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      setMessage('Background removed.');
+    }catch(error){
+      setMessage('Background removal failed: '+(error?.message||'Please try again.'));
+    }finally{setBusy(-1);}
   }
   async function removeJointBg(i) {
     const member=joint[i];
-    if (!member?.photo || busy!==-1) return;
+    if(!member?.photo||busy!==-1)return;
+    const original=member.originalPhoto||(!member.cutout?member.photo:null);
+    const source=original||member.photo;
     setBusy('joint-'+i);
-    setMessage('Removing member background. The AI model may need an internet connection.');
-    try {
-      updateJoint(i,{photo:await removeBackgroundSource(member.photo),cutout:true,photoZoom:1,photoX:0,photoY:0});
-      setMessage('Background removed. The portrait now fits inside the green frame.');
+    setMessage('Removing background…');
+    try{
+      const transparent=await removeBackgroundSource(source);
+      updateJoint(i,{photo:transparent,...(original?{originalPhoto:original}:{}),cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      setMessage('Background removed.');
     }catch(error){
       setMessage('Background removal failed: '+(error?.message||'Please try again.'));
     }finally{setBusy(-1);}
   }
   // Keep the original crop even if client-side AI removal is unavailable.
   async function prepareUploadedPortrait(src) {
-    const transparent = await imageHasTransparency(src);
-    const original = {photo:src,cutout:transparent,photoMode:'inside',photoZoom:1,photoX:0,photoY:0};
-    if (transparent || !autoRemoveUpload) return original;
+    const transparent=await imageHasTransparency(src);
+    const original={
+      photo:src,
+      originalPhoto:src,
+      originalCutout:transparent,
+      cutout:transparent,
+      photoMode:'inside',
+      photoZoom:1,photoX:0,photoY:0
+    };
+    if(transparent||!autoRemoveUpload)return original;
     setBusy('auto-bg');
-    setMessage('Automatically removing photo background…');
-    try {
+    setMessage('Removing background…');
+    try{
       const photo=await removeBackgroundSource(src);
-      setMessage('Background removed. Photo fitted to the green frame.');
+      setMessage('Background removed.');
       return {...original,photo,cutout:true,photoMode:'popout'};
-    } catch(error) {
-      setMessage('Auto background removal unavailable. Your original photo has been kept; use Remove BG to retry.');
+    }catch(error){
+      setMessage('Original photo saved. Background removal was unavailable.');
       return original;
-    } finally {
-      setBusy(-1);
-    }
+    }finally{setBusy(-1);}
   }
   const portraitGesture=useRef({
     role:null,index:-1,pointers:new Map(),image:null,
@@ -590,15 +593,37 @@ export default function App() {
     const {role,index}=photoEdit;
     const member=memberForEdit(role,index);
     if(!member?.photo)return;
+    const original=member.originalPhoto||(!member.cutout?member.photo:null);
+    const source=original||member.photo;
     setBusy('inline-bg');
     setMessage('Removing background…');
     try{
-      const photo=await removeBackgroundSource(member.photo);
-      patchPortrait(role,index,{photo,cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0});
+      const transparent=await removeBackgroundSource(source);
+      patchPortrait(role,index,{
+        photo:transparent,...(original?{originalPhoto:original}:{}),
+        cutout:true,photoMode:'popout',photoZoom:1,photoX:0,photoY:0
+      });
       setMessage('');
     }catch(error){
-      setMessage('Background removal failed: '+(error?.message||'Try again.'));
+      setMessage('Background removal failed: '+(error?.message||'Please try again.'));
     }finally{setBusy(-1);}
+  }
+  function resetSelectedPortrait(role,index){
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const original=member.originalPhoto||(!member.cutout?member.photo:null);
+    if(!original){
+      setMessage('Original photo unavailable for this older cutout. Re-upload the photo to enable Reset.');
+      return;
+    }
+    patchPortrait(role,index,{
+      photo:original,
+      originalPhoto:original,
+      cutout:member.originalCutout??false,
+      photoMode:'inside',
+      photoZoom:1,photoX:0,photoY:0,
+    });
+    setMessage('');
   }
   function cropSelectedPortrait() {
     if(!photoEdit)return;
@@ -804,7 +829,7 @@ export default function App() {
             onClick={()=>patchPortrait(role,index,{photoMode:'popout'})}>Pop out</button>
           <button type="button" onClick={cropSelectedPortrait}>Crop</button>
           <button type="button" disabled={busy!==-1} onClick={removeSelectedPortraitBackground}>{busy==='inline-bg'?'Removing…':'Remove BG'}</button>
-          <button type="button" onClick={()=>patchPortrait(role,index,{photoZoom:1,photoX:0,photoY:0})}>Reset</button>
+          <button type="button" onClick={()=>resetSelectedPortrait(role,index)} title="Restore the original uploaded photo, background and position">Reset photo</button>
         </div>
       </div>;
     })()}
@@ -816,7 +841,11 @@ export default function App() {
         const currentCrop=crop;
         setCrop(null);
         const patch=currentCrop.fromExisting
-          ? {photo:src,cutout:await imageHasTransparency(src),photoMode:'inside',photoZoom:1,photoX:0,photoY:0}
+          ? {
+              photo:src,
+              cutout:await imageHasTransparency(src),
+              photoMode:'inside',photoZoom:1,photoX:0,photoY:0
+            }
           : await prepareUploadedPortrait(src);
         if(currentCrop.role){
           if(currentCrop.role===jointRole)updateJoint(currentCrop.index,patch);
