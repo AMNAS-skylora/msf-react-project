@@ -1,4 +1,4 @@
-// Export exactly at 1080 x 1350 without relying on SVG foreignObject to
+// Export crisp 4:5 posters at 1080, 2160 or 3240px wide.
 // rasterize portraits. iOS Safari can omit <img> content from SVG snapshots:
 // capture the poster artwork, then paint every loaded image onto the real
 // canvas using the same rect, object-fit and arch clipping as the preview.
