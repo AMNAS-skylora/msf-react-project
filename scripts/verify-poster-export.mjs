@@ -154,6 +154,30 @@ try{
   }
   console.log('Logo content color palettes (top, bottom):',
     paletteParts.map(map=>[...map].sort((a,b)=>b[1]-a[1]).slice(0,7)));
+  // Ensure the text shapes were recolored without filling transparent areas.
+  const logoPalette=await page.evaluate(async()=>{
+    const img=document.querySelector('.ref-brand-strength-logo');
+    await img.decode();
+    const canvas=document.createElement('canvas');
+    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0);
+    const bytes=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    const result={cream:0,lime:0,transparent:0,other:0,paletteApplied:img.dataset.paletteApplied};
+    for(let i=0;i<bytes.length;i+=4){
+      if(bytes[i+3]===0){result.transparent++;continue;}
+      if(bytes[i]===0xF6&&bytes[i+1]===0xF0&&bytes[i+2]===0xDA){result.cream++;continue;}
+      if(bytes[i]===0xD8&&bytes[i+1]===0xEB&&bytes[i+2]===0x8B){result.lime++;continue;}
+      result.other++;
+    }
+    return result;
+  });
+  console.log('MSF transparent logo brand palette:',logoPalette);
+  assert.equal(logoPalette.paletteApplied,'true','Existing logo was not recolored.');
+  assert(logoPalette.cream>100&&logoPalette.lime>100,
+    'Warm Cream and Light Lime must both appear in the logo ink.');
+  assert(logoPalette.transparent>100,'Transparent logo background was lost.');
+  assert.equal(logoPalette.other,0,'Unapproved colored pixels remain in the logo.');
   console.log('Capturing preview screenshot');
   const screenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
   console.log('Rendering 1080x1350 PNG export');
