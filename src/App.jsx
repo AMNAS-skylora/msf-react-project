@@ -807,6 +807,14 @@ export default function App() {
     setShareError('');
     setShareIndex(0);
   }
+  const posterShareCaption = [
+    '_ചലനാത്മക വിദ്യാർത്ഥിത്വം.. ചടുലമാം മുന്നേറ്റം..!_',
+    '*IMPULSO*',
+    'MSF ചോക്കാട് പഞ്ചായത്ത് കമ്മിറ്റി സംഘടനാ ശാക്തീകരണ ക്യാമ്പയിൻ "IMPULSO"',
+    `${String(unitName||'ചോക്കാട്').trim()} യൂണിറ്റ് MSF കമ്മിറ്റി പുനഃസംഘടിപ്പിച്ചു.`,
+    'പുതിയ ഭാരവാഹികൾക്ക് അഭിവാദ്യങ്ങൾ 💚',
+    'MSF Chokkad Panchayath Committee 💚'
+  ].join('\n\n');
   function sharePreparedPoster(){
     const chosen=shareFiles[shareIndex];
     if(!chosen)return;
@@ -815,7 +823,7 @@ export default function App() {
       // Called synchronously from a user tap; no async PNG rendering before
       // navigator.share, so Safari retains the required user activation.
       if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){
-        navigator.share({files,title:'MSF Poster'}).catch(error=>{
+        navigator.share({files,title:'MSF Chokkad Panchayath Committee',text:posterShareCaption}).catch(error=>{
           if(error?.name!=='AbortError')setShareError('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
         });
       }else{
@@ -1000,7 +1008,7 @@ export default function App() {
             aria-label="Download the displayed poster image">
             <Download size={17}/> Download Image
           </a>
-          <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image</button>
+          <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image + Caption</button>
         </div>
       </section>
     </div>}
