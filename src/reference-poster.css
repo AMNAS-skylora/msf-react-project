@@ -506,12 +506,12 @@
   position:absolute;
   z-index:4;
   left:1.1%;
-  top:30%;
+  top:33%;
   width:2.5%;
-  height:43%;
+  height:19%;
   display:flex;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-start;
   gap:.65cqw;
   writing-mode:vertical-rl;
   transform:rotate(180deg);
