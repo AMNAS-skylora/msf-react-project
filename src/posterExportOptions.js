@@ -9,7 +9,7 @@ export const POSTER_EXPORT_PRESETS = [
   {id:'print-jpg',label:'Flex Print JPEG · 3240 × 4050',shortLabel:'Flex Print JPEG',width:3240,height:4050,mime:'image/jpeg',extension:'jpg',quality:.96},
 ];
 
-export const DEFAULT_POSTER_EXPORT_PRESET='ultra-png';
+export const DEFAULT_POSTER_EXPORT_PRESET='max-png';
 
 export function getPosterExportPreset(id){
   return POSTER_EXPORT_PRESETS.find(preset=>preset.id===id) ||
