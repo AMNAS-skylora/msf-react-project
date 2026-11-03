@@ -35,17 +35,24 @@
 .frame .ref-poster .ref-strength-wordmark {
   display: none !important;
 }
+/* Center the committee logo within the poster artboard. */
 .frame .ref-poster .ref-brand {
-  top: 1.388889cqw;
-  right: 1.388889cqw;
-  left: auto;
-  width: 16.203704cqw;
+  top: 1.4cqw;
+  left: 50%;
+  right: auto;
+  width: 19cqw;
+  max-width: 19cqw;
   height: auto;
+  transform: translateX(-50%);
+  align-items: center;
+  justify-content: center;
 }
 .frame .ref-poster .ref-brand-strength-logo {
   transform: none;
+  width: 100%;
+  height: auto;
   object-fit: contain;
-  object-position: top right;
+  object-position: center;
 }
 
 /* Readable hierarchy: committee name over the hero announcement.
