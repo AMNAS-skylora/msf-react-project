@@ -316,8 +316,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* Mask the footer artwork baked into the poster background PNG. */
-  background: #0b2614;
+  /* No separate footer panel or overlay. */
+  background: transparent;
   border: 0;
   box-shadow: none;
   padding: 0;
