@@ -188,3 +188,82 @@
 .frame .ref-poster .ref-portrait-popout .ref-photo-selection-ring {
   border-radius:49% 49% 0 0 / 39% 39% 0 0;
 }
+
+/* Officer labels: photo -> role -> person name, with an even baseline and
+   enough space for two-line names. Preserve the exact green arch geometry. */
+.frame .ref-poster .ref-profile-leader {
+  justify-content:flex-start;
+  align-items:center;
+  text-align:center;
+}
+.frame .ref-poster .ref-profile-leader .ref-portrait {
+  flex:0 0 68%;
+  height:68%;
+  width:90%;
+}
+.frame .ref-poster .ref-profile-leader .ref-profile-role {
+  flex:0 0 auto;
+  min-height:0;
+  width:100%;
+  padding:.8cqw .25cqw .1cqw;
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  font-size:1.6cqw;
+  line-height:1.2;
+  font-weight:700;
+  color:#236a43;
+  text-align:center;
+  letter-spacing:0;
+}
+.frame .ref-poster .ref-profile-leader .ref-profile-name {
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  padding:.3cqw .35cqw 0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:center;
+  gap:.1cqw;
+  color:#16251c;
+  font-family:Inter,"Noto Sans Malayalam",Arial,sans-serif;
+  font-weight:800;
+  font-size:1.92cqw;
+  line-height:1.1;
+  text-align:center;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+.frame .ref-poster .ref-profile-leader .ref-profile-name span {
+  width:100%;
+  max-width:100%;
+  display:block;
+  margin:0;
+  text-align:center;
+}
+/* All committee portraits follow the same name spacing and alignment. */
+.frame .ref-poster .ref-profile-committee .ref-profile-name,
+.frame .ref-poster .ref-profile-executive .ref-profile-name {
+  margin:0 auto;
+  text-align:center;
+  align-items:center;
+  color:#1b2820;
+  font-weight:750;
+  text-wrap:balance;
+}
+.frame .ref-poster .ref-profile-committee .ref-profile-name {
+  padding-top:.85cqw;
+  font-size:1.47cqw;
+  line-height:1.13;
+}
+.frame .ref-poster .ref-main-executives .ref-profile-executive .ref-profile-name {
+  padding-top:.45cqw;
+  font-size:1.28cqw;
+  line-height:1.1;
+}
+.frame .ref-poster .ref-extra-executives .ref-profile-executive .ref-profile-name {
+  padding-top:.52cqw;
+  font-size:1.42cqw;
+  line-height:1.1;
+}
