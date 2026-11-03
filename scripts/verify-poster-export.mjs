@@ -140,6 +140,20 @@ try{
     trim:{left:minX,top:minY,right:logoPng.width-maxX-1,bottom:logoPng.height-maxY-1},
   });
 
+  // Report quantized top/bottom text colors without changing the logo asset.
+  const paletteParts=[new Map(),new Map()];
+  for(let y=0;y<logoPng.height;y+=3){
+    const half=y<logoPng.height*.46?0:1;
+    for(let x=0;x<logoPng.width;x+=3){
+      const i=(y*logoPng.width+x)*4;
+      if(logoPng.data[i+3]<220)continue;
+      const k=[0,1,2].map(j=>(Math.round(logoPng.data[i+j]/24)*24).toString(16).padStart(2,'0')).join('');
+      const table=paletteParts[half];
+      table.set(k,(table.get(k)||0)+1);
+    }
+  }
+  console.log('Logo content color palettes (top, bottom):',
+    paletteParts.map(map=>[...map].sort((a,b)=>b[1]-a[1]).slice(0,7)));
   console.log('Capturing preview screenshot');
   const screenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
   console.log('Rendering 1080x1350 PNG export');
