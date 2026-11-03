@@ -277,7 +277,7 @@
   z-index:3;
   left:4%;
   width:92%;
-  top:51%;
+  top:48.8%;
   height:18.1%;
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -373,6 +373,6 @@
 /* Bring executive members up as the 8-person officer row becomes shorter.
    This preserves the poster's 4:5 composition and avoids a large empty gap. */
 .frame .ref-poster .ref-main-executives {
-  top:70.2%;
+  top:68%;
   height:23.3%;
 }
