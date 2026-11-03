@@ -60,7 +60,9 @@ function compareImages(reference,exported,region){
 }
 
 let browser;
+let testFailure=null;
 try{
+  console.log('Starting browser comparison');
   await waitForServer();
   browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const page=await browser.newPage({viewport:{width:1920,height:1800},deviceScaleFactor:1});
@@ -100,7 +102,9 @@ try{
   assert(bounds,'Frame not visible');
   assert(Math.abs(bounds.width-1080)<1,'Preview is not 1080px wide: '+bounds.width);
   assert(Math.abs(bounds.height-1350)<1,'Preview is not 1350px high: '+bounds.height);
+  console.log('Capturing preview screenshot');
   const screenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
+  console.log('Rendering 1080x1350 PNG export');
   const exported=await makeExport(page);
   assert.equal(exported.width,1080);
   assert.equal(exported.height,1350);
@@ -128,11 +132,21 @@ try{
   console.log('Mobile preview:',mobile.width,mobile.height);
   assert(mobile.width<420&&mobile.width>250,'Mobile preview size invalid.');
   assert(Math.abs(mobile.width/mobile.height-.8)<.005,'Mobile preview lost its 4:5 ratio.');
+  console.log('Rendering 1080x1350 PNG export from mobile preview');
   const mobileExport=await makeExport(page);
   assert.equal(mobileExport.width,1080);
   assert.equal(mobileExport.height,1350);
   console.log('Poster preview/export smoke test passed');
+}catch(error){
+  testFailure=error;
+  console.error('Preview/export regression failed:',error);
 }finally{
   await browser?.close();
+  // `npm run dev` spawns Vite as a child. Close inherited stdout/stderr
+  // streams and exit explicitly so the GitHub runner cannot hang forever.
   server.kill('SIGTERM');
+  server.stdout.destroy();
+  server.stderr.destroy();
+  await delay(100);
+  process.exit(testFailure?1:0);
 }
