@@ -92,8 +92,21 @@ export default function ReferencePoster({
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
-      <div className="ref-brand" aria-label="Strength logo">
-        <img className="ref-brand-strength-logo" src={strengthLogo} alt="Strength" draggable={false} />
+      <div className="ref-brand" aria-label="MSF logo">
+        <img
+          className="ref-brand-strength-logo"
+          src="/background/logo.png"
+          alt="MSF logo"
+          draggable={false}
+          onError={event => {
+            // The user's local logo file may not have been committed yet.
+            // Show the existing Strength asset instead of a broken image.
+            if (!event.currentTarget.dataset.fallbackApplied) {
+              event.currentTarget.dataset.fallbackApplied = 'true';
+              event.currentTarget.src = strengthLogo;
+            }
+          }}
+        />
       </div>
 
       {firstPage ? (
