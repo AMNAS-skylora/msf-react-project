@@ -26,7 +26,7 @@ const splitMalayalamHeading = value => {
   return [words.slice(0,split).join(' '),words.slice(split).join(' ')];
 };
 const INITIAL = ['President', 'General Secretary', 'Treasurer'].map(role=>({role}));
-const EXECUTIVE_FIRST_PAGE_SIZE = 8;
+const EXECUTIVE_FIRST_PAGE_SIZE = 16;
 const EXECUTIVE_PAGE_SIZE = 16;
 const COMMITTEE_LIMIT = 4;
 const loadImage = src => new Promise((resolve, reject) => {
