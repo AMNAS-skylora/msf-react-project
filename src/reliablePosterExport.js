@@ -93,10 +93,25 @@ function drawFittedImage(ctx,image,dest,css){
 // cannot reliably distinguish a correct render from a missing render.
 // Verify that the SVG capture decodes; missing photos are composited below.
 
+// Use the exact CSS poster image in the native-canvas fallback as well.
+async function loadPosterBackground(frame){
+  const poster=frame.querySelector('.ref-poster');
+  if(!poster)return null;
+  const background=getComputedStyle(poster).backgroundImage;
+  const match=background.match(/url\(["']?([^"')]+)["']?\)/);
+  if(!match)return null;
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve(img.naturalWidth>0?img:null);
+    img.onerror=()=>resolve(null);
+    img.src=match[1];
+  });
+}
+
 // iOS Safari can refuse SVG foreignObject rasterization altogether.
 // A native-canvas fallback still yields a usable, complete image with all
 // leadership photographs, names, the poster grid and rounded green arches.
-function nativeArtworkSnapshot(frame,rect,dimensions){
+async function nativeArtworkSnapshot(frame,rect,dimensions){
   const {width:WIDTH,height:HEIGHT}=dimensions;
   const canvas=document.createElement('canvas');
   canvas.width=WIDTH;
@@ -105,16 +120,13 @@ function nativeArtworkSnapshot(frame,rect,dimensions){
   if(!ctx)throw new Error('Canvas is unavailable in this browser.');
   const scaleX=WIDTH/rect.width;
   const scaleY=HEIGHT/rect.height;
-  ctx.fillStyle='#fcfefd';
-  ctx.fillRect(0,0,WIDTH,HEIGHT);
-  const grid=WIDTH*.052;
-  ctx.strokeStyle='rgba(18,60,104,0.05)';
-  ctx.lineWidth=1;
-  for(let x=0;x<=WIDTH;x+=grid){
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,HEIGHT);ctx.stroke();
-  }
-  for(let y=0;y<=HEIGHT;y+=grid){
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(WIDTH,y);ctx.stroke();
+  const backgroundImage=await loadPosterBackground(frame);
+  if(backgroundImage){
+    // Match background-size:100% 100% at the selected export resolution.
+    ctx.drawImage(backgroundImage,0,0,WIDTH,HEIGHT);
+  }else{
+    ctx.fillStyle='#fff9ea';
+    ctx.fillRect(0,0,WIDTH,HEIGHT);
   }
 
   for(const button of frame.querySelectorAll('.ref-portrait')){
