@@ -808,3 +808,18 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
   font:600 12px/1.5 "Noto Sans Malayalam",sans-serif;
   margin:5px 0 0;
 }
+
+/* iPhone Safari zooms the entire page when a focused form field has a computed
+   font size under 16px. Keep the EDITOR'S real form fields at 16px or above;
+   poster typography remains unchanged and browser pinch zoom stays enabled. */
+@media (max-width: 1024px) {
+  .editor-panel input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="hidden"]),
+  .editor-panel select,
+  .editor-panel textarea,
+  .header-editor input:not([type="checkbox"]),
+  .header-editor textarea,
+  .header-editor select {
+    font-size: 16px !important;
+    line-height: 1.4;
+  }
+}
