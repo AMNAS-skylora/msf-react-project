@@ -185,10 +185,6 @@ export default function ReferencePoster({
         </div>
       </section>
 
-      <footer className="ref-footer">
-        <div className="ref-footer-organization">MSF CHOKKAD GRAMA PANCHAYATH</div>
-        <div className="ref-footer-message">MSF ചോക്കാട് ഗ്രാമപഞ്ചായത്ത് കമ്മിറ്റിയുടെ ഹൃദയം നിറഞ്ഞ അഭിനന്ദനങ്ങൾ</div>
-      </footer>
     </div>
   );
 }
