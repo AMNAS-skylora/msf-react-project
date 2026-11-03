@@ -563,3 +563,47 @@
   background:currentColor;
   border-radius:50%;
 }
+
+
+/* MSF Panchayath Committee logo: compact top-right artboard anchoring. */
+/* One artboard reference for mobile preview and full-resolution PNG.
+   15/1080 * 100 = 1.388889cqw and 175/1080 * 100 = 16.203704cqw.
+   Keep the transparent source image intact; only adjust its positioning. */
+.frame .ref-poster .ref-brand {
+  top: 1.388889cqw;
+  right: 1.388889cqw;
+  bottom: auto;
+  left: auto;
+  width: 16.203704cqw;
+  max-width: 16.203704cqw;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+  pointer-events: none;
+}
+.frame .ref-poster .ref-brand-strength-logo {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 20cqw;
+  object-fit: contain;
+  object-position: top right;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+  transform: none;
+  transform-origin: center center;
+}
