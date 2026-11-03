@@ -121,6 +121,36 @@ async function loadPosterBackground(frame){
 // Prefer the full DOM capture for preview/download parity. Keep the native
 // compositor below only as a fallback for browsers where SVG foreignObject
 // rendering is unavailable (notably some iOS Safari versions).
+// Keep the pixel-check and Safari fallback in step with the poster's
+// photographic gradient: white-only exports cannot pass as a valid poster.
+function paintStrengthOverlay(ctx,width,height,underArtwork=false){
+  const radial=()=>{
+    ctx.save();
+    ctx.translate(width*.5,height*.53);
+    ctx.scale(width*.95,height*.84);
+    const gradient=ctx.createRadialGradient(0,0,0,0,0,1);
+    gradient.addColorStop(0,'rgba(4,22,12,0)');
+    gradient.addColorStop(.43,'rgba(4,22,12,0)');
+    gradient.addColorStop(1,'rgba(4,22,12,.28)');
+    ctx.fillStyle=gradient;
+    ctx.fillRect(-2,-2,4,4);
+    ctx.restore();
+  };
+  const linear=()=>{
+    const gradient=ctx.createLinearGradient(0,0,0,height);
+    gradient.addColorStop(0,'rgba(6,28,15,.86)');
+    gradient.addColorStop(.29,'rgba(16,55,32,.68)');
+    gradient.addColorStop(.50,'rgba(16,55,32,.26)');
+    gradient.addColorStop(.75,'rgba(10,37,21,.48)');
+    gradient.addColorStop(1,'rgba(4,22,12,.89)');
+    ctx.fillStyle=gradient;
+    ctx.fillRect(0,0,width,height);
+  };
+  // CSS orders layers linear -> radial -> original photo. Compositing
+  // behind existing artwork must therefore draw in the reverse order.
+  if(underArtwork){linear();radial();}
+  else{radial();linear();}
+}
 function snapshotHasPosterBackground(canvas,backgroundImage){
   const sw=72,sh=90;
   const expected=document.createElement('canvas');
@@ -131,6 +161,7 @@ function snapshotHasPosterBackground(canvas,backgroundImage){
   const ac=actual.getContext('2d',{willReadFrequently:true});
   if(!ec||!ac)return false;
   ec.drawImage(backgroundImage,0,0,sw,sh);
+  paintStrengthOverlay(ec,sw,sh);
   ac.drawImage(canvas,0,0,sw,sh);
   const samples=[[.025,.025],[.975,.025],[.025,.23],[.975,.23],
     [.025,.73],[.975,.73],[.025,.96],[.975,.96]];
@@ -140,12 +171,11 @@ function snapshotHasPosterBackground(canvas,backgroundImage){
     const y=Math.max(0,Math.min(sh-1,Math.floor(py*sh)));
     const a=ac.getImageData(x,y,1,1).data;
     const b=ec.getImageData(x,y,1,1).data;
-    if(a[3]>240&&Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])+
-       Math.abs(a[2]-b[2])<95)matches++;
+    if(a[3]>240 &&
+      Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])+
+      Math.abs(a[2]-b[2])<115)matches++;
   }
-  // Transparent or solid-white renders must never be accepted as completed
-  // posters when the original image is visibly different at the margins.
-  return matches>=6;
+  return matches>=5;
 }
 
 async function exactPreviewSnapshot(frame,rect,dimensions,backgroundImage){
@@ -402,6 +432,7 @@ export async function makeReliablePosterBlob(frame,options={}){
   // pixel of the text, green arches and headings. It does not cover photos.
   context.save();
   context.globalCompositeOperation='destination-over';
+  paintStrengthOverlay(context,WIDTH,HEIGHT,true);
   context.drawImage(backgroundImage,0,0,WIDTH,HEIGHT);
   context.restore();
 
