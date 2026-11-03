@@ -4,6 +4,7 @@
 export const POSTER_EXPORT_PRESETS = [
   {id:'standard-png',label:'Standard PNG · 1080 × 1350',shortLabel:'Standard PNG',width:1080,height:1350,mime:'image/png',extension:'png',quality:1},
   {id:'ultra-png',label:'Ultra Clear PNG · 2160 × 2700',shortLabel:'Ultra PNG',width:2160,height:2700,mime:'image/png',extension:'png',quality:1},
+  {id:'max-png',label:'Maximum Clear PNG · 3240 × 4050',shortLabel:'Maximum PNG',width:3240,height:4050,mime:'image/png',extension:'png',quality:1},
   {id:'ultra-jpg',label:'Optimized JPEG · 2160 × 2700',shortLabel:'Optimized JPEG',width:2160,height:2700,mime:'image/jpeg',extension:'jpg',quality:.95},
   {id:'print-jpg',label:'Flex Print JPEG · 3240 × 4050',shortLabel:'Flex Print JPEG',width:3240,height:4050,mime:'image/jpeg',extension:'jpg',quality:.96},
 ];
