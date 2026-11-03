@@ -501,3 +501,40 @@
 .frame .ref-poster .ref-extra-executives .ref-executive-one-row .ref-executive-row {
   height:48%;
 }
+
+/* Adaptive Executive Members rows.
+   1-8: one centered row (eight available positions)
+   9-16: 8 + remainder
+   17-20: 10 + remainder
+   21-30: 10 + 10 + remainder
+   A row always uses the same slot width as its siblings; the last row
+   naturally centers its photos instead of stretching them edge to edge. */
+.frame .ref-poster .ref-executive-row {
+  justify-content:center;
+  gap:1.15%;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive,
+.frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive {
+  flex:0 0 calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
+  width:calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
+  max-width:calc((100% - var(--exec-total-gap,8.05%)) / var(--exec-columns,8));
+}
+.frame .ref-poster .ref-executive-three-rows .ref-executive-row {
+  height:30%;
+}
+.frame .ref-poster .ref-extra-executives .ref-executive-three-rows .ref-executive-row {
+  height:29%;
+}
+/* Compact photo arches remain unchanged in shape; three-row layouts have
+   a little extra space reserved beneath each image for long names. */
+.frame .ref-poster .ref-executive-three-rows .ref-profile-executive .ref-portrait,
+.frame .ref-poster .ref-main-executives .ref-executive-three-rows .ref-profile-executive .ref-portrait,
+.frame .ref-poster .ref-extra-executives .ref-executive-three-rows .ref-profile-executive .ref-portrait {
+  max-height:62%;
+}
+.frame .ref-poster .ref-executive-three-rows .ref-profile-executive .ref-profile-name {
+  padding-top:.3cqw;
+  font-size:1.08cqw;
+  line-height:1.1;
+  min-height:0;
+}
