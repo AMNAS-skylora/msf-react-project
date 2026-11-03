@@ -376,3 +376,128 @@
   top:68%;
   height:23.3%;
 }
+
+/* Executive Members match the Vice/Joint Secretary presentation:
+   green text + fine underline, smooth green arches, eight portraits per row.
+   Each real row has eight equally sized slots; a partial row stays centered. */
+.frame .ref-poster .ref-main-executives,
+.frame .ref-poster .ref-extra-executives {
+  left:4%;
+  width:92%;
+}
+.frame .ref-poster .ref-executive-heading {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:12%;
+  min-height:0;
+  margin:0 0 1.4%;
+  padding:0;
+  border-bottom:.09cqw solid rgba(25,105,58,.25);
+  color:#195a37;
+  font:700 1.64cqw/1.15 Inter,Arial,sans-serif;
+  letter-spacing:.015cqw;
+  text-align:center;
+}
+.frame .ref-poster .ref-executive-grid,
+.frame .ref-poster .ref-extra-executives .ref-executive-grid {
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:4%;
+  width:100%;
+  height:85%;
+  min-height:0;
+}
+.frame .ref-poster .ref-executive-row {
+  display:flex;
+  flex:0 0 auto;
+  flex-wrap:nowrap;
+  align-items:stretch;
+  justify-content:center;
+  gap:1.15%;
+  width:100%;
+  min-width:0;
+  height:100%;
+}
+.frame .ref-poster .ref-executive-two-rows .ref-executive-row {
+  height:48%;
+}
+.frame .ref-poster .ref-executive-one-row .ref-executive-row {
+  height:75%;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive,
+.frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive {
+  display:flex;
+  flex:0 0 calc((100% - 8.05%) / 8);
+  width:calc((100% - 8.05%) / 8);
+  min-width:0;
+  max-width:calc((100% - 8.05%) / 8);
+  height:100%;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait,
+.frame .ref-poster .ref-main-executives .ref-executive-row .ref-profile-executive .ref-portrait,
+.frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive .ref-portrait {
+  display:flex;
+  width:100%;
+  max-width:100%;
+  height:76%;
+  max-height:none;
+  flex:0 0 76%;
+  margin:0;
+  min-height:0;
+  aspect-ratio:auto;
+  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait-popout {
+  border-radius:0;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-portrait-popout::before,
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-photo-selection-ring {
+  border-radius:49% 49% 0 0 / 34% 34% 0 0;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-profile-name,
+.frame .ref-poster .ref-extra-executives .ref-executive-row .ref-profile-executive .ref-profile-name {
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  min-height:2.6cqw;
+  margin:0;
+  padding:.48cqw .08cqw 0;
+  align-items:center;
+  justify-content:flex-start;
+  font:700 1.21cqw/1.1 Inter,"Noto Sans Malayalam",Arial,sans-serif;
+  color:#1b2820;
+  text-align:center;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+.frame .ref-poster .ref-executive-row .ref-profile-executive .ref-profile-name span {
+  display:block;
+  max-width:100%;
+  width:100%;
+  text-align:center;
+}
+.frame .ref-poster .ref-extra-executives .ref-executive-heading {
+  height:9%;
+  margin-bottom:2%;
+}
+.frame .ref-poster .ref-extra-executives .ref-executive-grid {
+  height:88%;
+  align-items:center;
+  justify-content:center;
+  gap:6%;
+}
+.frame .ref-poster .ref-extra-executives .ref-executive-two-rows .ref-executive-row {
+  height:39%;
+}
+.frame .ref-poster .ref-extra-executives .ref-executive-one-row .ref-executive-row {
+  height:48%;
+}
