@@ -1,5 +1,4 @@
 import { Camera } from 'lucide-react';
-import { strengthLogo } from './strength-mark.js';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
 // Recolor only the *existing transparent logo ink*, not its lettering,
@@ -129,7 +128,6 @@ export default function ReferencePoster({
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
-      <img className="ref-strength-wordmark" src={strengthLogo} alt="STRENGTH" draggable={false} />
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
@@ -141,12 +139,8 @@ export default function ReferencePoster({
           draggable={false}
           onLoad={applyCommitteeLogoPalette}
           onError={event => {
-            // The user's local logo file may not have been committed yet.
-            // Show the existing Strength asset instead of a broken image.
-            if (!event.currentTarget.dataset.fallbackApplied) {
-              event.currentTarget.dataset.fallbackApplied = 'true';
-              event.currentTarget.src = strengthLogo;
-            }
+            // Do not reintroduce the removed STRENGTH wordmark.
+            event.currentTarget.style.display = 'none';
           }}
         />
       </div>
