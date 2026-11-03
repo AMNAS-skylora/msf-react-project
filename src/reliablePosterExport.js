@@ -113,6 +113,72 @@ async function loadPosterBackground(frame){
   });
 }
 
+// Capture the *same complete poster DOM* that the user sees. The previous
+// renderer filtered every <img> out of the DOM capture, then separately placed
+// the images on a canvas. That changed clipping, object-fit, CSS transforms and
+// z-index ordering between the preview and the downloaded image.
+//
+// Prefer the full DOM capture for preview/download parity. Keep the native
+// compositor below only as a fallback for browsers where SVG foreignObject
+// rendering is unavailable (notably some iOS Safari versions).
+function snapshotHasPosterBackground(canvas,backgroundImage){
+  const sw=72,sh=90;
+  const expected=document.createElement('canvas');
+  const actual=document.createElement('canvas');
+  expected.width=actual.width=sw;
+  expected.height=actual.height=sh;
+  const ec=expected.getContext('2d',{willReadFrequently:true});
+  const ac=actual.getContext('2d',{willReadFrequently:true});
+  if(!ec||!ac)return false;
+  ec.drawImage(backgroundImage,0,0,sw,sh);
+  ac.drawImage(canvas,0,0,sw,sh);
+  const samples=[[.025,.025],[.975,.025],[.025,.23],[.975,.23],
+    [.025,.73],[.975,.73],[.025,.96],[.975,.96]];
+  let matches=0;
+  for(const [px,py] of samples){
+    const x=Math.max(0,Math.min(sw-1,Math.floor(px*sw)));
+    const y=Math.max(0,Math.min(sh-1,Math.floor(py*sh)));
+    const a=ac.getImageData(x,y,1,1).data;
+    const b=ec.getImageData(x,y,1,1).data;
+    if(a[3]>240&&Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])+
+       Math.abs(a[2]-b[2])<95)matches++;
+  }
+  // Transparent or solid-white renders must never be accepted as completed
+  // posters when the original image is visibly different at the margins.
+  return matches>=6;
+}
+
+async function exactPreviewSnapshot(frame,rect,dimensions,backgroundImage){
+  const {width:WIDTH,height:HEIGHT}=dimensions;
+  // Keep the original images, CSS pseudo-elements, font metrics and clipping.
+  // Use the real preview's layout pixels and only increase device pixel ratio.
+  const blob=await toBlob(frame,{
+    pixelRatio:WIDTH/rect.width,
+    width:rect.width,
+    height:rect.height,
+    cacheBust:false,
+    filter:node=>!node.classList||
+      ![...HIDDEN_CLASSES].some(cls=>node.classList.contains(cls)),
+    style:{boxShadow:'none'},
+  });
+  if(!blob)throw new Error('Full poster snapshot was empty.');
+  const {image,dispose}=await loadBlobImage(blob);
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=WIDTH;
+    canvas.height=HEIGHT;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    if(!ctx)throw new Error('Canvas cannot paint the poster.');
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    ctx.drawImage(image,0,0,WIDTH,HEIGHT);
+    if(!snapshotHasPosterBackground(canvas,backgroundImage)){
+      throw new Error('Full poster capture did not include the original background.');
+    }
+    return canvas;
+  }finally{dispose();}
+}
+
 // iOS Safari can refuse SVG foreignObject rasterization altogether.
 // A native-canvas fallback still yields a usable, complete image with all
 // leadership photographs, names, the poster grid and rounded green arches.
@@ -301,9 +367,26 @@ export async function makeReliablePosterBlob(frame,options={}){
   if(bounds.width<=0||bounds.height<=0)throw new Error('Poster has an invalid size.');
   const scaleX=WIDTH/bounds.width,scaleY=HEIGHT/bounds.height;
   const backgroundImage=await loadPosterBackground(frame);
-  // Keep the generated design, typography and portrait shapes above the
-  // background, but NEVER let SVG-to-PNG decide whether to include the JPG/PNG
-  // background. That image is always composited separately from its real asset.
+
+  // The preview itself is the source of truth: capture the entire DOM,
+  // including background, every uploaded photo, logo, footer and transforms,
+  // at the selected output resolution. No image re-positioning afterwards.
+  try{
+    const exact=await exactPreviewSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT},backgroundImage);
+    const blob=await new Promise((resolve,reject)=>{
+      exact.toBlob(value=>value?resolve(value):reject(new Error('Poster encoding failed')),mime,quality);
+    });
+    if(!blob.size)throw new Error('Downloaded poster was empty.');
+    if(blob.type && blob.type!==mime)throw new Error('The chosen poster format is unsupported.');
+    return blob;
+  }catch(error){
+    // Safari's foreignObject implementation sometimes omits poster assets.
+    // Keep a usable fallback instead of delivering an empty or white poster.
+    console.warn('Full-fidelity poster capture unavailable; using compatibility export:',error);
+  }
+
+  // Legacy compatibility export: first paint vector artwork without <img>,
+  // then draw the verified original background and real photos separately.
   frame.classList.add('msf-export-transparent-background');
   let canvas;
   try{
