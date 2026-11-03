@@ -111,11 +111,11 @@ try{
   const brand=await page.locator('.ref-brand').boundingBox();
   assert(brand,'MSF logo container missing.');
   const relTop=brand.y-bounds.y;
-  const relRight=bounds.x+bounds.width-(brand.x+brand.width);
-  console.log('MSF logo artboard position:',{top:relTop,right:relRight,width:brand.width,height:logoBounds.height});
-  assert(Math.abs(relTop-15)<1,'Logo should be 15px from the top.');
-  assert(Math.abs(relRight-15)<1,'Logo should be 15px from the right.');
-  assert(Math.abs(brand.width-175)<1,'Logo container should be 175px wide.');
+  const relCenter=brand.x+brand.width/2-(bounds.x+bounds.width/2);
+  console.log('MSF logo artboard position:',{top:relTop,centerOffset:relCenter,width:brand.width,height:logoBounds.height});
+  assert(Math.abs(relTop-15.12)<1,'Logo should be approximately 15px from the top.');
+  assert(Math.abs(relCenter)<1,'Logo should be centered horizontally.');
+  assert(Math.abs(brand.width-205.2)<1,'Logo container should be 19% of poster width.');
   assert(logoBounds.x>=bounds.x&&logoBounds.y>=bounds.y&&
     logoBounds.x+logoBounds.width<=bounds.x+bounds.width+1&&
     logoBounds.y+logoBounds.height<=bounds.y+bounds.height+1,
