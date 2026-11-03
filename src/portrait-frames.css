@@ -814,3 +814,11 @@
   top: 67.8%;
   height: 20.1%;
 }
+
+
+/* Override the legacy first-page 12% heading height and .9% margin rule. */
+.frame .ref-poster.ref-first-page .ref-officer-eight .ref-officer-four .ref-officer-group-heading {
+  flex: 0 0 2.45cqw;
+  height: 2.45cqw;
+  margin: 0 0 var(--msf-committee-photo-gap);
+}
