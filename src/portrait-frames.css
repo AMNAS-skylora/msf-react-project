@@ -668,3 +668,43 @@
 .frame .ref-poster .ref-executive-heading {
   border-bottom-color: var(--msf-frame-olive);
 }
+
+
+/* MSF approved committee palette: gold headings, cream dividers, olive frames, white names */
+.frame .ref-poster {
+  --msf-section-gold: #F4CF38;
+  --msf-divider-cream: #F6F0DA;
+  --msf-frame-olive: #A5AD70;
+  --msf-member-white: #FFFFFF;
+}
+
+/* Only section titles: preserve the Malayalam poster headline and logo. */
+.frame .ref-poster .ref-officer-group-heading,
+.frame .ref-poster .ref-executive-heading,
+.frame .ref-poster .ref-section-heading,
+.frame .ref-poster .ref-section-heading span,
+.frame .ref-poster .ref-extra-header h1 {
+  color: var(--msf-section-gold);
+}
+
+/* All horizontal section separators use cream rather than green/olive. */
+.frame .ref-poster .ref-officer-group-heading,
+.frame .ref-poster .ref-executive-heading {
+  border-bottom-color: var(--msf-divider-cream);
+}
+.frame .ref-poster .ref-section-heading::before {
+  background: linear-gradient(90deg, transparent, var(--msf-divider-cream));
+}
+.frame .ref-poster .ref-section-heading::after {
+  background: linear-gradient(90deg, var(--msf-divider-cream), transparent);
+}
+
+/* All member names, including the president and additional executive pages,
+   stay white even where the older leader-specific styles were more specific.
+   Give white glyphs a restrained dark shadow against pale poster regions. */
+.frame .ref-poster .ref-profile-name,
+.frame .ref-poster .ref-profile-name span {
+  color: var(--msf-member-white) !important;
+  text-shadow: 0 .12cqw .38cqw rgba(17, 53, 28, .82),
+               0 0 .11cqw rgba(17, 53, 28, .85);
+}
