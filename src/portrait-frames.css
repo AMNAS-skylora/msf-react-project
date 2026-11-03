@@ -611,3 +611,33 @@
 .frame .ref-poster.ref-first-page .ref-profile-leader .ref-profile-role {
   font-weight:700;
 }
+
+
+/* Golden yellow primary leadership theme — MSF President / General Secretary / Treasurer */
+/* Only the three primary leaders: preserve existing arched silhouette,
+   portrait image positions and the styling of every other committee row. */
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait:not(.ref-portrait-popout) {
+  background: #F4CF38;
+  box-shadow: inset 0 0 0 .12cqw rgba(61, 68, 10, .18);
+}
+
+/* Transparent cutouts use a ::before arch rather than the button background. */
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait-popout {
+  background: transparent;
+}
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait-popout::before {
+  background: #F4CF38;
+  box-shadow: inset 0 0 0 .12cqw rgba(61, 68, 10, .18);
+}
+
+/* Exact golden-yellow label and member names on the poster's dark green. */
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-role,
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-name,
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-profile-name span {
+  color: #F4CF38;
+}
+/* Preserve visual contrast for empty frames (camera icon). */
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-camera-placeholder {
+  color: #315E2A;
+  opacity: .9;
+}
