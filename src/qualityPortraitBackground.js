@@ -50,8 +50,13 @@ export async function removePortraitBackgroundQuality(originalSource) {
   const cached=processedCache.get(source);
   if(cached)return cached;
   let result;
-  let qualityError;
-  try{
+  let fastError;
+  try {
+    // MediaPipe loads a small model once and reuses it for subsequent portraits.
+    result = await verifyTransparency(await removePortraitBackgroundFast(source));
+  } catch (error) {
+    fastError = error;
+    try {
     const library=await import('@imgly/background-removal');
     const removeBackground=library.default||library.removeBackground;
     if(typeof removeBackground!=='function')throw new Error('Background remover not available');
@@ -62,15 +67,9 @@ export async function removePortraitBackgroundQuality(originalSource) {
     });
     if(!(blob instanceof Blob)||!blob.size)throw new Error('No transparent PNG returned');
     result=await verifyTransparency(await readBlob(blob));
-  }catch(error){
-    qualityError=error;
-    try{
-      // Retain reliable person cutouts when the larger AI model cannot run.
-      result=await verifyTransparency(await removePortraitBackgroundFast(source));
-    }catch(fallbackError){
-      throw new Error('Could not remove background on this device. '+(
-        qualityError?.message||fallbackError?.message||'Try again with an ordinary portrait photo.'
-      ));
+    } catch (qualityError) {
+      throw new Error('Could not remove background on this device. ' +
+        (qualityError?.message || fastError?.message || 'Try another portrait photo.'));
     }
   }
   if(processedCache.size>=MAX_CACHE_ENTRIES){
