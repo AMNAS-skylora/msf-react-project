@@ -296,7 +296,79 @@ try{
   const mobileExport=await makeExport(page);
   assert.equal(mobileExport.width,1080);
   assert.equal(mobileExport.height,1350);
-  console.log('Poster preview/export smoke test passed');
+  // Populated-committee regression: fresh sessions start with empty officer
+  // groups, which cannot expose real 4+4+28-member layout problems.
+  // Seed a TEST-ONLY IndexedDB draft, reload, then inspect the real React
+  // components with a three-row executive committee.
+  await page.evaluate(()=>new Promise((resolve,reject)=>{
+    const request=indexedDB.open('msf-poster-editor',1);
+    request.onupgradeneeded=()=>{
+      if(!request.result.objectStoreNames.contains('draft'))request.result.createObjectStore('draft');
+    };
+    request.onerror=()=>reject(request.error);
+    request.onsuccess=()=>{
+      const db=request.result;
+      const member=(role,i)=>({role,name:role+' Member '+String(i+1).padStart(2,'0'),
+        photo:'',cutout:false,photoZoom:1,photoX:0,photoY:0});
+      const groups={
+        'Vice Presidents':Array.from({length:4},(_,i)=>member('Vice President',i)),
+        'Joint Secretaries':Array.from({length:4},(_,i)=>member('Joint Secretary',i)),
+        'Executive Members':Array.from({length:28},(_,i)=>member('Executive',i)),
+      };
+      const tx=db.transaction('draft','readwrite');
+      tx.objectStore('draft').put({groups},'committees');
+      tx.oncomplete=()=>{db.close();resolve();};
+      tx.onerror=()=>{db.close();reject(tx.error);};
+    };
+  }));
+  await page.reload({waitUntil:'networkidle'});
+  await page.waitForFunction(()=>
+    document.querySelectorAll('.ref-profile-executive').length===28,{
+      timeout:12000,
+    });
+  const populated=await page.evaluate(()=>{
+    const poster=document.querySelector('.ref-poster.ref-first-page');
+    const pr=poster.getBoundingClientRect();
+    const bounds=element=>{const r=element.getBoundingClientRect();return{
+      left:r.left-pr.left,right:r.right-pr.left,top:r.top-pr.top,
+      bottom:r.bottom-pr.top,width:r.width,height:r.height};};
+    const groups=[...poster.querySelectorAll('.ref-officer-four')]
+      .map(group=>({names:[...group.querySelectorAll('.ref-profile-name')]
+        .map(e=>e.textContent),frames:[...group.querySelectorAll('.ref-portrait')].map(bounds)}));
+    const rows=[...poster.querySelectorAll('.ref-executive-row')]
+      .map(row=>({row:bounds(row),frames:[...row.querySelectorAll('.ref-portrait')].map(bounds),
+        cards:[...row.querySelectorAll('.ref-profile-executive')].map(bounds),
+        names:[...row.querySelectorAll('.ref-profile-name')].map(e=>e.textContent)}));
+    return {groups,rows,poster:{width:pr.width,height:pr.height}};
+  });
+  console.log('Populated-committee regression:',JSON.stringify({
+    officerCounts:populated.groups.map(g=>g.frames.length),
+    executiveRowSizes:populated.rows.map(r=>r.frames.length),
+    lastExecutiveName:populated.rows.at(-1)?.names.at(-1),
+  }));
+  assert.deepEqual(populated.groups.map(g=>g.frames.length),[4,4]);
+  assert.deepEqual(populated.rows.map(r=>r.frames.length),[10,10,8]);
+  assert(populated.groups[0].names[0].startsWith('Vice President Member 01'));
+  assert(populated.rows[2].names[7].startsWith('Executive Member 28'));
+  for(const g of populated.groups){
+    const widths=g.frames.map(f=>f.width),heights=g.frames.map(f=>f.height);
+    assert(Math.max(...widths)-Math.min(...widths)<1,'Officer frame widths differ');
+    assert(Math.max(...heights)-Math.min(...heights)<1,'Officer frame heights differ');
+  }
+  for(const row of populated.rows){
+    const first=row.cards[0],last=row.cards.at(-1);
+    assert(Math.abs((first.left-row.row.left)-(row.row.right-last.right))<3,
+      'Incomplete executive row is not centered');
+    for(const rect of row.frames){
+      assert(rect.left>=-1 && rect.right<=populated.poster.width+1 &&
+        rect.top>=-1 && rect.bottom<=populated.poster.height+1,
+        'Populated executive portrait was clipped outside the poster');
+    }
+  }
+  const populatedExport=await makeExport(page);
+  assert.equal(populatedExport.width,1080);
+  assert.equal(populatedExport.height,1350);
+  console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;
   console.error('Preview/export regression failed:',error);
