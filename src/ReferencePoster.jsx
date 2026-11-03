@@ -159,7 +159,7 @@ export default function ReferencePoster({
       >
         <h2 className="ref-officer-group-heading ref-executive-heading">Executive Members</h2>
         <div className={'ref-executive-grid '+executiveRowClass}
-          style={{'--exec-columns': executiveColumns, '--exec-total-gap': (executiveColumns - 1) * 1.15 + '%'}}>
+          style={{'--exec-slot-width': ((100 - (executiveColumns - 1) * 1.15) / executiveColumns).toFixed(4) + '%'}}>
           {executiveRows.map((row,rowIndex) => (
             <div className="ref-executive-row" key={rowIndex}>
               {row.map((person,i) => {
