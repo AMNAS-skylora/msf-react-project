@@ -544,16 +544,16 @@
    Reserve the last 11% of the poster for the enlarged congratulations artwork.
    The continuation page is intentionally unchanged. */
 .frame .ref-poster.ref-first-page .ref-primary-leadership {
-  top: 32%;
-  height: 19.2%;
+  top: 33%;
+  height: 19%;
 }
 .frame .ref-poster.ref-first-page .ref-officer-eight {
-  top: 51.3%;
-  height: 15.8%;
+  top: 52.4%;
+  height: 14.8%;
 }
 .frame .ref-poster.ref-first-page .ref-main-executives {
-  top: 67.6%;
-  height: 20%;
+  top: 67.8%;
+  height: 19.2%;
 }
 .frame .ref-poster.ref-first-page .ref-officer-four .ref-officer-group-heading {
   flex-basis: 12%;
