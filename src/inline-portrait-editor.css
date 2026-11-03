@@ -173,3 +173,29 @@ body.msf-portrait-editing .inline-photo-toolbar-buttons>button{
   .inline-photo-zoom button {min-height:44px;gap:5px;font-size:12px}
   .inline-photo-zoom strong {font-size:13px}
 }
+
+/* Simple, precise vertical placement, on the same editing surface. */
+.inline-photo-height {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:9px;
+}
+.inline-photo-height button{
+  min-height:42px;
+  padding:8px 12px;
+  border:1px solid #bedac6;
+  border-radius:10px;
+  background:#eff8f0;
+  color:#185f36;
+  font:750 13px/1.3 Inter,Arial,sans-serif;
+  touch-action:manipulation;
+}
+.inline-photo-height button:active:not(:disabled){
+  background:#d4ead8;
+}
+.inline-photo-height button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:580px){
+  .inline-photo-height{gap:6px;margin-bottom:7px}
+  .inline-photo-height button{min-height:39px;font-size:12px}
+}
