@@ -450,10 +450,10 @@
    heading down slightly with less dominant typography. Poster-only rules:
    export coordinates and committee photo positioning remain untouched. */
 .frame .ref-poster .ref-brand {
-  top: 1.1%;
-  left: 18%;
-  width: 64%;
-  height: 7.7%;
+  top: .8%;
+  left: 12%;
+  width: 76%;
+  height: 10.5%;
   align-items: center;
   justify-content: center;
 }
@@ -463,12 +463,16 @@
   object-fit: contain;
   object-position: center center;
   margin: 0 auto;
+  /* The provided image contains generous transparent padding. Enlarge
+     the visible mark without cropping its lettering or changing the PNG. */
+  transform: scale(1.55);
+  transform-origin: center center;
 }
 .frame .ref-poster.ref-first-page .ref-title {
-  top: 11.6%;
+  top: 14.2%;
   left: 8%;
   width: 84%;
-  height: 18%;
+  height: 17%;
   align-items: center;
   justify-content: flex-start;
   gap: .55cqw;
@@ -476,14 +480,14 @@
 .frame .ref-poster.ref-first-page .ref-title p {
   width: 100%;
   max-width: 100%;
-  font-size: 2.1cqw;
+  font-size: 2cqw;
   text-align: center;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 .frame .ref-poster.ref-first-page .ref-title h1 {
   width: 100%;
-  font-size: 7.05cqw;
-  line-height: 1.1;
+  font-size: 6.8cqw;
+  line-height: 1.08;
   letter-spacing: -.1cqw;
   text-align: center;
 }
