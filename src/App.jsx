@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import { Camera, Crop, Download, Minus, Pencil, Plus, WandSparkles } from 'lucide-react';
 import { MEMBERS, imageUrl } from './data/committee.js';
 import { makeReliablePosterBlob } from './reliablePosterExport.js';
+import { POSTER_EXPORT_PRESETS, DEFAULT_POSTER_EXPORT_PRESET, getPosterExportPreset, posterExportFilename, fileSizeLabel } from './posterExportOptions.js';
 import ReferencePoster from './ReferencePoster.jsx';
 import { EXECUTIVE_MEMBERS_PER_PAGE } from './executiveLayout.js';
 import { removePortraitBackgroundQuality } from './qualityPortraitBackground.js';
@@ -222,6 +223,11 @@ export default function App() {
   const [message,setMessage] = useState('');
   const [template,setTemplate]=useState(()=>{try{return '1';}catch{return '1';}});
   useEffect(()=>{try{localStorage.setItem('msf-poster-template',template)}catch{}},[template]);
+  const [exportPreset,setExportPreset]=useState(()=>{
+    try{return getPosterExportPreset(localStorage.getItem('msf-export-preset')).id;}
+    catch{return DEFAULT_POSTER_EXPORT_PRESET;}
+  });
+  useEffect(()=>{try{localStorage.setItem('msf-export-preset',exportPreset);}catch{}},[exportPreset]);
   const [exporting,setExporting]=useState(false);
   const [shareOpen,setShareOpen]=useState(false);
   const [shareIntent,setShareIntent]=useState('share');
@@ -731,8 +737,8 @@ export default function App() {
     }catch{}
     return false;
   }
-  async function makePosterBlob(){
-    return makeReliablePosterBlob(frameRef.current);
+  async function makePosterBlob(preset){
+    return makeReliablePosterBlob(frameRef.current,preset);
   }
   function saveBlob(blob,filename='msf-poster.png'){
     const url=URL.createObjectURL(blob);
@@ -745,7 +751,21 @@ export default function App() {
     setTimeout(()=>URL.revokeObjectURL(url),30000);
   }
   const waitForPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const exportAllPages=async()=>{const original=posterPage;const blobs=[];try{for(let page=0;page<posterPageCount;page++){flushSync(()=>setPosterPage(page));await waitForPaint();blobs.push(await makePosterBlob());}return blobs;}finally{flushSync(()=>setPosterPage(Math.min(original,posterPageCount-1)));await waitForPaint();}};
+  const exportAllPages=async(preset)=>{
+    const original=posterPage;
+    const blobs=[];
+    try{
+      for(let page=0;page<posterPageCount;page++){
+        flushSync(()=>setPosterPage(page));
+        await waitForPaint();
+        blobs.push(await makePosterBlob(preset));
+      }
+      return blobs;
+    }finally{
+      flushSync(()=>setPosterPage(Math.min(original,posterPageCount-1)));
+      await waitForPaint();
+    }
+  };
   function validateCommitteeLimits(){
     const groups={...jointGroups,[jointRole]:joint};
     const exceeded=Object.entries(groups).filter(([role,members])=>role!=='Executive Members'&&members.length>COMMITTEE_LIMIT);
@@ -762,15 +782,15 @@ export default function App() {
     if(exporting||!validateCommitteeLimits())return;
     setExporting(true);
     setMessage('');
-    // Exit photo-adjust mode before capture, restoring iOS scroll and
-    // leaving the share preview free to receive normal touch events.
+    const preset=getPosterExportPreset(exportPreset);
+    // Disable adjust mode during capture so the PNG contains no editor controls.
     flushSync(()=>setPhotoEdit(null));
     await waitForPaint();
     try{
-      const blobs=await exportAllPages();
-      const items=blobs.map((blob,i)=>{
-        const filename=blobs.length>1?`msf-poster-page-${String(i+1).padStart(2,'0')}.png`:'msf-poster.png';
-        const file=new File([blob],filename,{type:'image/png'});
+      const blobs=await exportAllPages(preset);
+      const items=blobs.map((blob,index)=>{
+        const filename=posterExportFilename(preset,index,blobs.length);
+        const file=new File([blob],filename,{type:blob.type||preset.mime});
         return {file,url:URL.createObjectURL(file)};
       });
       setShareError('');
@@ -778,7 +798,7 @@ export default function App() {
       setShareIndex(Math.min(posterPage,items.length-1));
       setShareOpen(true);
     }catch(error){
-      setMessage('Unable to prepare image for sharing: '+(error?.message||'Please try again.'));
+      setMessage('Unable to prepare poster image: '+(error?.message||'Please try again.'));
     }finally{setExporting(false);}
   }
   function closeSharePreview(){
@@ -807,7 +827,20 @@ export default function App() {
     }
   }
   return <main className="app-shell">
-    <div className="editor-bar"><div><strong>MSF Poster Creator</strong></div><div className="poster-export-actions"><button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download PNG"}</button><button type="button" onClick={()=>sharePoster('share')} disabled={exporting}>Share Poster</button></div></div>
+    <div className="editor-bar">
+      <div><strong>MSF Poster Creator</strong><span>Ultra-clear 4:5 poster export</span></div>
+      <div className="poster-export-actions">
+        <label className="poster-export-quality-label" htmlFor="msf-poster-export-quality">
+          <span>Export quality</span>
+          <select id="msf-poster-export-quality" value={exportPreset} disabled={exporting}
+            onChange={event=>setExportPreset(event.target.value)}>
+            {POSTER_EXPORT_PRESETS.map(preset=><option key={preset.id} value={preset.id}>{preset.label}</option>)}
+          </select>
+        </label>
+        <button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download"}</button>
+        <button type="button" onClick={()=>sharePoster('share')} disabled={exporting}>Share Poster</button>
+      </div>
+    </div>
     
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
     <div className="workspace">
@@ -943,7 +976,7 @@ export default function App() {
       onMouseDown={event=>{if(event.target===event.currentTarget)closeSharePreview();}}>
       <section className="poster-share-dialog" role="dialog" aria-modal="true" aria-label="Share poster image">
         <div className="poster-share-heading">
-          <strong>{shareIntent==='download'?'Download PNG Ready':'Poster PNG Ready'}</strong>
+          <strong>{shareIntent==='download'?'Poster Download Ready':'Poster Image Ready'}</strong>
           <button type="button" onClick={closeSharePreview} aria-label="Close image preview">Close</button>
         </div>
         <img className="poster-share-image" src={shareFiles[shareIndex]?.url}
@@ -956,13 +989,16 @@ export default function App() {
             onClick={()=>setShareIndex(index=>Math.min(shareFiles.length-1,index+1))}>Next</button>
         </div>}
         {shareError&&<p className="poster-share-error" role="alert">{shareError}</p>}
-        <p className="poster-share-help">PNG തയ്യാറായി. ചിത്രം പരിശോധിച്ച് <strong>Download PNG</strong> അമർത്തുക. iPhone-ൽ ചിത്രം Photos-ലേക്ക് Save ചെയ്യാൻ <strong>Share Image</strong> ഉപയോഗിക്കാം.</p>
+        <p className="poster-share-help">
+          {getPosterExportPreset(exportPreset).shortLabel} · {getPosterExportPreset(exportPreset).width} × {getPosterExportPreset(exportPreset).height} px · {fileSizeLabel(shareFiles[shareIndex]?.file.size)}
+          {' — '}ചിത്രം പരിശോധിച്ച് <strong>Download</strong> അമർത്തുക. iPhone-ൽ Photos-ലേക്ക് Save ചെയ്യാൻ <strong>Share Image</strong> ഉപയോഗിക്കാം.
+        </p>
         <div className="poster-share-actions">
           <a className="poster-share-download"
             href={shareFiles[shareIndex]?.url}
             download={shareFiles[shareIndex]?.file.name}
-            aria-label="Download the displayed PNG image">
-            <Download size={17}/> Download PNG
+            aria-label="Download the displayed poster image">
+            <Download size={17}/> Download Image
           </a>
           <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image</button>
         </div>
