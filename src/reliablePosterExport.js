@@ -177,6 +177,28 @@ function nativeArtworkSnapshot(frame,rect){
   return canvas;
 }
 
+// Probe a real on-poster frame instead of random white-background points.
+// SVG rasterization sometimes succeeds but returns a blank white bitmap on
+// iOS Safari. The green arch remains visible after images are filtered out.
+function snapshotContainsArtwork(context,frame,rect){
+  const sx=WIDTH/rect.width,sy=HEIGHT/rect.height;
+  const targets=[...frame.querySelectorAll('.ref-portrait')].slice(0,8);
+  if(!targets.length)return true;
+  for(const target of targets){
+    const r=rectRelative(target.getBoundingClientRect(),rect,sx,sy);
+    if(r.w<4||r.h<4)continue;
+    const x=Math.max(0,Math.min(WIDTH-1,Math.round(r.x+r.w*.5)));
+    const y=Math.max(0,Math.min(HEIGHT-1,Math.round(r.y+r.h*.6)));
+    const pixels=context.getImageData(x,y,1,1).data;
+    if(pixels[3]>100 &&
+       (Math.min(pixels[0],pixels[1],pixels[2])<218 ||
+        Math.max(pixels[0],pixels[1],pixels[2])-Math.min(pixels[0],pixels[1],pixels[2])>35)){
+      return true;
+    }
+  }
+  return false;
+}
+
 async function artworkSnapshot(frame,rect){
   const scale=WIDTH/rect.width;
   let lastError;
@@ -202,7 +224,12 @@ async function artworkSnapshot(frame,rect){
         test.width=WIDTH;test.height=HEIGHT;
         const context=test.getContext('2d',{willReadFrequently:true});
         context.drawImage(image,0,0,WIDTH,HEIGHT);
-        // Valid white artboards must never be rejected by a color heuristic.
+        // A real arch must be painted; a white-only SVG snapshot is broken.
+        // The check is anchored to known portrait positions, not random white
+        // areas of the intentionally minimal poster layout.
+        if(!snapshotContainsArtwork(context,frame,rect)){
+          throw new Error('Browser returned empty SVG poster artwork.');
+        }
         return test;
       }finally{dispose();}
     }catch(error){lastError=error;}
