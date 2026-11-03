@@ -141,8 +141,9 @@ async function nativeArtworkSnapshot(frame,rect,dimensions){
   }
   for(const heading of frame.querySelectorAll('.ref-officer-group-heading,.ref-executive-heading')){
     const r=rectRelative(heading.getBoundingClientRect(),rect,scaleX,scaleY);
-    ctx.fillStyle='rgba(25,105,58,.25)';
-    ctx.fillRect(r.x,r.y+r.h-1,r.w,1);
+    // Keep the divider cream in the Safari native-canvas export, too.
+    ctx.fillStyle='#F6F0DA';
+    ctx.fillRect(r.x,r.y+r.h-Math.max(1,scaleY*.8),r.w,Math.max(1,scaleY*.8));
   }
 
   const selectors=[
@@ -169,6 +170,11 @@ async function nativeArtworkSnapshot(frame,rect,dimensions){
     const weight=css.fontWeight||'700';
     ctx.save();
     ctx.fillStyle=css.color||'#173d29';
+    if(element.matches('.ref-profile-name span')){
+      ctx.shadowColor='rgba(17,53,28,.85)';
+      ctx.shadowBlur=Math.max(1,scaleX*2);
+      ctx.shadowOffsetY=Math.max(1,scaleY);
+    }
     ctx.font=`${weight} ${fontSize}px ${css.fontFamily||'sans-serif'}`;
     ctx.textAlign=css.textAlign==='center'?'center':css.textAlign==='right'?'right':'left';
     ctx.textBaseline='middle';
