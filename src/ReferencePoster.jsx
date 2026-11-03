@@ -89,6 +89,7 @@ export default function ReferencePoster({
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
+      {firstPage && <div className="ref-instagram-vertical" aria-label="Instagram msf_chokkad_panchayath"><span className="ref-instagram-glyph" aria-hidden="true">◎</span><span>msf_chokkad_panchayath</span></div>}
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
