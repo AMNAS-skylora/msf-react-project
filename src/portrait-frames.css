@@ -278,7 +278,7 @@
   left:4%;
   width:92%;
   top:51%;
-  height:19.4%;
+  height:18.1%;
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   align-items:stretch;
@@ -335,8 +335,8 @@
 .frame .ref-poster .ref-officer-four .ref-profile-committee .ref-portrait {
   width:100%;
   max-width:100%;
-  height:74%;
-  flex:0 0 74%;
+  height:71%;
+  flex:0 0 71%;
   aspect-ratio:auto;
   min-height:0;
   margin:0 auto;
@@ -373,6 +373,6 @@
 /* Bring executive members up as the 8-person officer row becomes shorter.
    This preserves the poster's 4:5 composition and avoids a large empty gap. */
 .frame .ref-poster .ref-main-executives {
-  top:71.4%;
-  height:22.1%;
+  top:70.2%;
+  height:23.3%;
 }
