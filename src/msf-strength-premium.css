@@ -452,10 +452,10 @@
   content: none;
 }
 
-/* Dyuthi font supplied by the user; load from public/fonts/Dyuthi.ttf. */
+/* Dyuthi font supplied by the user; load from public/font/Dyuthi.ttf. */
 @font-face {
   font-family: "MSF Dyuthi";
-  src: url("/fonts/Dyuthi.ttf") format("truetype");
+  src: url("/font/Dyuthi.ttf") format("truetype");
   font-style: normal;
   font-weight: 400 900;
   font-display: swap;
