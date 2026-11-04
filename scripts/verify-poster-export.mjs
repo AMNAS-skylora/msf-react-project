@@ -151,7 +151,12 @@ try{
       committee:poster.querySelector('.ref-title p')?.textContent,
       leaderFrames,officerGroups,executiveRows,frameBounds,
       posterWidth:root.width,posterHeight:root.height,
-      footerText:poster.querySelector('.ref-footer-greeting')?.textContent,
+      footerArtwork:poster.querySelector('.ref-footer-artwork')?.getAttribute('src'),
+      footerArtworkLoaded:(()=>{
+        const image=poster.querySelector('.ref-footer-artwork');
+        return !!image && image.complete && image.naturalWidth>0;
+      })(),
+      footerText:poster.querySelector('.ref-footer')?.textContent.trim(),
       titleColor:getComputedStyle(poster.querySelector('.ref-title h1')).color
     };
   });
@@ -166,12 +171,14 @@ try{
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
-  assert.equal(geometry.footerText,'അഭിവാദ്യങ്ങൾ');
+  assert.equal(geometry.footerArtwork,'/background/congratulations.png','Congratulations image path changed');
+  assert(geometry.footerArtworkLoaded,'Congratulations PNG failed to load');
+  assert.equal(geometry.footerText,'','Old greeting or Instagram footer text remains');
   assert.equal(geometry.titleColor,'rgb(244, 207, 56)');
   assert(geometry.title.bottom<=geometry.leaders.top+1,'Main title overlaps the primary leaders');
   assert(geometry.leaders.bottom<=geometry.officers.top+1,'Primary leaders overlap vice/joint section');
   assert(geometry.officers.bottom<=geometry.executives.top+1,'Vice/joint officers overlap executives');
-  assert(geometry.executives.bottom<=geometry.footer.top+1,'Executive rows overlap greeting');
+  assert(geometry.executives.bottom<=geometry.footer.top+1,'Executive rows overlap congratulations artwork');
   assert(geometry.leaderFrames.length===3,'Three primary leaders must remain');
   assert(Math.max(...geometry.leaderFrames.map(r=>r.width))-
     Math.min(...geometry.leaderFrames.map(r=>r.width))<1,
