@@ -451,3 +451,25 @@
 .frame .ref-poster .ref-footer-instagram-icon::after {
   content: none;
 }
+
+/* Dyuthi font supplied by the user; load from public/fonts/Dyuthi.ttf. */
+@font-face {
+  font-family: "MSF Dyuthi";
+  src: url("/fonts/Dyuthi.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+}
+.frame .ref-poster .ref-footer {
+  align-items: center;
+  text-align: center;
+}
+.frame .ref-poster .ref-footer-greeting {
+  font-family: "MSF Dyuthi", "Anek Malayalam", "Noto Sans Malayalam", sans-serif !important;
+  text-align: center;
+  font-weight: 700;
+}
+.frame .ref-poster .ref-footer-instagram {
+  justify-content: center;
+  margin-left: 0;
+}
