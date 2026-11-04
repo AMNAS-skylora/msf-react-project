@@ -188,6 +188,10 @@ export default function ReferencePoster({
 
       <footer className="ref-footer" aria-label="Congratulations">
         <span className="ref-footer-greeting">അഭിവാദ്യങ്ങൾ</span>
+        <span className="ref-footer-instagram" aria-label="Instagram msf_chokkad_panchayath">
+          <span className="ref-footer-instagram-icon" aria-hidden="true" />
+          <span>msf_chokkad_panchayath</span>
+        </span>
       </footer>
     </div>
   );
