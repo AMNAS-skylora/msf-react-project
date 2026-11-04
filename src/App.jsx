@@ -324,7 +324,7 @@ export default function App() {
     } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
-    return removePortraitBackgroundQuality(source);
+    return removePortraitBackgroundQuality(source, setMessage);
   }
   async function removeBg(i) {
     const member=people[i];
