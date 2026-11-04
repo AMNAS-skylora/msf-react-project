@@ -326,16 +326,22 @@
   object-fit: contain;
   object-position: center;
 }
-.frame .ref-poster .ref-unit-corner-label {
+/* Use the supplied Chokkad artwork in the upper-right position,
+   replacing the previous committee text without distorting the PNG. */
+.frame .ref-poster .ref-unit-corner-image {
   position: absolute;
   z-index: 7;
-  top: 2.4cqw;
-  right: 2.5cqw;
-  max-width: 27cqw;
-  color: #f6f0da;
-  font: 600 1.55cqw/1.45 "Noto Sans Malayalam", "Manjari", sans-serif;
-  text-align: right;
-  text-shadow: 0 .16cqw .5cqw rgba(0, 18, 8, .65);
+  top: 1.4cqw;
+  right: 2.4cqw;
+  width: 16cqw;
+  max-width: 16cqw;
+  height: auto;
+  max-height: 13.2cqw;
+  object-fit: contain;
+  object-position: top right;
+  background: transparent;
+  pointer-events: none;
+  user-select: none;
 }
 .frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait:not(.ref-portrait-popout) {
   background: #d8eb8b !important;
