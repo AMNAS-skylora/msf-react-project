@@ -297,8 +297,8 @@
   top: .8cqw;
   left: 1.8cqw;
   right: auto;
-  width: 30cqw;
-  max-width: 30cqw;
+  width: 34cqw;
+  max-width: 34cqw;
   height: auto;
   transform: none;
   justify-content: flex-start;
@@ -312,18 +312,18 @@
   object-fit: contain;
   object-position: top left;
 }
-/* Strength campaign artwork: enlarged on the right, preserving its aspect ratio.
-   Responsive cqw units match the 1080x1350 preview/export artboard. */
+/* Keep chokkad.png at its original 21cqw (227px) on the right.
+   Scale both images with the poster artboard, without stretching. */
 .frame .ref-poster .ref-unit-corner-image {
   position: absolute;
   z-index: 7;
   top: .8cqw;
   right: 1.8cqw;
   left: auto;
-  width: 27cqw;
-  max-width: 27cqw;
+  width: 21cqw;
+  max-width: 21cqw;
   height: auto;
-  max-height: none;
+  max-height: 20cqw;
   object-fit: contain;
   object-position: top right;
   background: transparent;
