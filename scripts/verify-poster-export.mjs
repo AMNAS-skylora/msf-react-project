@@ -104,87 +104,10 @@ try{
   assert(Math.abs(bounds.width-1080)<1,'Preview is not 1080px wide: '+bounds.width);
   assert(Math.abs(bounds.height-1350)<1,'Preview is not 1350px high: '+bounds.height);
 
-  // Logo position is specified in poster coordinates, not device pixels.
-  const logo=page.locator('.ref-brand-strength-logo');
-  const logoBounds=await logo.boundingBox();
-  assert(logoBounds,'MSF logo missing from the poster.');
-  const brand=await page.locator('.ref-brand').boundingBox();
-  assert(brand,'MSF logo container missing.');
-  const relTop=brand.y-bounds.y;
-  const relCenter=brand.x+brand.width/2-(bounds.x+bounds.width/2);
-  console.log('MSF logo artboard position:',{top:relTop,centerOffset:relCenter,width:brand.width,height:logoBounds.height});
-  assert(Math.abs(relTop-15.12)<1,'Logo should be approximately 15px from the top.');
-  assert(Math.abs(relCenter)<1,'Logo should be centered horizontally.');
-  assert(Math.abs(brand.width-205.2)<1,'Logo container should be 19% of poster width.');
-  assert(logoBounds.x>=bounds.x&&logoBounds.y>=bounds.y&&
-    logoBounds.x+logoBounds.width<=bounds.x+bounds.width+1&&
-    logoBounds.y+logoBounds.height<=bounds.y+bounds.height+1,
-    'Logo is clipped by poster boundary.');
+  // The removed STRENGTH artwork must not appear in the poster.
+  assert.equal(await page.locator('.ref-brand-strength-logo, .ref-strength-wordmark').count(),0,
+    'Removed STRENGTH artwork is still present.');
 
-  const logoPng=PNG.sync.read(readFileSync('public/background/logo.png'));
-  const pixelCount=logoPng.width*logoPng.height;
-  let transparent=0;
-  let minX=logoPng.width,minY=logoPng.height,maxX=-1,maxY=-1;
-  for(let y=0;y<logoPng.height;y++){
-    for(let x=0;x<logoPng.width;x++){
-      const alpha=logoPng.data[(y*logoPng.width+x)*4+3];
-      if(alpha<8){transparent++;continue;}
-      minX=Math.min(minX,x);minY=Math.min(minY,y);
-      maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
-    }
-  }
-  console.log('Logo alpha bounding box:',{
-    sourceWidth:logoPng.width,sourceHeight:logoPng.height,
-    transparentRatio:transparent/pixelCount,
-    visibleWidth:maxX-minX+1,visibleHeight:maxY-minY+1,
-    trim:{left:minX,top:minY,right:logoPng.width-maxX-1,bottom:logoPng.height-maxY-1},
-  });
-
-  // Report quantized top/bottom text colors without changing the logo asset.
-  const paletteParts=[new Map(),new Map()];
-  for(let y=0;y<logoPng.height;y+=3){
-    const half=y<logoPng.height*.46?0:1;
-    for(let x=0;x<logoPng.width;x+=3){
-      const i=(y*logoPng.width+x)*4;
-      if(logoPng.data[i+3]<220)continue;
-      const k=[0,1,2].map(j=>(Math.round(logoPng.data[i+j]/24)*24).toString(16).padStart(2,'0')).join('');
-      const table=paletteParts[half];
-      table.set(k,(table.get(k)||0)+1);
-    }
-  }
-  console.log('Logo content color palettes (top, bottom):',
-    paletteParts.map(map=>[...map].sort((a,b)=>b[1]-a[1]).slice(0,7)));
-  // Ensure the text shapes were recolored without filling transparent areas.
-  const logoPalette=await page.evaluate(async()=>{
-    const img=document.querySelector('.ref-brand-strength-logo');
-    await img.decode();
-    const canvas=document.createElement('canvas');
-    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
-    const ctx=canvas.getContext('2d');
-    ctx.drawImage(img,0,0);
-    const bytes=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-    const result={cream:0,lime:0,transparent:0,antialiased:0,other:0,paletteApplied:img.dataset.paletteApplied};
-    for(let i=0;i<bytes.length;i+=4){
-      if(bytes[i+3]===0){result.transparent++;continue;}
-      // PNG anti-aliased glyphs have mostly partial alpha. Ignore nearly
-      // invisible pixels; decoded RGB can differ by a few units due to
-      // premultiplication without changing the displayed logo color.
-      if(bytes[i+3]<64){result.antialiased++;continue;}
-      const creamDelta=Math.abs(bytes[i]-0xF6)+Math.abs(bytes[i+1]-0xF0)+Math.abs(bytes[i+2]-0xDA);
-      const limeDelta=Math.abs(bytes[i]-0xD8)+Math.abs(bytes[i+1]-0xEB)+Math.abs(bytes[i+2]-0x8B);
-      if(creamDelta<=18){result.cream++;continue;}
-      if(limeDelta<=18){result.lime++;continue;}
-      result.other++;
-    }
-    return result;
-  });
-  console.log('MSF transparent logo brand palette:',logoPalette);
-  assert.equal(logoPalette.paletteApplied,'true','Existing logo was not recolored.');
-  assert(logoPalette.cream>100&&logoPalette.lime>100,
-    'Warm Cream and Light Lime must both appear in the logo ink.');
-  assert(logoPalette.transparent>100,'Transparent logo background was lost.');
-  assert(logoPalette.other < (logoPalette.cream+logoPalette.lime+logoPalette.other)*.01,
-    'Unapproved colored pixels remain in the visible logo ink.');
   // Premium MSF geometry: verify the generated sections still fit inside
   // the fixed poster artboard and the original member order/slots survive.
   const geometry=await page.evaluate(()=>{
@@ -219,7 +142,7 @@ try{
     });
     return {title:sel('.ref-title'),leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
-      footer:sel('.ref-footer'),logo:sel('.ref-brand-strength-logo'),
+      footer:sel('.ref-footer'),
       removedWordmark:poster.querySelector('.ref-strength-wordmark')===null,
       background:getComputedStyle(poster).backgroundImage,
       mainTitle:poster.querySelector('.ref-title h1')?.textContent,
