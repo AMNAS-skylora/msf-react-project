@@ -261,34 +261,34 @@
   line-height: 1.15;
 }
 
-/* Footer contains only the Malayalam greeting: no artwork cover or green panel. */
+/* Single PNG artwork replaces both the greeting text and Instagram label.
+   Keep its intrinsic 3:1 ratio so it renders identically in preview and PNG export. */
 .frame .ref-poster .ref-footer {
-  left: 9%;
-  width: 82%;
-  bottom: 1%;
+  left: 0;
+  width: 100%;
+  bottom: .55%;
   height: auto;
   min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent !important;
   background-image: none !important;
-  border: none;
+  border: 0;
   box-shadow: none;
   isolation: auto;
   overflow: visible;
 }
-/* Never display the removed congratulations artwork. */
-.frame .ref-poster .ref-footer-congratulations {
-  display: none !important;
-}
-
-.frame .ref-poster .ref-footer-greeting {
-  position: relative;
-  z-index: 1;
+.frame .ref-poster .ref-footer-artwork {
   display: block;
-  color: var(--strength-cream);
-  font: 800 4.6cqw/1.17 "Noto Sans Malayalam", "Nirmala UI", sans-serif;
-  text-align: center;
-  white-space: nowrap;
-  text-shadow: 0 .14cqw .33cqw rgba(0, 14, 7, .50);
+  width: 42cqw;
+  max-width: 94%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Continuation pages retain the same photographic atmosphere, matching
@@ -346,7 +346,6 @@
 }
 .frame .ref-poster .ref-title h1,
 .frame .ref-poster .ref-title p,
-.frame .ref-poster .ref-footer-greeting,
 .frame .ref-poster .ref-profile-name {
   font-family: "Noto Sans Malayalam", "Manjari", "Nirmala UI", sans-serif !important;
 }
@@ -368,113 +367,4 @@
   max-width: 100%;
   flex: 0 0 76%;
   height: 76%;
-}
-/* Small Instagram signature below the greeting, no artwork panel. */
-.frame .ref-poster .ref-footer {
-  flex-direction: column;
-  gap: .35cqw;
-  bottom: .55%;
-}
-.frame .ref-poster .ref-footer-greeting {
-  font-size: 4.05cqw;
-}
-.frame .ref-poster .ref-footer-instagram {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .8cqw;
-  color: #f6f0da;
-  font: 600 1.65cqw/1.3 Inter, Arial, sans-serif;
-  letter-spacing: .015cqw;
-  text-shadow: 0 .12cqw .3cqw rgba(0,0,0,.55);
-  white-space: nowrap;
-}
-.frame .ref-poster .ref-footer-instagram-icon {
-  position: relative;
-  display: inline-block;
-  width: 1.75cqw;
-  height: 1.75cqw;
-  border: .18cqw solid currentColor;
-  border-radius: .5cqw;
-  box-sizing: border-box;
-}
-.frame .ref-poster .ref-footer-instagram-icon::before {
-  content: "";
-  position: absolute;
-  width: .65cqw;
-  height: .65cqw;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%,-50%);
-  border: .15cqw solid currentColor;
-  border-radius: 50%;
-}
-.frame .ref-poster .ref-footer-instagram-icon::after {
-  content: "";
-  position: absolute;
-  width: .25cqw;
-  height: .25cqw;
-  top: .27cqw;
-  right: .27cqw;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-/* Footer redesign: left-aligned greeting and Instagram signature. */
-.frame .ref-poster .ref-footer {
-  left: 6%;
-  width: 88%;
-  align-items: flex-start;
-  justify-content: center;
-  text-align: left;
-  gap: .45cqw;
-  bottom: .8%;
-}
-.frame .ref-poster .ref-footer-greeting {
-  width: 100%;
-  text-align: left;
-  font-family: "Anek Malayalam", "Noto Sans Malayalam", sans-serif !important;
-  font-size: 4.35cqw;
-  font-weight: 800;
-  line-height: 1.15;
-}
-.frame .ref-poster .ref-footer-instagram {
-  justify-content: flex-start;
-  font-size: 1.8cqw;
-  gap: .7cqw;
-  margin-left: .25cqw;
-}
-.frame .ref-poster .ref-footer-instagram-icon {
-  width: 1.9cqw;
-  height: 1.9cqw;
-  flex-shrink: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-}
-.frame .ref-poster .ref-footer-instagram-icon::before,
-.frame .ref-poster .ref-footer-instagram-icon::after {
-  content: none;
-}
-
-/* Dyuthi font supplied by the user; load from public/font/Dyuthi.ttf. */
-@font-face {
-  font-family: "MSF Dyuthi";
-  src: url("/font/Dyuthi.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-}
-.frame .ref-poster .ref-footer {
-  align-items: center;
-  text-align: center;
-}
-.frame .ref-poster .ref-footer-greeting {
-  font-family: "MSF Dyuthi", "Anek Malayalam", "Noto Sans Malayalam", sans-serif !important;
-  text-align: center;
-  font-weight: 700;
-}
-.frame .ref-poster .ref-footer-instagram {
-  justify-content: center;
-  margin-left: 0;
 }
