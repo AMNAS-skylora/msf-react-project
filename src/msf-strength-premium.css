@@ -35,33 +35,13 @@
 .frame .ref-poster .ref-strength-wordmark {
   display: none !important;
 }
-/* Center the committee logo within the poster artboard. */
-.frame .ref-poster .ref-brand {
-  top: 1.4cqw;
-  left: 50%;
-  right: auto;
-  width: 19cqw;
-  max-width: 19cqw;
-  height: auto;
-  transform: translateX(-50%);
-  align-items: center;
-  justify-content: center;
-}
-.frame .ref-poster .ref-brand-strength-logo {
-  transform: none;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-}
-
 /* Readable hierarchy: committee name over the hero announcement.
    This sits below branding, and clears the first leader portraits. */
 .frame .ref-poster.ref-first-page .ref-title {
-  top: 12.5%;
+  top: 16%;
   left: 6%;
   width: 88%;
-  height: 18.5%;
+  height: 15.5%;
   padding: 0;
   margin: 0;
   display: flex;
@@ -309,23 +289,44 @@
 /* No aspect-ratio or viewport breakpoints: the complete 1080×1350 design
    scales as one image inside the existing .frame on every device. */
 
-/* Larger centered MSF logo (public/background/logo.png).
-   Keep the full artwork above the first-page title at 1080x1350. */
+/* Two balanced header images: Chokkad artwork left, large MSF logo right.
+   All dimensions scale with the 1080x1350 poster artboard. */
 .frame .ref-poster .ref-brand {
   position: absolute;
-  top: .5cqw;
-  left: 50%;
-  right: auto;
-  width: 26cqw;
-  max-width: 26cqw;
-  transform: translateX(-50%);
   z-index: 8;
+  top: .8cqw;
+  right: 1.8cqw;
+  left: auto;
+  width: 30cqw;
+  max-width: 30cqw;
+  height: auto;
+  transform: none;
+  justify-content: flex-end;
+  align-items: flex-start;
 }
 .frame .ref-poster .ref-brand-strength-logo {
+  display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   object-fit: contain;
-  object-position: center;
+  object-position: top right;
+}
+.frame .ref-poster .ref-unit-corner-image {
+  position: absolute;
+  z-index: 7;
+  top: .8cqw;
+  left: 1.8cqw;
+  right: auto;
+  width: 21cqw;
+  max-width: 21cqw;
+  height: auto;
+  max-height: 20cqw;
+  object-fit: contain;
+  object-position: top left;
+  background: transparent;
+  pointer-events: none;
+  user-select: none;
 }
 .frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait:not(.ref-portrait-popout) {
   background: #d8eb8b !important;
