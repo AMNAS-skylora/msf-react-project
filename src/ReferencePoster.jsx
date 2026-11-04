@@ -88,6 +88,10 @@ export default function ReferencePoster({
 
   return (
     <div className={'ref-poster ' + (firstPage ? 'ref-first-page' : 'ref-continuation-page')}>
+      <div className="ref-brand" aria-label="MSF logo">
+        <img className="ref-brand-strength-logo" src="/background/logo.png" alt="MSF committee logo" draggable={false} />
+      </div>
+      <span className="ref-unit-corner-label">MSF {placeName} യൂണിറ്റ് കമ്മിറ്റി</span>
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
@@ -96,7 +100,7 @@ export default function ReferencePoster({
       {firstPage ? (
         <>
           <div className="ref-title">
-            <p>MSF {placeName} പഞ്ചായത്ത് കമ്മിറ്റി</p>
+            <p>MSF {placeName} യൂണിറ്റ് കമ്മിറ്റി</p>
             <h1>{headingText}</h1>
           </div>
 
