@@ -312,16 +312,18 @@
   object-fit: contain;
   object-position: top left;
 }
+/* Strength campaign artwork: enlarged on the right, preserving its aspect ratio.
+   Responsive cqw units match the 1080x1350 preview/export artboard. */
 .frame .ref-poster .ref-unit-corner-image {
   position: absolute;
   z-index: 7;
   top: .8cqw;
   right: 1.8cqw;
   left: auto;
-  width: 21cqw;
-  max-width: 21cqw;
+  width: 27cqw;
+  max-width: 27cqw;
   height: auto;
-  max-height: 20cqw;
+  max-height: none;
   object-fit: contain;
   object-position: top right;
   background: transparent;
