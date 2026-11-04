@@ -194,15 +194,17 @@ try{
   assert.equal(geometry.chokkadSource,'/background/chokkad.png',
     'Chokkad image source missing or changed');
   assert(geometry.chokkadLoaded,'Chokkad artwork failed to load');
-  assert(geometry.chokkad.width>=226 && geometry.chokkad.width<=228,
-    'Chokkad artwork should be 21% of the 1080px poster width');
+  assert(geometry.chokkad.width>=291 && geometry.chokkad.width<=293,
+    'Right campaign artwork should be 27% of the 1080px poster width');
   assert(Math.abs(geometry.posterWidth-geometry.chokkad.right-19.44)<1,
     'Chokkad artwork is not aligned to the top-right margin');
   assert(Math.abs(geometry.chokkad.top-8.64)<1,'Chokkad artwork top margin changed');
   assert(geometry.chokkad.left>geometry.posterWidth/2,
     'Chokkad artwork is not on the right');
-  assert(geometry.chokkad.bottom<=geometry.title.top+1,
-    'Chokkad artwork overlaps the main heading');
+  assert(geometry.chokkad.left>=geometry.posterWidth*.70,
+    'Right campaign artwork extends into the central title');
+  assert(geometry.chokkad.bottom<=geometry.leaders.top+1,
+    'Right campaign artwork overlaps the leadership portraits');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
