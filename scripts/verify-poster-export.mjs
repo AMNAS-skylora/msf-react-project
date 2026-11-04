@@ -183,11 +183,12 @@ try{
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
   assert(geometry.logoLoaded,'MSF logo failed to load');
   assert(geometry.logo.width>=323 && geometry.logo.width<=325,
-    'Right-side MSF logo should be 30% of the 1080px poster width');
-  assert(Math.abs(geometry.posterWidth-geometry.logo.right-19.44)<1,
-    'MSF logo is not aligned to the top-right margin');
+    'Left-side MSF logo should be 30% of the 1080px poster width');
+  assert(Math.abs(geometry.logo.left-19.44)<1,
+    'MSF logo is not aligned to the top-left margin');
   assert(Math.abs(geometry.logo.top-8.64)<1,'MSF logo top margin changed');
-  assert(geometry.logo.left>geometry.posterWidth/2,'MSF logo is not on the right');
+  assert(geometry.logo.right<geometry.posterWidth/2,
+    'MSF logo is not on the left');
   assert(geometry.logo.bottom<=geometry.title.top+1,
     'MSF logo overlaps the main heading');
   assert.equal(geometry.chokkadSource,'/background/chokkad.png',
@@ -195,11 +196,11 @@ try{
   assert(geometry.chokkadLoaded,'Chokkad artwork failed to load');
   assert(geometry.chokkad.width>=226 && geometry.chokkad.width<=228,
     'Chokkad artwork should be 21% of the 1080px poster width');
-  assert(Math.abs(geometry.chokkad.left-19.44)<1,
-    'Chokkad artwork is not aligned to the top-left margin');
+  assert(Math.abs(geometry.posterWidth-geometry.chokkad.right-19.44)<1,
+    'Chokkad artwork is not aligned to the top-right margin');
   assert(Math.abs(geometry.chokkad.top-8.64)<1,'Chokkad artwork top margin changed');
-  assert(geometry.chokkad.right<geometry.posterWidth/2,
-    'Chokkad artwork is not on the left');
+  assert(geometry.chokkad.left>geometry.posterWidth/2,
+    'Chokkad artwork is not on the right');
   assert(geometry.chokkad.bottom<=geometry.title.top+1,
     'Chokkad artwork overlaps the main heading');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
