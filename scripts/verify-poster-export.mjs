@@ -146,18 +146,13 @@ try{
       leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
-      chokkad:sel('.ref-unit-corner-image'),
+      removedChokkad:poster.querySelector('.ref-unit-corner-image')===null,
       removedWordmark:poster.querySelector('.ref-strength-wordmark')===null,
       background:getComputedStyle(poster).backgroundImage,
       mainTitle:poster.querySelector('.ref-title h1')?.textContent,
       committee:poster.querySelector('.ref-title p')?.textContent,
       leaderFrames,officerGroups,executiveRows,frameBounds,
       posterWidth:root.width,posterHeight:root.height,
-      chokkadArtwork:poster.querySelector('.ref-unit-corner-image')?.getAttribute('src'),
-      chokkadArtworkLoaded:(()=>{
-        const image=poster.querySelector('.ref-unit-corner-image');
-        return !!image && image.complete && image.naturalWidth>0;
-      })(),
       topRightTextRemoved:poster.querySelector('.ref-unit-corner-label')===null,
       footerArtwork:poster.querySelector('.ref-footer-artwork')?.getAttribute('src'),
       footerArtworkLoaded:(()=>{
@@ -185,11 +180,8 @@ try{
     'Enlarged MSF logo overlaps the main heading');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
-  assert.equal(geometry.chokkadArtwork,'/background/chokkad.png','Chokkad image path changed');
-  assert(geometry.chokkadArtworkLoaded,'Chokkad header PNG failed to load');
+  assert(geometry.removedChokkad,'Chokkad header image must be removed');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
-  assert(geometry.chokkad.top>=0&&geometry.chokkad.right<=geometry.posterWidth+1,
-    'Chokkad header artwork is outside the poster');
   assert.equal(geometry.footerArtwork,'/background/congratulations.png','Congratulations image path changed');
   assert(geometry.footerArtworkLoaded,'Congratulations PNG failed to load');
   assert.equal(geometry.footerText,'','Old greeting or Instagram footer text remains');
