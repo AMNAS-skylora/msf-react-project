@@ -344,6 +344,42 @@ try{
   const populatedExport=await makeExport(page);
   assert.equal(populatedExport.width,1080);
   assert.equal(populatedExport.height,1350);
+  // Upload regression: a wide committee photo should be visible instantly,
+  // without an AI network call, cropped by user choice instead of silently.
+  const widePng=await page.evaluate(()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=1200;canvas.height=600;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#bc8c55';ctx.fillRect(0,0,1200,600);
+    ctx.fillStyle='#244b39';ctx.fillRect(0,250,1200,350);
+    return canvas.toDataURL('image/png');
+  });
+  await page.locator('.person-editor input[type="file"]').first().setInputFiles({
+    name:'preview-landscape.png',
+    mimeType:'image/png',
+    buffer:Buffer.from(widePng.split(',')[1],'base64'),
+  });
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('.ref-primary-leadership .ref-portrait img');
+    return !!img && img.complete && img.naturalWidth===1200;
+  });
+  const selectedImage=page.locator('.ref-primary-leadership .ref-portrait img').first();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'contain',
+    'Wide uploaded photo should initially fit completely in the poster frame');
+  await page.getByRole('button',{name:'Fill Frame'}).click();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'cover',
+    'Fill Frame did not update the live poster');
+  await page.getByRole('button',{name:'Show Full Photo'}).click();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'contain',
+    'Show Full Photo did not update the live poster');
+  await page.getByRole('button',{name:'Flip photo horizontally'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('scaleX(-1)'),
+    'Flipping the photo did not update the live poster');
+  await page.getByRole('button',{name:'Done'}).click();
+  const fittedExport=await makeExport(page);
+  assert.equal(fittedExport.width,1080);
+  assert.equal(fittedExport.height,1350);
+  console.log('Live upload, auto-fit, Fill/Full Photo, Flip and PNG smoke test passed.');
   console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;
