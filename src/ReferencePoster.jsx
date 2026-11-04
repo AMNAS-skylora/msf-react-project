@@ -91,6 +91,12 @@ export default function ReferencePoster({
       <div className="ref-brand" aria-label="MSF logo">
         <img className="ref-brand-strength-logo" src="/background/logo.png" alt="MSF committee logo" draggable={false} />
       </div>
+      <img
+        className="ref-unit-corner-image"
+        src="/background/chokkad.png"
+        alt="ചോക്കാട്"
+        draggable={false}
+      />
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
