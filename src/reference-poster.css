@@ -304,7 +304,7 @@
   font-size: 1.25cqw;
   line-height: 1.08;
 }
-/* Plain Malayalam greeting, without the removed congratulations artwork. */
+/* Congratulations PNG artwork in the footer; no duplicate text or overlay. */
 .frame .ref-poster .ref-footer {
   position: absolute;
   z-index: 4;
@@ -322,12 +322,13 @@
   box-shadow: none;
   padding: 0;
 }
-.frame .ref-poster .ref-footer-greeting {
-  font-family: "Noto Sans Malayalam", "Manjari", sans-serif;
-  font-size: 3.2cqw;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #f4ffdf;
+/* Actual artwork dimensions and centering are managed by msf-strength-premium.css. */
+.frame .ref-poster .ref-footer-artwork {
+  display: block;
+  width: 42cqw;
+  max-width: 94%;
+  height: auto;
+  object-fit: contain;
 }
 .frame .ref-extra-header {
   position: absolute;
