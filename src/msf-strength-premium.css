@@ -414,3 +414,40 @@
   border-radius: 50%;
   background: currentColor;
 }
+
+/* Footer redesign: left-aligned greeting and Instagram signature. */
+.frame .ref-poster .ref-footer {
+  left: 6%;
+  width: 88%;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  gap: .45cqw;
+  bottom: .8%;
+}
+.frame .ref-poster .ref-footer-greeting {
+  width: 100%;
+  text-align: left;
+  font-family: "Anek Malayalam", "Noto Sans Malayalam", sans-serif !important;
+  font-size: 4.35cqw;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.frame .ref-poster .ref-footer-instagram {
+  justify-content: flex-start;
+  font-size: 1.8cqw;
+  gap: .7cqw;
+  margin-left: .25cqw;
+}
+.frame .ref-poster .ref-footer-instagram-icon {
+  width: 1.9cqw;
+  height: 1.9cqw;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.frame .ref-poster .ref-footer-instagram-icon::before,
+.frame .ref-poster .ref-footer-instagram-icon::after {
+  content: none;
+}
