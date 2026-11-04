@@ -105,8 +105,10 @@ try{
   assert(Math.abs(bounds.height-1350)<1,'Preview is not 1350px high: '+bounds.height);
 
   // The removed STRENGTH artwork must not appear in the poster.
-  assert.equal(await page.locator('.ref-brand-strength-logo, .ref-strength-wordmark').count(),0,
-    'Removed STRENGTH artwork is still present.');
+  assert.equal(await page.locator('.ref-strength-wordmark').count(),0,
+    'Removed STRENGTH wordmark is still present.');
+  assert.equal(await page.locator('.ref-brand-strength-logo').count(),1,
+    'Centered MSF committee logo is missing.');
 
   // Premium MSF geometry: verify the generated sections still fit inside
   // the fixed poster artboard and the original member order/slots survive.
@@ -163,7 +165,7 @@ try{
   assert(geometry.background.includes('msf_background.png'),'Original meeting photo removed');
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
-  assert(geometry.committee?.includes('പഞ്ചായത്ത് കമ്മിറ്റി'),'Panchayat committee title missing');
+  assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert.equal(geometry.footerText,'അഭിവാദ്യങ്ങൾ');
   assert.equal(geometry.titleColor,'rgb(244, 207, 56)');
   assert(geometry.title.bottom<=geometry.leaders.top+1,'Main title overlaps the primary leaders');
