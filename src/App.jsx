@@ -367,7 +367,8 @@ export default function App() {
       originalCutout:transparent,
       cutout:transparent,
       photoMode:'inside',
-      photoZoom:1,photoX:0,photoY:0
+      photoZoom:1,photoX:0,photoY:0,
+      flipHorizontal:false,flipVertical:false
     };
   }
   const portraitGesture=useRef({
@@ -674,6 +675,15 @@ export default function App() {
     const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
     patchPortrait(role,index,{photoY:next});
   }
+  // Flip the selected member photo without modifying the uploaded image bytes.
+  // The saved flags are applied to the actual poster <img>, so PNG export
+  // matches the editor and the original file stays available for reset.
+  function flipSelectedPortrait(role,index,axis) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const key=axis==='vertical'?'flipVertical':'flipHorizontal';
+    patchPortrait(role,index,{[key]:!member[key]});
+  }
   async function removeSelectedPortraitBackground() {
     if(!photoEdit||busy!==-1)return;
     const {role,index}=photoEdit;
@@ -708,6 +718,7 @@ export default function App() {
       cutout:member.originalCutout??false,
       photoMode:'inside',
       photoZoom:1,photoX:0,photoY:0,
+      flipHorizontal:false,flipVertical:false,
     });
     setMessage('');
   }
@@ -969,6 +980,20 @@ export default function App() {
             disabled={(Number(person.photoY)||0)<=-80} aria-label="Raise photo upwards">↑ Raise</button>
           <button type="button" onClick={()=>raiseSelectedPortrait(role,index,1)}
             disabled={(Number(person.photoY)||0)>=80} aria-label="Lower photo downwards">↓ Lower</button>
+        </div>
+        <div className="inline-photo-flip" role="group" aria-label="Flip selected photo">
+          <button type="button" aria-label="Flip photo horizontally"
+            aria-pressed={!!person.flipHorizontal}
+            className={person.flipHorizontal?'is-active':''}
+            onClick={()=>flipSelectedPortrait(role,index,'horizontal')}>
+            ↔ Flip Horizontal
+          </button>
+          <button type="button" aria-label="Flip photo vertically"
+            aria-pressed={!!person.flipVertical}
+            className={person.flipVertical?'is-active':''}
+            onClick={()=>flipSelectedPortrait(role,index,'vertical')}>
+            ↕ Flip Vertical
+          </button>
         </div>
         {showPhotoTools&&<div className="inline-photo-toolbar-buttons">
           <button type="button" className={person.photoMode!=='popout'?'is-active':''}
