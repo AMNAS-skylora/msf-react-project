@@ -142,7 +142,8 @@ try{
         rightGap:last?r.right-last.right:0,
         widths:cards.map(c=>c.getBoundingClientRect().width)};
     });
-    return {title:sel('.ref-title'),leaders:sel('.ref-primary-leadership'),
+    return {title:sel('.ref-title'),logo:sel('.ref-brand'),
+      leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
       chokkad:sel('.ref-unit-corner-image'),
@@ -176,6 +177,12 @@ try{
   assert(geometry.removedWordmark,'Removed STRENGTH wordmark reappeared');
   assert(geometry.background.includes('msf_background.png'),'Original meeting photo removed');
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
+  assert(geometry.logo.width>=280 && geometry.logo.width<=282,
+    'Centered MSF logo should be 26% of the 1080px poster width');
+  assert(Math.abs((geometry.logo.left+geometry.logo.right)/2 - geometry.posterWidth/2)<1,
+    'MSF logo is not centered');
+  assert(geometry.logo.bottom<=geometry.title.top+1,
+    'Enlarged MSF logo overlaps the main heading');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert.equal(geometry.chokkadArtwork,'/background/chokkad.png','Chokkad image path changed');
