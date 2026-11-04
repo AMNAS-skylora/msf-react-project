@@ -289,19 +289,19 @@
 /* No aspect-ratio or viewport breakpoints: the complete 1080×1350 design
    scales as one image inside the existing .frame on every device. */
 
-/* Two balanced header images: Chokkad artwork left, large MSF logo right.
-   All dimensions scale with the 1080x1350 poster artboard. */
+/* Header art placement: logo.png LEFT, chokkad.png RIGHT.
+   Size and positions scale with the fixed 1080x1350 poster artboard. */
 .frame .ref-poster .ref-brand {
   position: absolute;
   z-index: 8;
   top: .8cqw;
-  right: 1.8cqw;
-  left: auto;
+  left: 1.8cqw;
+  right: auto;
   width: 30cqw;
   max-width: 30cqw;
   height: auto;
   transform: none;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: flex-start;
 }
 .frame .ref-poster .ref-brand-strength-logo {
@@ -310,20 +310,20 @@
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  object-position: top right;
+  object-position: top left;
 }
 .frame .ref-poster .ref-unit-corner-image {
   position: absolute;
   z-index: 7;
   top: .8cqw;
-  left: 1.8cqw;
-  right: auto;
+  right: 1.8cqw;
+  left: auto;
   width: 21cqw;
   max-width: 21cqw;
   height: auto;
   max-height: 20cqw;
   object-fit: contain;
-  object-position: top left;
+  object-position: top right;
   background: transparent;
   pointer-events: none;
   user-select: none;
