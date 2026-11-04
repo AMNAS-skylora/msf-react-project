@@ -331,12 +331,12 @@
 .frame .ref-poster .ref-unit-corner-image {
   position: absolute;
   z-index: 7;
-  top: 1.4cqw;
-  right: 2.4cqw;
-  width: 16cqw;
-  max-width: 16cqw;
+  top: 1cqw;
+  right: 1.5cqw;
+  width: 24cqw;
+  max-width: 24cqw;
   height: auto;
-  max-height: 13.2cqw;
+  max-height: 21cqw;
   object-fit: contain;
   object-position: top right;
   background: transparent;
