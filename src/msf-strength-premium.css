@@ -358,11 +358,16 @@
   font-size: 1.65cqw;
 }
 /* A slightly larger upload area without changing the three-column layout. */
+.frame .ref-poster.ref-first-page .ref-primary-leadership {
+  left: 14%;
+  width: 72%;
+  gap: 2%;
+}
 .frame .ref-poster.ref-first-page .ref-primary-leadership .ref-profile-leader .ref-portrait {
-  width: 98%;
-  max-width: 98%;
-  flex-basis: 73%;
-  height: 73%;
+  width: 100%;
+  max-width: 100%;
+  flex: 0 0 76%;
+  height: 76%;
 }
 /* Small Instagram signature below the greeting, no artwork panel. */
 .frame .ref-poster .ref-footer {
