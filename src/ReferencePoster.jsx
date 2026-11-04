@@ -1,4 +1,4 @@
-import { Camera, Instagram } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
 function splitName(person = {}) {
@@ -186,12 +186,13 @@ export default function ReferencePoster({
         </div>
       </section>
 
-      <footer className="ref-footer" aria-label="Congratulations">
-        <span className="ref-footer-greeting">അഭിവാദ്യങ്ങൾ</span>
-        <span className="ref-footer-instagram" aria-label="Instagram msf_chokkad_panchayath">
-          <Instagram className="ref-footer-instagram-icon" aria-hidden="true" strokeWidth={2.2} />
-          <span>msf_chokkad_panchayath</span>
-        </span>
+      <footer className="ref-footer" aria-label="Congratulations artwork">
+        <img
+          className="ref-footer-artwork"
+          src="/background/congratulations.png"
+          alt="MSF congratulations"
+          draggable={false}
+        />
       </footer>
     </div>
   );
