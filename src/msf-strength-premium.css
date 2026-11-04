@@ -309,14 +309,15 @@
 /* No aspect-ratio or viewport breakpoints: the complete 1080×1350 design
    scales as one image inside the existing .frame on every device. */
 
-/* Committee identity: centered transparent logo and discreet right-side unit name. */
+/* Larger centered MSF logo (public/background/logo.png).
+   Keep the full artwork above the first-page title at 1080x1350. */
 .frame .ref-poster .ref-brand {
   position: absolute;
-  top: 1.4cqw;
+  top: .5cqw;
   left: 50%;
   right: auto;
-  width: 19cqw;
-  max-width: 19cqw;
+  width: 26cqw;
+  max-width: 26cqw;
   transform: translateX(-50%);
   z-index: 8;
 }
