@@ -46,7 +46,10 @@ function Portrait({ person, onClick, role, type = 'member', selectionRole, selec
             src={person.photo}
             alt={person.name || role}
             draggable={false}
-            style={{transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1}) scaleX(${person.flipHorizontal ? -1 : 1}) scaleY(${person.flipVertical ? -1 : 1})`}}
+            style={{
+              transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1}) scaleX(${person.flipHorizontal ? -1 : 1}) scaleY(${person.flipVertical ? -1 : 1})`,
+              objectFit:isCutout?'contain':(person.photoFit==='contain'?'contain':'cover'),
+            }}
           />
           : <Camera className="ref-camera-placeholder" size={22} aria-hidden="true" />}
         {person.photo && editingPhoto?.role===selectionRole && editingPhoto?.index===selectionIndex &&
