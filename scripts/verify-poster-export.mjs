@@ -108,7 +108,7 @@ try{
   assert.equal(await page.locator('.ref-strength-wordmark').count(),0,
     'Removed STRENGTH wordmark is still present.');
   assert.equal(await page.locator('.ref-brand-strength-logo').count(),1,
-    'Centered MSF committee logo is missing.');
+    'MSF committee logo is missing.');
 
   // Premium MSF geometry: verify the generated sections still fit inside
   // the fixed poster artboard and the original member order/slots survive.
@@ -143,10 +143,19 @@ try{
         widths:cards.map(c=>c.getBoundingClientRect().width)};
     });
     return {title:sel('.ref-title'),logo:sel('.ref-brand'),
+      chokkad:sel('.ref-unit-corner-image'),
       leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
-      removedChokkad:poster.querySelector('.ref-unit-corner-image')===null,
+      chokkadSource:poster.querySelector('.ref-unit-corner-image')?.getAttribute('src'),
+      chokkadLoaded:(()=>{
+        const image=poster.querySelector('.ref-unit-corner-image');
+        return !!image && image.complete && image.naturalWidth>0;
+      })(),
+      logoLoaded:(()=>{
+        const image=poster.querySelector('.ref-brand-strength-logo');
+        return !!image && image.complete && image.naturalWidth>0;
+      })(),
       removedWordmark:poster.querySelector('.ref-strength-wordmark')===null,
       background:getComputedStyle(poster).backgroundImage,
       mainTitle:poster.querySelector('.ref-title h1')?.textContent,
@@ -172,15 +181,29 @@ try{
   assert(geometry.removedWordmark,'Removed STRENGTH wordmark reappeared');
   assert(geometry.background.includes('msf_background.png'),'Original meeting photo removed');
   assert(geometry.background.includes('linear-gradient'),'Cinematic gradient was not applied');
-  assert(geometry.logo.width>=280 && geometry.logo.width<=282,
-    'Centered MSF logo should be 26% of the 1080px poster width');
-  assert(Math.abs((geometry.logo.left+geometry.logo.right)/2 - geometry.posterWidth/2)<1,
-    'MSF logo is not centered');
+  assert(geometry.logoLoaded,'MSF logo failed to load');
+  assert(geometry.logo.width>=323 && geometry.logo.width<=325,
+    'Right-side MSF logo should be 30% of the 1080px poster width');
+  assert(Math.abs(geometry.posterWidth-geometry.logo.right-19.44)<1,
+    'MSF logo is not aligned to the top-right margin');
+  assert(Math.abs(geometry.logo.top-8.64)<1,'MSF logo top margin changed');
+  assert(geometry.logo.left>geometry.posterWidth/2,'MSF logo is not on the right');
   assert(geometry.logo.bottom<=geometry.title.top+1,
-    'Enlarged MSF logo overlaps the main heading');
+    'MSF logo overlaps the main heading');
+  assert.equal(geometry.chokkadSource,'/background/chokkad.png',
+    'Chokkad image source missing or changed');
+  assert(geometry.chokkadLoaded,'Chokkad artwork failed to load');
+  assert(geometry.chokkad.width>=226 && geometry.chokkad.width<=228,
+    'Chokkad artwork should be 21% of the 1080px poster width');
+  assert(Math.abs(geometry.chokkad.left-19.44)<1,
+    'Chokkad artwork is not aligned to the top-left margin');
+  assert(Math.abs(geometry.chokkad.top-8.64)<1,'Chokkad artwork top margin changed');
+  assert(geometry.chokkad.right<geometry.posterWidth/2,
+    'Chokkad artwork is not on the left');
+  assert(geometry.chokkad.bottom<=geometry.title.top+1,
+    'Chokkad artwork overlaps the main heading');
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
-  assert(geometry.removedChokkad,'Chokkad header image must be removed');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
   assert.equal(geometry.footerArtwork,'/background/congratulations.png','Congratulations image path changed');
   assert(geometry.footerArtworkLoaded,'Congratulations PNG failed to load');
