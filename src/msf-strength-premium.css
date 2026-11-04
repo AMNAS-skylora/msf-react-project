@@ -308,3 +308,45 @@
 
 /* No aspect-ratio or viewport breakpoints: the complete 1080×1350 design
    scales as one image inside the existing .frame on every device. */
+
+/* Committee identity: centered transparent logo and discreet right-side unit name. */
+.frame .ref-poster .ref-brand {
+  position: absolute;
+  top: 1.4cqw;
+  left: 50%;
+  right: auto;
+  width: 19cqw;
+  max-width: 19cqw;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+.frame .ref-poster .ref-brand-strength-logo {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+.frame .ref-poster .ref-unit-corner-label {
+  position: absolute;
+  z-index: 7;
+  top: 2.4cqw;
+  right: 2.5cqw;
+  max-width: 27cqw;
+  color: #f6f0da;
+  font: 600 1.55cqw/1.45 "Noto Sans Malayalam", "Manjari", sans-serif;
+  text-align: right;
+  text-shadow: 0 .16cqw .5cqw rgba(0, 18, 8, .65);
+}
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait:not(.ref-portrait-popout) {
+  background: #d8eb8b !important;
+  box-shadow: inset 0 0 0 .16cqw #f6f0da, 0 .2cqw .65cqw rgba(3,20,11,.3) !important;
+}
+.frame .ref-poster .ref-primary-leadership .ref-profile-leader .ref-portrait .ref-camera-placeholder {
+  color: #335b28;
+}
+.frame .ref-poster .ref-title h1,
+.frame .ref-poster .ref-title p,
+.frame .ref-poster .ref-footer-greeting,
+.frame .ref-poster .ref-profile-name {
+  font-family: "Noto Sans Malayalam", "Manjari", "Nirmala UI", sans-serif !important;
+}
