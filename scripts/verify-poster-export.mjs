@@ -215,8 +215,8 @@ try{
     assert.equal(geometry.optionalSubtext.src,'/background/text.png',
       'Optional text artwork has an unexpected source');
     assert(geometry.optionalSubtext.loaded,'Optional text artwork did not load');
-    assert(geometry.optionalSubtext.opacity<=.4,
-      'Optional text artwork is too opaque');
+    assert(geometry.optionalSubtext.opacity>=.99,
+      'Optional text artwork should be fully opaque');
     assert(geometry.optionalSubtext.bounds.top>=geometry.chokkad.bottom,
       'Optional text artwork is not placed beneath Chokkad');
     assert(geometry.optionalSubtext.bounds.right<=geometry.posterWidth+1,
@@ -382,7 +382,11 @@ try{
   });
   const selectedImage=page.locator('.ref-primary-leadership .ref-portrait img').first();
   assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'contain',
-    'Wide uploaded photo should initially fit completely in the poster frame');
+    'Uploaded photo should initially fit completely in the poster frame');
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).opacity),'1',
+    'Uploaded photo must be fully opaque');
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).filter),'none',
+    'Uploaded photo must not have a color filter');
   await page.getByRole('button',{name:'Fill Frame'}).click();
   assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'cover',
     'Fill Frame did not update the live poster');
@@ -405,7 +409,31 @@ try{
   const fittedExport=await makeExport(page);
   assert.equal(fittedExport.width,1080);
   assert.equal(fittedExport.height,1350);
-  console.log('Live upload, auto-fit, horizontal movement, Flip and PNG smoke test passed.');
+  // Enlarge the preview artboard for a pixel-level export comparison after
+  // upload, flipping and moving the photo. This catches green/blurred/faded
+  // photos or a snapshot that differs from the visible editor.
+  await page.setViewportSize({width:1920,height:1800});
+  await page.evaluate(()=>{
+    const stage=document.querySelector('.workspace .poster-edit-stage');
+    const workspace=document.querySelector('.workspace');
+    workspace.style.setProperty('max-width','2000px','important');
+    stage.style.setProperty('width','1080px','important');
+    stage.style.setProperty('max-width','1080px','important');
+  });
+  const postUploadBounds=await frame.boundingBox();
+  const postUploadScreenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
+  const postUploadExport=await makeExport(page);
+  const postUploadImage=await selectedImage.boundingBox();
+  const uploadedRegion={
+    x:Math.max(0,Math.floor(postUploadImage.x-postUploadBounds.x)-2),
+    y:Math.max(0,Math.floor(postUploadImage.y-postUploadBounds.y)-2),
+    right:Math.min(1080,Math.ceil(postUploadImage.x-postUploadBounds.x+postUploadImage.width)+2),
+    bottom:Math.min(1350,Math.ceil(postUploadImage.y-postUploadBounds.y+postUploadImage.height)+2)
+  };
+  const parity=compareImages(postUploadScreenshot,postUploadExport,uploadedRegion);
+  assert(parity.averageRGBDiff<32,
+    'Uploaded photo colors/position in exported PNG differ from preview.');
+  console.log('Live upload, full opacity, fit, flip, horizontal movement and PNG parity passed.');
   console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;
