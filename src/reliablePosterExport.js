@@ -70,6 +70,27 @@ function imageFitPosition(value){
   return {x:read(tokens[0]),y:read(tokens[1])};
 }
 
+// In the Safari compatibility renderer, reproduce the image's preview
+// translation, zoom and horizontal/vertical flips. getBoundingClientRect()
+// alone loses the flip direction (and bakes zoom into the destination box),
+// which is why old fallback PNGs could differ from the on-screen poster.
+function drawPreviewImage(ctx,image,frameBounds,scaleX,scaleY,css){
+  const rect=image.getBoundingClientRect();
+  const width=image.offsetWidth*scaleX;
+  const height=image.offsetHeight*scaleY;
+  if(!width||!height)return;
+  const matrix=css.transform&&css.transform!=='none'
+    ? new DOMMatrix(css.transform) : new DOMMatrix();
+  // A CSS transform around the center moves the bounding-box center by e/f.
+  // Recreate its original center, then apply exactly the same CSS matrix.
+  const centerX=(rect.left+rect.width/2-frameBounds.left-matrix.e)*scaleX;
+  const centerY=(rect.top+rect.height/2-frameBounds.top-matrix.f)*scaleY;
+  ctx.translate(centerX,centerY);
+  ctx.transform(matrix.a,matrix.b,matrix.c,matrix.d,
+    matrix.e*scaleX,matrix.f*scaleY);
+  drawFittedImage(ctx,image,{x:-width/2,y:-height/2,w:width,h:height},css);
+}
+
 function drawFittedImage(ctx,image,dest,css){
   const nw=image.naturalWidth,nh=image.naturalHeight;
   if(!nw||!nh||dest.w<=0||dest.h<=0)return;
@@ -442,9 +463,11 @@ export async function makeReliablePosterBlob(frame,options={}){
     const css=getComputedStyle(image);
     if(css.display==='none'||css.visibility==='hidden'||Number(css.opacity)===0)continue;
     const photoFrame=image.closest('.ref-portrait');
-    const sourceRect=image.getBoundingClientRect();
-    const dest=rectRelative(sourceRect,bounds,scaleX,scaleY);
     context.save();
+    // An image opacity of 0.3 must not turn into 1.0 in the fallback PNG.
+    // Portrait photo CSS is intentionally fully opaque; preserve any other
+    // art image opacity from the live preview.
+    context.globalAlpha=Math.max(0,Math.min(1,Number(css.opacity)||0));
     if(photoFrame){
       const frameRect=rectRelative(photoFrame.getBoundingClientRect(),bounds,scaleX,scaleY);
       if(photoFrame.classList.contains('ref-portrait-popout')){
@@ -456,7 +479,7 @@ export async function makeReliablePosterBlob(frame,options={}){
       }
     }
     try{
-      drawFittedImage(context,image,dest,css);
+      drawPreviewImage(context,image,bounds,scaleX,scaleY,css);
     }catch(error){
       context.restore();
       throw new Error('Could not draw an uploaded poster photo: '+(error?.message||'Unknown error'));
