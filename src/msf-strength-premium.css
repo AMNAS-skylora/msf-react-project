@@ -350,10 +350,12 @@
   width: 100%;
   max-width: 100%;
   height: auto;
-  max-height: 8cqw;
+  max-height: 12cqw;
   object-fit: contain;
   object-position: top right;
   opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
   pointer-events: none;
   user-select: none;
 }
