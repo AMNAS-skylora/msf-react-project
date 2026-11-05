@@ -453,6 +453,8 @@ try{
       }
     });
   });
+  // Keep the UI test lightweight; selected PNG remains a real exported file.
+  await page.locator('#msf-poster-export-quality').selectOption('standard-png');
   await page.getByRole('button',{name:'Share Poster'}).click();
   await page.getByRole('button',{name:'Open phone share sheet for poster image'}).click();
   const nativeShare=await page.evaluate(()=>window.__msfNativeShare);
