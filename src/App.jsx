@@ -843,6 +843,10 @@ export default function App() {
   async function sharePoster(intent='share'){
     setShareIntent(intent);
     if(exporting||!validateCommitteeLimits())return;
+    // Never leave an older, potentially incomplete PNG in the preview.
+    setShareOpen(false);
+    setShareFiles([]);
+    setShareError('');
     setExporting(true);
     setMessage('');
     const preset=getPosterExportPreset(exportPreset);
@@ -861,7 +865,12 @@ export default function App() {
       setShareIndex(Math.min(posterPage,items.length-1));
       setShareOpen(true);
     }catch(error){
-      setMessage('Unable to prepare poster image: '+(error?.message||'Please try again.'));
+      const reason=error?.message||'Please try again.';
+      setMessage('Poster was not saved because an image could be missing. '+reason+
+        ' Try Standard PNG (1080 × 1350) on iPhone, then share again.');
+      // Keep the message visible next to the actual export buttons, not only
+      // in the bottom editor panel which can be offscreen on mobile.
+      setShareError(reason);
     }finally{setExporting(false);}
   }
   function closeSharePreview(){
@@ -909,6 +918,9 @@ export default function App() {
         <button type="button" onClick={download} disabled={exporting}><Download size={17}/> {exporting?"Preparing…":"Download"}</button>
         <button type="button" onClick={()=>sharePoster('share')} disabled={exporting}>Share Poster</button>
       </div>
+      {shareError&&!shareOpen&&<p className="poster-export-error" role="alert">
+        Poster image incomplete: {shareError} Try Standard PNG and export again.
+      </p>}
     </div>
     
     {posterPageCount>1&&<div className="poster-pagination" aria-label="Poster pages"><span>Poster page · {posterPage+1} of {posterPageCount}</span><div><button type="button" disabled={posterPage===0} onClick={()=>setPosterPage(v=>Math.max(0,v-1))}>Previous</button><button type="button" disabled={posterPage>=posterPageCount-1} onClick={()=>setPosterPage(v=>Math.min(posterPageCount-1,v+1))}>Next page</button></div></div>}
