@@ -36,12 +36,19 @@ function trimInvisibleArtwork(image) {
   const y=Math.max(0,Math.floor((top-pad)/scale));
   const endX=Math.min(image.naturalWidth,Math.ceil((right+1+pad)/scale));
   const endY=Math.min(image.naturalHeight,Math.ceil((bottom+1+pad)/scale));
+  // The displayed right-side art is only 227px wide. Bound the generated
+  // canvas to 1600px on its longest side to keep iPhone memory use modest
+  // without sacrificing the high-resolution poster export.
+  const cropWidth=endX-x,cropHeight=endY-y;
+  const outputScale=Math.min(1,1600/Math.max(cropWidth,cropHeight));
   const trimmed=document.createElement('canvas');
-  trimmed.width=Math.max(1,endX-x);
-  trimmed.height=Math.max(1,endY-y);
+  trimmed.width=Math.max(1,Math.round(cropWidth*outputScale));
+  trimmed.height=Math.max(1,Math.round(cropHeight*outputScale));
   const out=trimmed.getContext('2d');
   if(!out)return OPTIONAL_HEADER_TEXT;
-  out.drawImage(image,x,y,trimmed.width,trimmed.height,
+  out.imageSmoothingEnabled=true;
+  out.imageSmoothingQuality='high';
+  out.drawImage(image,x,y,cropWidth,cropHeight,
     0,0,trimmed.width,trimmed.height);
   return trimmed.toDataURL('image/png');
 }
