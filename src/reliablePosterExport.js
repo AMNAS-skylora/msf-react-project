@@ -488,22 +488,23 @@ export async function makeReliablePosterBlob(frame,options={}){
   const scaleX=WIDTH/bounds.width,scaleY=HEIGHT/bounds.height;
   const backgroundImage=await loadPosterBackground(frame);
 
-  // The preview itself is the source of truth: capture the entire DOM,
-  // including background, every uploaded photo, logo, footer and transforms,
-  // at the selected output resolution. No image re-positioning afterwards.
-  try{
-    const exact=await exactPreviewSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT},backgroundImage);
-    assertImagesInSnapshot(exact,images,bounds,scaleX,scaleY);
-    const blob=await new Promise((resolve,reject)=>{
-      exact.toBlob(value=>value?resolve(value):reject(new Error('Poster encoding failed')),mime,quality);
-    });
-    if(!blob.size)throw new Error('Downloaded poster was empty.');
-    if(blob.type && blob.type!==mime)throw new Error('The chosen poster format is unsupported.');
-    return blob;
-  }catch(error){
-    // Safari's foreignObject implementation sometimes omits poster assets.
-    // Keep a usable fallback instead of delivering an empty or white poster.
-    console.warn('Full-fidelity poster capture unavailable; using compatibility export:',error);
+  // The preview is the source of truth. On iPhone Safari foreignObject can
+  // yield a valid green/text-only PNG while silently dropping all <img> tags.
+  // Reject that bitmap and rebuild its image layers from actual DOM pixels.
+  // forceNativeFallback exists for the browser regression test only.
+  if(!options.forceNativeFallback){
+    try{
+      const exact=await exactPreviewSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT},backgroundImage);
+      assertImagesInSnapshot(exact,images,bounds,scaleX,scaleY);
+      const blob=await new Promise((resolve,reject)=>{
+        exact.toBlob(value=>value?resolve(value):reject(new Error('Poster encoding failed')),mime,quality);
+      });
+      if(!blob.size)throw new Error('Downloaded poster was empty.');
+      if(blob.type && blob.type!==mime)throw new Error('The chosen poster format is unsupported.');
+      return blob;
+    }catch(error){
+      console.warn('Poster bitmap omitted artwork; rebuilding from real images:',error);
+    }
   }
 
   // Legacy compatibility export: first paint vector artwork without <img>,
@@ -511,7 +512,9 @@ export async function makeReliablePosterBlob(frame,options={}){
   frame.classList.add('msf-export-transparent-background');
   let canvas;
   try{
-    canvas=await artworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT});
+    canvas=options.forceNativeFallback
+      ?await nativeArtworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT})
+      :await artworkSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT});
   }finally{
     frame.classList.remove('msf-export-transparent-background');
   }
