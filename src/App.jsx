@@ -870,31 +870,29 @@ export default function App() {
     setShareError('');
     setShareIndex(0);
   }
-  const posterShareCaption = [
-    '_ചലനാത്മക വിദ്യാർത്ഥിത്വം.. ചടുലമാം മുന്നേറ്റം..!_',
-    '*IMPULSO*',
-    'MSF ചോക്കാട് പഞ്ചായത്ത് കമ്മിറ്റി സംഘടനാ ശാക്തീകരണ ക്യാമ്പയിൻ "IMPULSO"',
-    `${String(unitName||'ചോക്കാട്').trim()} യൂണിറ്റ് MSF കമ്മിറ്റി പുനഃസംഘടിപ്പിച്ചു.`,
-    'പുതിയ ഭാരവാഹികൾക്ക് അഭിവാദ്യങ്ങൾ 💚',
-    'MSF Chokkad Panchayath Committee 💚'
-  ].join('\n\n');
   function sharePreparedPoster(){
     const chosen=shareFiles[shareIndex];
     if(!chosen)return;
     const files=[chosen.file];
+    setShareError('');
     try{
-      // Called synchronously from a user tap; no async PNG rendering before
-      // navigator.share, so Safari retains the required user activation.
-      if(navigator.share&&(!navigator.canShare||navigator.canShare({files}))){
-        navigator.share({files,title:'MSF Chokkad Panchayath Committee',text:posterShareCaption}).catch(error=>{
-          if(error?.name!=='AbortError')setShareError('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+      // Native iOS / Android share sheet: send the actual poster image File.
+      // Do not combine files with a text caption: iOS Safari can share only
+      // the text to some targets (including WhatsApp), losing the image.
+      // This call must be synchronous inside the user's tap. PNG creation
+      // already finished before this button became available.
+      if(typeof navigator.share==='function'&&
+        typeof navigator.canShare==='function'&&navigator.canShare({files})){
+        Promise.resolve(navigator.share({files})).catch(error=>{
+          if(error?.name!=='AbortError')setShareError(
+            'Could not open the system share sheet. Download the image or press and hold the preview to save it.');
         });
       }else{
-        saveBlob(chosen.file,chosen.file.name);
-        setShareError('Sharing is not available here. PNG downloaded; attach it as an image.');
+        setShareError('Native image sharing is not supported in this browser. Use Download Image or press and hold the poster preview to save/share.');
       }
     }catch(error){
-      setShareError('Sharing failed: '+(error?.message||'Try downloading the PNG.'));
+      if(error?.name!=='AbortError')setShareError(
+        'Could not open the system share sheet. Use Download Image or press and hold the preview.');
     }
   }
   return <main className="app-shell">
@@ -1090,7 +1088,7 @@ export default function App() {
         {shareError&&<p className="poster-share-error" role="alert">{shareError}</p>}
         <p className="poster-share-help">
           {getPosterExportPreset(exportPreset).shortLabel} · {getPosterExportPreset(exportPreset).width} × {getPosterExportPreset(exportPreset).height} px · {fileSizeLabel(shareFiles[shareIndex]?.file.size)}
-          {' — '}ചിത്രം പരിശോധിച്ച് <strong>Download</strong> അമർത്തുക. iPhone-ൽ Photos-ലേക്ക് Save ചെയ്യാൻ <strong>Share Image</strong> ഉപയോഗിക്കാം.
+          {' — '}<strong>Share Image</strong> അമർത്തി ഫോണിന്റെ Share Sheet തുറക്കാം. അവിടെ Save Image ഇല്ലെങ്കിൽ poster image അമർത്തിപ്പിടിച്ച് Save ചെയ്യുക, അല്ലെങ്കിൽ Download Image ഉപയോഗിക്കുക.
         </p>
         <div className="poster-share-actions">
           <a className="poster-share-download"
@@ -1099,7 +1097,8 @@ export default function App() {
             aria-label="Download the displayed poster image">
             <Download size={17}/> Download Image
           </a>
-          <button type="button" className="poster-share-native" onClick={sharePreparedPoster}>Share Image + Caption</button>
+          <button type="button" className="poster-share-native" onClick={sharePreparedPoster}
+            aria-label="Open phone share sheet for poster image">Share Image</button>
         </div>
       </section>
     </div>}
