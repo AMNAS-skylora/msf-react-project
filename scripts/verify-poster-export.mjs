@@ -144,6 +144,12 @@ try{
     });
     return {title:sel('.ref-title'),logo:sel('.ref-brand'),
       chokkad:sel('.ref-unit-corner-image'),
+      optionalSubtext:(()=>{
+        const image=poster.querySelector('.ref-unit-subtext-image');
+        if(!image)return null; // text.png has not yet been uploaded
+        return {src:image.getAttribute('src'),opacity:Number(getComputedStyle(image).opacity),
+          loaded:image.complete&&image.naturalWidth>0,bounds:sel('.ref-unit-subtext-image')};
+      })(),
       leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
@@ -205,6 +211,17 @@ try{
     'Right campaign artwork extends into the central title');
   assert(geometry.chokkad.bottom<=geometry.leaders.top+1,
     'Right campaign artwork overlaps the leadership portraits');
+  if(geometry.optionalSubtext){
+    assert.equal(geometry.optionalSubtext.src,'/background/text.png',
+      'Optional text artwork has an unexpected source');
+    assert(geometry.optionalSubtext.loaded,'Optional text artwork did not load');
+    assert(geometry.optionalSubtext.opacity<=.4,
+      'Optional text artwork is too opaque');
+    assert(geometry.optionalSubtext.bounds.top>=geometry.chokkad.bottom,
+      'Optional text artwork is not placed beneath Chokkad');
+    assert(geometry.optionalSubtext.bounds.right<=geometry.posterWidth+1,
+      'Optional text artwork extends outside the poster');
+  }
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
