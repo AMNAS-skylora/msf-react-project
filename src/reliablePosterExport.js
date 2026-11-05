@@ -110,6 +110,75 @@ function drawFittedImage(ctx,image,dest,css){
   }
 }
 
+// Safari can return a valid PNG blob while silently dropping every <img>
+// (both uploaded data-URL portraits and the logo/header PNGs). Before sharing
+// or saving we verify that the actual source image pixels are present in the
+// generated bitmap. This check uses tiny downscaled tiles rather than making
+// another full-size 3240x4050 canvas on memory-constrained iPhones.
+function imageVisibleInSnapshot(canvas,image,frameBounds,scaleX,scaleY){
+  const css=getComputedStyle(image);
+  if(css.display==='none'||css.visibility==='hidden'||Number(css.opacity)===0)return true;
+  const domRect=image.getBoundingClientRect();
+  const left=Math.max(0,Math.floor((domRect.left-frameBounds.left)*scaleX));
+  const top=Math.max(0,Math.floor((domRect.top-frameBounds.top)*scaleY));
+  const right=Math.min(canvas.width,Math.ceil((domRect.right-frameBounds.left)*scaleX));
+  const bottom=Math.min(canvas.height,Math.ceil((domRect.bottom-frameBounds.top)*scaleY));
+  if(right-left<2||bottom-top<2)return true;
+  const width=Math.max(1,Math.min(144,Math.round(right-left)));
+  const height=Math.max(1,Math.min(144,Math.round(bottom-top)));
+  const sampleCanvas=document.createElement('canvas');
+  const actualCanvas=document.createElement('canvas');
+  sampleCanvas.width=actualCanvas.width=width;
+  sampleCanvas.height=actualCanvas.height=height;
+  const expectedCtx=sampleCanvas.getContext('2d',{willReadFrequently:true});
+  const actualCtx=actualCanvas.getContext('2d',{willReadFrequently:true});
+  if(!expectedCtx||!actualCtx)return false;
+  const tileX=width/(right-left),tileY=height/(bottom-top);
+  expectedCtx.scale(tileX,tileY);
+  expectedCtx.translate(-left,-top);
+  const portrait=image.closest('.ref-portrait');
+  if(portrait){
+    const rect=rectRelative(portrait.getBoundingClientRect(),frameBounds,scaleX,scaleY);
+    if(portrait.classList.contains('ref-portrait-popout')){
+      expectedCtx.beginPath();
+      expectedCtx.rect(rect.x,rect.y-rect.h*.42,rect.w,rect.h*1.42);
+      expectedCtx.clip();
+    }else clipArch(expectedCtx,rect);
+  }
+  try{drawPreviewImage(expectedCtx,image,frameBounds,scaleX,scaleY,css);}
+  catch(error){console.warn('Could not inspect preview photo:',error);return false;}
+  actualCtx.drawImage(canvas,left,top,right-left,bottom-top,0,0,width,height);
+  // getImageData reads backing pixels regardless of the drawing transform.
+  const expectedData=expectedCtx.getImageData(0,0,width,height).data;
+  const actualData=actualCtx.getImageData(0,0,width,height).data;
+  let samples=0,matches=0;
+  for(let y=1;y<height-1;y+=2){
+    for(let x=1;x<width-1;x+=2){
+      const i=(y*width+x)*4;
+      if(expectedData[i+3]<235)continue;
+      samples++;
+      const difference=Math.abs(expectedData[i]-actualData[i])+
+        Math.abs(expectedData[i+1]-actualData[i+1])+
+        Math.abs(expectedData[i+2]-actualData[i+2]);
+      if(difference<130)matches++;
+    }
+  }
+  if(samples<8)return true; // Mostly transparent image: no useful comparison
+  return matches/samples>.26;
+}
+
+function assertImagesInSnapshot(canvas,images,frameBounds,scaleX,scaleY){
+  // Every visible source image must be represented, not just CSS headings.
+  // In particular, don't report "Poster Download Ready" if portraits are
+  // blank or the branded header PNG vanished on iPhone Safari.
+  const missing=images.filter(image=>!imageVisibleInSnapshot(
+    canvas,image,frameBounds,scaleX,scaleY));
+  if(missing.length){
+    throw new Error('Poster export omitted images: '+missing.map(image=>
+      image.className||image.alt||'uploaded portrait').join(', '));
+  }
+}
+
 // The MSF design intentionally has large white areas, so color sampling
 // cannot reliably distinguish a correct render from a missing render.
 // Verify that the SVG capture decodes; missing photos are composited below.
@@ -424,6 +493,7 @@ export async function makeReliablePosterBlob(frame,options={}){
   // at the selected output resolution. No image re-positioning afterwards.
   try{
     const exact=await exactPreviewSnapshot(frame,bounds,{width:WIDTH,height:HEIGHT},backgroundImage);
+    assertImagesInSnapshot(exact,images,bounds,scaleX,scaleY);
     const blob=await new Promise((resolve,reject)=>{
       exact.toBlob(value=>value?resolve(value):reject(new Error('Poster encoding failed')),mime,quality);
     });
@@ -487,6 +557,9 @@ export async function makeReliablePosterBlob(frame,options={}){
     context.restore();
   }
 
+  // The compatibility path must pass the same image-presence validation.
+  // Showing an error is preferable to saving a blank poster as a success.
+  assertImagesInSnapshot(canvas,images,bounds,scaleX,scaleY);
   const result=await new Promise((resolve,reject)=>{
     canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Poster image encoding failed')),mime,quality);
   });
