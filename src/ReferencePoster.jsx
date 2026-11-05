@@ -1,92 +1,5 @@
-import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
-
-// Original text.png is an opaque white sheet with black repeated lettering.
-// Convert white to transparency, recolor the existing lettering cream and
-// crop its empty lower area for the top-right poster decoration.
-// Only the browser preview is transformed; the original PNG is unchanged.
-const OPTIONAL_HEADER_TEXT='/background/text.png';
-function trimInvisibleArtwork(image) {
-  // The committed text.png is a white, opaque 2480×3508 sheet with black
-  // micro-lettering in the upper portion. Alpha-only trimming treated its
-  // enormous white background as content and shrunk the letters to nothing.
-  // Make the white paper transparent, tint the lettering cream so it remains
-  // visible on the dark poster, and crop away blank space.
-  const limit=1200; // modest on iPhone, detailed enough at 227 poster pixels
-  const scale=Math.min(1,limit/Math.max(image.naturalWidth,image.naturalHeight));
-  const canvas=document.createElement('canvas');
-  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
-  canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-  const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  if(!ctx)return OPTIONAL_HEADER_TEXT;
-  ctx.drawImage(image,0,0,canvas.width,canvas.height);
-  const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-  const pixels=imageData.data;
-  let left=canvas.width,top=canvas.height,right=-1,bottom=-1;
-  for(let y=0;y<canvas.height;y++){
-    for(let x=0;x<canvas.width;x++){
-      const i=(y*canvas.width+x)*4;
-      const alpha=pixels[i+3]/255;
-      const luminance=.2126*pixels[i]+.7152*pixels[i+1]+.0722*pixels[i+2];
-      // Retain dark text and antialiasing; strip the white paper entirely.
-      const ink=Math.max(0,Math.min(1,(240-luminance)/170))*alpha;
-      pixels[i]=246;
-      pixels[i+1]=240;
-      pixels[i+2]=218;
-      pixels[i+3]=Math.round(ink*255);
-      if(pixels[i+3]<=24)continue;
-      if(x<left)left=x;
-      if(x>right)right=x;
-      if(y<top)top=y;
-      if(y>bottom)bottom=y;
-    }
-  }
-  if(right<left||bottom<top)return '';
-  ctx.putImageData(imageData,0,0);
-  const pad=3;
-  left=Math.max(0,left-pad);
-  top=Math.max(0,top-pad);
-  right=Math.min(canvas.width-1,right+pad);
-  bottom=Math.min(canvas.height-1,bottom+pad);
-  const output=document.createElement('canvas');
-  output.width=right-left+1;
-  output.height=bottom-top+1;
-  const out=output.getContext('2d');
-  if(!out)return OPTIONAL_HEADER_TEXT;
-  out.drawImage(canvas,left,top,output.width,output.height,
-    0,0,output.width,output.height);
-  return output.toDataURL('image/png');
-}
-function OptionalChokkadTextArtwork() {
-  // Render the actual committed PNG immediately. Previously the image was
-  // hidden until a Safari canvas trim had finished, leaving the header blank
-  // when that conversion was interrupted or the user exported immediately.
-  const [source,setSource]=useState(OPTIONAL_HEADER_TEXT);
-  useEffect(()=>{
-    let active=true;
-    const image=new Image();
-    image.onload=()=>{
-      if(!active||!image.naturalWidth)return;
-      try{
-        const trimmed=trimInvisibleArtwork(image);
-        if(active)setSource(trimmed);
-      }catch{
-        // Never hide the original artwork just because trimming is unsupported.
-        if(active)setSource(OPTIONAL_HEADER_TEXT);
-      }
-    };
-    image.onerror=()=>{
-      if(active)setSource('');
-    };
-    image.src=OPTIONAL_HEADER_TEXT;
-    return ()=>{active=false;image.onload=null;image.onerror=null;};
-  },[]);
-  if(!source)return null;
-  return <img className="ref-unit-subtext-image" src={source}
-    data-source={OPTIONAL_HEADER_TEXT}
-    alt="MSF Chokkad committee text artwork" draggable={false}/>;
-}
 
 function splitName(person = {}) {
   if (person.nameLayout === 'manual') {
@@ -188,7 +101,6 @@ export default function ReferencePoster({
           alt="ചോക്കാട്"
           draggable={false}
         />
-        <OptionalChokkadTextArtwork />
       </div>
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
