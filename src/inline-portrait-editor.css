@@ -255,6 +255,10 @@ body.msf-portrait-editing .inline-photo-toolbar-buttons>button{
   gap:6px;
   margin-bottom:0;
 }
+/* Keep horizontal nudge controls compact below Raise / Lower on phones. */
+.inline-photo-horizontal {
+  margin-top:6px;
+}
 .inline-photo-toolbar .inline-photo-height button {
   min-height:34px;
   padding:5px 8px;
