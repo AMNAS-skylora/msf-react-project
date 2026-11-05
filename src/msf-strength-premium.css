@@ -313,7 +313,7 @@
   object-position: top left;
 }
 /* Fixed top-right artwork stack: chokkad.png keeps its original 227px
-   width; optional text.png sits directly below it at low opacity. */
+   width; optional text.png is fully opaque and shown directly beneath it. */
 .frame .ref-poster .ref-right-header-artwork {
   position: absolute;
   z-index: 7;
@@ -353,7 +353,7 @@
   max-height: 8cqw;
   object-fit: contain;
   object-position: top right;
-  opacity: .34;
+  opacity: 1;
   pointer-events: none;
   user-select: none;
 }
@@ -387,4 +387,13 @@
   max-width: 100%;
   flex: 0 0 76%;
   height: 76%;
+}
+
+/* Uploaded portraits must retain original photo colors/clarity.
+   The olive-green arch stays behind the photo, never tinted over it. */
+.frame .ref-poster .ref-portrait img {
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
+  image-rendering: auto;
 }
