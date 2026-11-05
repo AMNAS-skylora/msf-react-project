@@ -110,6 +110,13 @@ try{
   assert.equal(await page.locator('.ref-brand-strength-logo').count(),1,
     'MSF committee logo is missing.');
 
+  // Wait for the optional text artwork's alpha-trimmed PNG to finish loading.
+  // Its source may be a data URL generated from the committed text.png.
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('.ref-unit-subtext-image');
+    return !!img && img.complete && img.naturalWidth>0;
+  },null,{timeout:10000});
+
   // Premium MSF geometry: verify the generated sections still fit inside
   // the fixed poster artboard and the original member order/slots survive.
   const geometry=await page.evaluate(()=>{
@@ -147,7 +154,7 @@ try{
       optionalSubtext:(()=>{
         const image=poster.querySelector('.ref-unit-subtext-image');
         if(!image)return null; // text.png has not yet been uploaded
-        return {src:image.getAttribute('src'),opacity:Number(getComputedStyle(image).opacity),
+        return {src:image.getAttribute('data-source'),opacity:Number(getComputedStyle(image).opacity),
           loaded:image.complete&&image.naturalWidth>0,bounds:sel('.ref-unit-subtext-image')};
       })(),
       leaders:sel('.ref-primary-leadership'),
