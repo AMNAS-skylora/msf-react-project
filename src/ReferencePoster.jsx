@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
-// text.png is a tall transparent artwork (2480x3508). Rendering the entire
-// transparent canvas below the small right-side Chokkad header makes the
-// visible letters tiny. Trim ONLY invisible transparent margins in the browser
-// so the displayed image stays clear at the same position in preview/export.
-// The original /public/background/text.png is never modified or re-uploaded.
+// Original text.png is an opaque white sheet with black repeated lettering.
+// Convert white to transparency, recolor the existing lettering cream and
+// crop its empty lower area for the top-right poster decoration.
+// Only the browser preview is transformed; the original PNG is unchanged.
 const OPTIONAL_HEADER_TEXT='/background/text.png';
 function trimInvisibleArtwork(image) {
-  const limit=800;
+  // The committed text.png is a white, opaque 2480×3508 sheet with black
+  // micro-lettering in the upper portion. Alpha-only trimming treated its
+  // enormous white background as content and shrunk the letters to nothing.
+  // Make the white paper transparent, tint the lettering cream so it remains
+  // visible on the dark poster, and crop away blank space.
+  const limit=1200; // modest on iPhone, detailed enough at 227 poster pixels
   const scale=Math.min(1,limit/Math.max(image.naturalWidth,image.naturalHeight));
   const canvas=document.createElement('canvas');
   canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
@@ -17,40 +21,42 @@ function trimInvisibleArtwork(image) {
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
   if(!ctx)return OPTIONAL_HEADER_TEXT;
   ctx.drawImage(image,0,0,canvas.width,canvas.height);
-  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const pixels=imageData.data;
   let left=canvas.width,top=canvas.height,right=-1,bottom=-1;
   for(let y=0;y<canvas.height;y++){
     for(let x=0;x<canvas.width;x++){
-      if(pixels[(y*canvas.width+x)*4+3]<=8)continue;
-      left=Math.min(left,x);right=Math.max(right,x);
-      top=Math.min(top,y);bottom=Math.max(bottom,y);
+      const i=(y*canvas.width+x)*4;
+      const alpha=pixels[i+3]/255;
+      const luminance=.2126*pixels[i]+.7152*pixels[i+1]+.0722*pixels[i+2];
+      // Retain dark text and antialiasing; strip the white paper entirely.
+      const ink=Math.max(0,Math.min(1,(240-luminance)/170))*alpha;
+      pixels[i]=246;
+      pixels[i+1]=240;
+      pixels[i+2]=218;
+      pixels[i+3]=Math.round(ink*255);
+      if(pixels[i+3]<=24)continue;
+      if(x<left)left=x;
+      if(x>right)right=x;
+      if(y<top)top=y;
+      if(y>bottom)bottom=y;
     }
   }
-  if(right<left||bottom<top)return OPTIONAL_HEADER_TEXT;
-  // Do nothing if the image has no meaningful transparent border.
-  if(left<3&&top<3&&right>=canvas.width-4&&bottom>=canvas.height-4){
-    return OPTIONAL_HEADER_TEXT;
-  }
+  if(right<left||bottom<top)return '';
+  ctx.putImageData(imageData,0,0);
   const pad=3;
-  const x=Math.max(0,Math.floor((left-pad)/scale));
-  const y=Math.max(0,Math.floor((top-pad)/scale));
-  const endX=Math.min(image.naturalWidth,Math.ceil((right+1+pad)/scale));
-  const endY=Math.min(image.naturalHeight,Math.ceil((bottom+1+pad)/scale));
-  // The displayed right-side art is only 227px wide. Bound the generated
-  // canvas to 1600px on its longest side to keep iPhone memory use modest
-  // without sacrificing the high-resolution poster export.
-  const cropWidth=endX-x,cropHeight=endY-y;
-  const outputScale=Math.min(1,1600/Math.max(cropWidth,cropHeight));
-  const trimmed=document.createElement('canvas');
-  trimmed.width=Math.max(1,Math.round(cropWidth*outputScale));
-  trimmed.height=Math.max(1,Math.round(cropHeight*outputScale));
-  const out=trimmed.getContext('2d');
+  left=Math.max(0,left-pad);
+  top=Math.max(0,top-pad);
+  right=Math.min(canvas.width-1,right+pad);
+  bottom=Math.min(canvas.height-1,bottom+pad);
+  const output=document.createElement('canvas');
+  output.width=right-left+1;
+  output.height=bottom-top+1;
+  const out=output.getContext('2d');
   if(!out)return OPTIONAL_HEADER_TEXT;
-  out.imageSmoothingEnabled=true;
-  out.imageSmoothingQuality='high';
-  out.drawImage(image,x,y,cropWidth,cropHeight,
-    0,0,trimmed.width,trimmed.height);
-  return trimmed.toDataURL('image/png');
+  out.drawImage(canvas,left,top,output.width,output.height,
+    0,0,output.width,output.height);
+  return output.toDataURL('image/png');
 }
 function OptionalChokkadTextArtwork() {
   // Render the actual committed PNG immediately. Previously the image was
