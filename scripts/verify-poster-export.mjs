@@ -375,11 +375,20 @@ try{
   await page.getByRole('button',{name:'Flip photo horizontally'}).click();
   assert((await selectedImage.getAttribute('style')).includes('scaleX(-1)'),
     'Flipping the photo did not update the live poster');
+  await page.getByRole('button',{name:'Move photo left'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(-8%, 0%)'),
+    'Left control did not shift the image in the preview');
+  await page.getByRole('button',{name:'Move photo right'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(0%, 0%)'),
+    'Right control did not restore the horizontal position');
+  await page.getByRole('button',{name:'Move photo right'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(8%, 0%)'),
+    'Right control did not shift the image in the preview');
   await page.getByRole('button',{name:'Done'}).click();
   const fittedExport=await makeExport(page);
   assert.equal(fittedExport.width,1080);
   assert.equal(fittedExport.height,1350);
-  console.log('Live upload, auto-fit, Fill/Full Photo, Flip and PNG smoke test passed.');
+  console.log('Live upload, auto-fit, horizontal movement, Flip and PNG smoke test passed.');
   console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;
