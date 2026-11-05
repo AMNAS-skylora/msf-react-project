@@ -383,3 +383,18 @@
   mix-blend-mode: normal;
   image-rendering: auto;
 }
+
+/* Slightly enlarge Executive Members portraits on both poster pages without
+   changing the 8/10-column member slots, green arch, or name baseline. */
+.frame .ref-poster .ref-executive-section .ref-executive-row .ref-profile-executive .ref-portrait {
+  width: 86%;
+  max-width: 86%;
+  max-height: 68%;
+  margin-inline: auto;
+}
+/* Keep enough room for names when three executive rows share one page. */
+.frame .ref-poster .ref-executive-section .ref-executive-three-rows .ref-profile-executive .ref-portrait {
+  width: 84%;
+  max-width: 84%;
+  max-height: 62%;
+}
