@@ -915,3 +915,18 @@ body{font-family:Inter,"Noto Sans Malayalam",system-ui,sans-serif;color:#173d2b}
     max-width: 100%;
   }
 }
+
+/* Export failures stay visible beside Download / Share, especially on iPhone. */
+.editor-bar:has(.poster-export-error) {flex-wrap:wrap;}
+.poster-export-error {
+  flex:1 0 100%;
+  margin:0;
+  padding:9px 12px;
+  color:#8a271e;
+  background:#fff2ee;
+  border:1px solid #edb7aa;
+  border-radius:8px;
+  font-size:13px;
+  line-height:1.4;
+  font-weight:600;
+}
