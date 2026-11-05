@@ -71,6 +71,34 @@ try{
   page.on('console',msg=>{if(msg.type()==='warning'||msg.type()==='error')
     console.log('Browser:',msg.type(),msg.text().slice(0,500));});
   await page.goto(URL,{waitUntil:'networkidle'});
+  // The committed text.png is opaque white with tiny dark lettering and a huge
+  // blank lower page. Wait for browser-side whitening removal before export.
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('.ref-unit-subtext-image');
+    return img?.getAttribute('src')?.startsWith('data:image/png;base64,') &&
+      img.complete && img.naturalWidth>0;
+  },null,{timeout:20000});
+  const preparedText=await page.evaluate(()=>{
+    const img=document.querySelector('.ref-unit-subtext-image');
+    const canvas=document.createElement('canvas');
+    canvas.width=120;canvas.height=60;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0,120,60);
+    const pixels=ctx.getImageData(0,0,120,60).data;
+    let transparent=0,visible=0,cream=0;
+    for(let i=0;i<pixels.length;i+=4){
+      if(pixels[i+3]<10)transparent++;
+      if(pixels[i+3]>90)visible++;
+      if(pixels[i+3]>90&&pixels[i]>220&&pixels[i+1]>215&&pixels[i+2]>195)cream++;
+    }
+    return {transparent,visible,cream,width:img.naturalWidth,height:img.naturalHeight};
+  });
+  assert(preparedText.visible>20&&preparedText.transparent>20,
+    'Converted text.png is missing or still includes opaque white paper');
+  assert(preparedText.cream>20,
+    'text.png lettering was not made visible on the green poster');
+  assert(preparedText.height<1000,
+    'text.png was not cropped to remove its large blank lower page');
   await page.evaluate(async()=>{
     const stage=document.querySelector('.workspace .poster-edit-stage');
     const workspace=document.querySelector('.workspace');
