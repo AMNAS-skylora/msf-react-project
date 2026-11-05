@@ -711,6 +711,15 @@ export default function App() {
     const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
     patchPortrait(role,index,{photoY:next});
   }
+  // Move the selected photo left or right in the same 8% increments and
+  // range used by the Raise / Lower controls. The green frame stays put.
+  function shiftSelectedPortrait(role,index,direction) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const current=Number(member.photoX)||0;
+    const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
+    patchPortrait(role,index,{photoX:next});
+  }
   // Switch between a full uncropped preview and edge-to-edge framing.
   // The real poster <img> owns this setting, so the PNG uses the same layout.
   function fitSelectedPortrait(role,index,mode) {
@@ -1022,6 +1031,12 @@ export default function App() {
             disabled={(Number(person.photoY)||0)<=-80} aria-label="Raise photo upwards">↑ Raise</button>
           <button type="button" onClick={()=>raiseSelectedPortrait(role,index,1)}
             disabled={(Number(person.photoY)||0)>=80} aria-label="Lower photo downwards">↓ Lower</button>
+        </div>
+        <div className="inline-photo-height inline-photo-horizontal" role="group" aria-label="Move the photo horizontally">
+          <button type="button" onClick={()=>shiftSelectedPortrait(role,index,-1)}
+            disabled={(Number(person.photoX)||0)<=-80} aria-label="Move photo left">← Left</button>
+          <button type="button" onClick={()=>shiftSelectedPortrait(role,index,1)}
+            disabled={(Number(person.photoX)||0)>=80} aria-label="Move photo right">→ Right</button>
         </div>
         <div className="inline-photo-fit" role="group" aria-label="Photo framing">
           <button type="button" className={(person.photoFit||'cover')==='cover'?'is-active':''}
