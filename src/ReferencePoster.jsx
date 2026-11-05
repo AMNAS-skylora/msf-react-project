@@ -53,27 +53,33 @@ function trimInvisibleArtwork(image) {
   return trimmed.toDataURL('image/png');
 }
 function OptionalChokkadTextArtwork() {
-  const [source,setSource]=useState('');
+  // Render the actual committed PNG immediately. Previously the image was
+  // hidden until a Safari canvas trim had finished, leaving the header blank
+  // when that conversion was interrupted or the user exported immediately.
+  const [source,setSource]=useState(OPTIONAL_HEADER_TEXT);
   useEffect(()=>{
     let active=true;
     const image=new Image();
     image.onload=()=>{
       if(!active||!image.naturalWidth)return;
       try{
-        setSource(trimInvisibleArtwork(image));
+        const trimmed=trimInvisibleArtwork(image);
+        if(active)setSource(trimmed);
       }catch{
-        // If canvas trimming is unavailable, still show the original file.
-        setSource(OPTIONAL_HEADER_TEXT);
+        // Never hide the original artwork just because trimming is unsupported.
+        if(active)setSource(OPTIONAL_HEADER_TEXT);
       }
     };
-    image.onerror=()=>{if(active)setSource('');};
+    image.onerror=()=>{
+      if(active)setSource('');
+    };
     image.src=OPTIONAL_HEADER_TEXT;
     return ()=>{active=false;image.onload=null;image.onerror=null;};
   },[]);
   if(!source)return null;
   return <img className="ref-unit-subtext-image" src={source}
     data-source={OPTIONAL_HEADER_TEXT}
-    alt="" aria-hidden="true" draggable={false}/>;
+    alt="MSF Chokkad committee text artwork" draggable={false}/>;
 }
 
 function splitName(person = {}) {
