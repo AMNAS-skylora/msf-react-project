@@ -160,11 +160,13 @@ function imageVisibleInSnapshot(canvas,image,frameBounds,scaleX,scaleY){
       const difference=Math.abs(expectedData[i]-actualData[i])+
         Math.abs(expectedData[i+1]-actualData[i+1])+
         Math.abs(expectedData[i+2]-actualData[i+2]);
-      if(difference<130)matches++;
+      if(difference<105)matches++;
     }
   }
   if(samples<8)return true; // Mostly transparent image: no useful comparison
-  return matches/samples>.26;
+  // Green placeholder fill must not be mistaken for a valid portrait:
+  // a few similar olive pixels are not evidence the photo was rendered.
+  return matches/samples>.60;
 }
 
 function assertImagesInSnapshot(canvas,images,frameBounds,scaleX,scaleY){
