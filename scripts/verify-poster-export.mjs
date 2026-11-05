@@ -71,34 +71,6 @@ try{
   page.on('console',msg=>{if(msg.type()==='warning'||msg.type()==='error')
     console.log('Browser:',msg.type(),msg.text().slice(0,500));});
   await page.goto(URL,{waitUntil:'networkidle'});
-  // The committed text.png is opaque white with tiny dark lettering and a huge
-  // blank lower page. Wait for browser-side whitening removal before export.
-  await page.waitForFunction(()=>{
-    const img=document.querySelector('.ref-unit-subtext-image');
-    return img?.getAttribute('src')?.startsWith('data:image/png;base64,') &&
-      img.complete && img.naturalWidth>0;
-  },null,{timeout:20000});
-  const preparedText=await page.evaluate(()=>{
-    const img=document.querySelector('.ref-unit-subtext-image');
-    const canvas=document.createElement('canvas');
-    canvas.width=120;canvas.height=60;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.drawImage(img,0,0,120,60);
-    const pixels=ctx.getImageData(0,0,120,60).data;
-    let transparent=0,visible=0,cream=0;
-    for(let i=0;i<pixels.length;i+=4){
-      if(pixels[i+3]<10)transparent++;
-      if(pixels[i+3]>90)visible++;
-      if(pixels[i+3]>90&&pixels[i]>220&&pixels[i+1]>215&&pixels[i+2]>195)cream++;
-    }
-    return {transparent,visible,cream,width:img.naturalWidth,height:img.naturalHeight};
-  });
-  assert(preparedText.visible>20&&preparedText.transparent>20,
-    'Converted text.png is missing or still includes opaque white paper');
-  assert(preparedText.cream>20,
-    'text.png lettering was not made visible on the green poster');
-  assert(preparedText.height<1000,
-    'text.png was not cropped to remove its large blank lower page');
   await page.evaluate(async()=>{
     const stage=document.querySelector('.workspace .poster-edit-stage');
     const workspace=document.querySelector('.workspace');
@@ -139,13 +111,6 @@ try{
   assert.equal(await page.locator('.ref-brand-strength-logo').count(),1,
     'MSF committee logo is missing.');
 
-  // Wait for the optional text artwork's alpha-trimmed PNG to finish loading.
-  // Its source may be a data URL generated from the committed text.png.
-  await page.waitForFunction(()=>{
-    const img=document.querySelector('.ref-unit-subtext-image');
-    return !!img && img.complete && img.naturalWidth>0;
-  },null,{timeout:10000});
-
   // Premium MSF geometry: verify the generated sections still fit inside
   // the fixed poster artboard and the original member order/slots survive.
   const geometry=await page.evaluate(()=>{
@@ -180,12 +145,6 @@ try{
     });
     return {title:sel('.ref-title'),logo:sel('.ref-brand'),
       chokkad:sel('.ref-unit-corner-image'),
-      optionalSubtext:(()=>{
-        const image=poster.querySelector('.ref-unit-subtext-image');
-        if(!image)return null; // text.png has not yet been uploaded
-        return {src:image.getAttribute('data-source'),opacity:Number(getComputedStyle(image).opacity),
-          loaded:image.complete&&image.naturalWidth>0,bounds:sel('.ref-unit-subtext-image')};
-      })(),
       leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
@@ -247,20 +206,6 @@ try{
     'Right campaign artwork extends into the central title');
   assert(geometry.chokkad.bottom<=geometry.leaders.top+1,
     'Right campaign artwork overlaps the leadership portraits');
-  // text.png is now committed to public/background and must appear in every
-  // poster preview; never silently omit it from a saved image.
-  assert(geometry.optionalSubtext,'text.png is missing from the poster preview');
-  if(geometry.optionalSubtext){
-    assert.equal(geometry.optionalSubtext.src,'/background/text.png',
-      'Optional text artwork has an unexpected source');
-    assert(geometry.optionalSubtext.loaded,'Optional text artwork did not load');
-    assert(geometry.optionalSubtext.opacity>=.99,
-      'Optional text artwork should be fully opaque');
-    assert(geometry.optionalSubtext.bounds.top>=geometry.chokkad.bottom,
-      'Optional text artwork is not placed beneath Chokkad');
-    assert(geometry.optionalSubtext.bounds.right<=geometry.posterWidth+1,
-      'Optional text artwork extends outside the poster');
-  }
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
@@ -304,16 +249,18 @@ try{
     bottom:Math.min(1350,Math.ceil(photoBounds.y-bounds.y+photoBounds.height)),
   };
   const portrait=compareImages(screenshot,exported,photoRegion);
-  const headerRightRegion={
-    x:Math.max(0,Math.floor(Math.min(geometry.chokkad.left,geometry.optionalSubtext.bounds.left))),
+  const chokkadRegion={
+    x:Math.max(0,Math.floor(geometry.chokkad.left)),
     y:Math.max(0,Math.floor(geometry.chokkad.top)),
-    right:Math.min(1080,Math.ceil(Math.max(geometry.chokkad.right,geometry.optionalSubtext.bounds.right))),
-    bottom:Math.min(1350,Math.ceil(geometry.optionalSubtext.bounds.bottom)),
+    right:Math.min(1080,Math.ceil(geometry.chokkad.right)),
+    bottom:Math.min(1350,Math.ceil(geometry.chokkad.bottom)),
   };
-  const headerRight=compareImages(screenshot,exported,headerRightRegion);
-  console.log('Preview/export 1080x1350:',{overall,portrait,headerRight});
-  assert(headerRight.averageRGBDiff<30,
-    'Chokkad/text.png artwork position or colors changed in downloaded PNG');
+  const chokkadParity=compareImages(screenshot,exported,chokkadRegion);
+  console.log('Preview/export 1080x1350:',{overall,portrait,chokkadParity});
+  assert(chokkadParity.averageRGBDiff<30,
+    'Chokkad artwork position or colors changed in downloaded PNG');
+  assert.equal(await page.locator('.ref-unit-subtext-image').count(),0,
+    'Removed text.png artwork reappeared');
   assert(overall.averageRGBDiff<22,'The exported poster does not match preview colors.');
   assert(portrait.averageRGBDiff<32,'The exported photo crop differs from preview.');
 
