@@ -20,12 +20,13 @@ async function waitForServer(){
   }
   throw new Error('Vite dev server did not start: '+stderr);
 }
-async function makeExport(page,width=1080){
-  const data=await page.evaluate(async outWidth=>{
+async function makeExport(page,width=1080,forceNativeFallback=false){
+  const data=await page.evaluate(async ({outWidth,native})=>{
     const {makeReliablePosterBlob}=await import('/src/reliablePosterExport.js');
     const frame=document.querySelector('.workspace .frame');
     const blob=await makeReliablePosterBlob(frame,{
       width:outWidth,height:outWidth*5/4,mime:'image/png',quality:1,
+      forceNativeFallback:native,
     });
     return new Promise((resolve,reject)=>{
       const reader=new FileReader();
@@ -33,7 +34,7 @@ async function makeExport(page,width=1080){
       reader.onerror=()=>reject(reader.error);
       reader.readAsDataURL(blob);
     });
-  },width);
+  },{outWidth:width,native:forceNativeFallback});
   return PNG.sync.read(Buffer.from(String(data).split(',')[1],'base64'));
 }
 function compareImages(reference,exported,region){
@@ -452,6 +453,16 @@ try{
   const parity=compareImages(postUploadScreenshot,postUploadExport,uploadedRegion);
   assert(parity.averageRGBDiff<32,
     'Uploaded photo colors/position in exported PNG differ from preview.');
+  // Force Safari's native-canvas compatibility path in desktop Chromium.
+  // The resulting PNG must contain the uploaded photo and all static logo,
+  // chokkad, text and footer image pixels (no empty green placeholders).
+  const safariFallbackExport=await makeExport(page,1080,true);
+  assert.equal(safariFallbackExport.width,1080);
+  assert.equal(safariFallbackExport.height,1350);
+  const fallbackPortrait=compareImages(postUploadScreenshot,safariFallbackExport,uploadedRegion);
+  assert(fallbackPortrait.averageRGBDiff<48,
+    'Safari fallback photo does not resemble the live uploaded image.');
+  console.log('Forced iPhone Safari compatibility export retains artwork and portraits.');
   console.log('Live upload, full opacity, fit, flip, horizontal movement and PNG parity passed.');
   // Web Share Level 2 regression: iPhone/Android should receive the real
   // generated image File, with no text caption that can hide the image on iOS.
