@@ -434,6 +434,34 @@ try{
   assert(parity.averageRGBDiff<32,
     'Uploaded photo colors/position in exported PNG differ from preview.');
   console.log('Live upload, full opacity, fit, flip, horizontal movement and PNG parity passed.');
+  // Web Share Level 2 regression: iPhone/Android should receive the real
+  // generated image File, with no text caption that can hide the image on iOS.
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,'canShare',{
+      configurable:true,value:data=>Array.isArray(data?.files)&&
+        data.files.length===1&&data.files[0].type==='image/png'
+    });
+    Object.defineProperty(navigator,'share',{
+      configurable:true,value:data=>{
+        window.__msfNativeShare={
+          count:data?.files?.length||0,
+          mime:data?.files?.[0]?.type,
+          filename:data?.files?.[0]?.name,
+          hasText:Object.prototype.hasOwnProperty.call(data,'text')
+        };
+        return Promise.resolve();
+      }
+    });
+  });
+  await page.getByRole('button',{name:'Share Poster'}).click();
+  await page.getByRole('button',{name:'Open phone share sheet for poster image'}).click();
+  const nativeShare=await page.evaluate(()=>window.__msfNativeShare);
+  assert(nativeShare,'Native share sheet handler did not run');
+  assert.equal(nativeShare.count,1,'Only the displayed poster page should be shared');
+  assert.equal(nativeShare.mime,'image/png','Native share received a non-PNG file');
+  assert(nativeShare.filename.endsWith('.png'),'Native share image file has the wrong filename');
+  assert.equal(nativeShare.hasText,false,'Native share should not send a caption that can hide the photo on iOS');
+  console.log('Native iOS/Android image-file share regression passed.');
   console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;
