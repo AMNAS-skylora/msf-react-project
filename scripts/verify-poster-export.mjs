@@ -211,6 +211,9 @@ try{
     'Right campaign artwork extends into the central title');
   assert(geometry.chokkad.bottom<=geometry.leaders.top+1,
     'Right campaign artwork overlaps the leadership portraits');
+  // text.png is now committed to public/background and must appear in every
+  // poster preview; never silently omit it from a saved image.
+  assert(geometry.optionalSubtext,'text.png is missing from the poster preview');
   if(geometry.optionalSubtext){
     assert.equal(geometry.optionalSubtext.src,'/background/text.png',
       'Optional text artwork has an unexpected source');
@@ -265,7 +268,16 @@ try{
     bottom:Math.min(1350,Math.ceil(photoBounds.y-bounds.y+photoBounds.height)),
   };
   const portrait=compareImages(screenshot,exported,photoRegion);
-  console.log('Preview/export 1080x1350:',{overall,portrait});
+  const headerRightRegion={
+    x:Math.max(0,Math.floor(Math.min(geometry.chokkad.left,geometry.optionalSubtext.bounds.left))),
+    y:Math.max(0,Math.floor(geometry.chokkad.top)),
+    right:Math.min(1080,Math.ceil(Math.max(geometry.chokkad.right,geometry.optionalSubtext.bounds.right))),
+    bottom:Math.min(1350,Math.ceil(geometry.optionalSubtext.bounds.bottom)),
+  };
+  const headerRight=compareImages(screenshot,exported,headerRightRegion);
+  console.log('Preview/export 1080x1350:',{overall,portrait,headerRight});
+  assert(headerRight.averageRGBDiff<30,
+    'Chokkad/text.png artwork position or colors changed in downloaded PNG');
   assert(overall.averageRGBDiff<22,'The exported poster does not match preview colors.');
   assert(portrait.averageRGBDiff<32,'The exported photo crop differs from preview.');
 
