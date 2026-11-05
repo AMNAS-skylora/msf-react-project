@@ -2,21 +2,70 @@ import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
 
-// The optional text artwork is kept off the canvas until its PNG loads.
-// This prevents a broken image or failed poster export while text.png exists
-// only on the user's computer and has not yet been committed to /public.
+// text.png is a tall transparent artwork (2480x3508). Rendering the entire
+// transparent canvas below the small right-side Chokkad header makes the
+// visible letters tiny. Trim ONLY invisible transparent margins in the browser
+// so the displayed image stays clear at the same position in preview/export.
+// The original /public/background/text.png is never modified or re-uploaded.
+const OPTIONAL_HEADER_TEXT='/background/text.png';
+function trimInvisibleArtwork(image) {
+  const limit=800;
+  const scale=Math.min(1,limit/Math.max(image.naturalWidth,image.naturalHeight));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
+  canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  if(!ctx)return OPTIONAL_HEADER_TEXT;
+  ctx.drawImage(image,0,0,canvas.width,canvas.height);
+  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  let left=canvas.width,top=canvas.height,right=-1,bottom=-1;
+  for(let y=0;y<canvas.height;y++){
+    for(let x=0;x<canvas.width;x++){
+      if(pixels[(y*canvas.width+x)*4+3]<=8)continue;
+      left=Math.min(left,x);right=Math.max(right,x);
+      top=Math.min(top,y);bottom=Math.max(bottom,y);
+    }
+  }
+  if(right<left||bottom<top)return OPTIONAL_HEADER_TEXT;
+  // Do nothing if the image has no meaningful transparent border.
+  if(left<3&&top<3&&right>=canvas.width-4&&bottom>=canvas.height-4){
+    return OPTIONAL_HEADER_TEXT;
+  }
+  const pad=3;
+  const x=Math.max(0,Math.floor((left-pad)/scale));
+  const y=Math.max(0,Math.floor((top-pad)/scale));
+  const endX=Math.min(image.naturalWidth,Math.ceil((right+1+pad)/scale));
+  const endY=Math.min(image.naturalHeight,Math.ceil((bottom+1+pad)/scale));
+  const trimmed=document.createElement('canvas');
+  trimmed.width=Math.max(1,endX-x);
+  trimmed.height=Math.max(1,endY-y);
+  const out=trimmed.getContext('2d');
+  if(!out)return OPTIONAL_HEADER_TEXT;
+  out.drawImage(image,x,y,trimmed.width,trimmed.height,
+    0,0,trimmed.width,trimmed.height);
+  return trimmed.toDataURL('image/png');
+}
 function OptionalChokkadTextArtwork() {
-  const [available,setAvailable] = useState(false);
+  const [source,setSource]=useState('');
   useEffect(()=>{
     let active=true;
     const image=new Image();
-    image.onload=()=>{if(active&&image.naturalWidth>0)setAvailable(true);};
-    image.onerror=()=>{if(active)setAvailable(false);};
-    image.src='/background/text.png';
+    image.onload=()=>{
+      if(!active||!image.naturalWidth)return;
+      try{
+        setSource(trimInvisibleArtwork(image));
+      }catch{
+        // If canvas trimming is unavailable, still show the original file.
+        setSource(OPTIONAL_HEADER_TEXT);
+      }
+    };
+    image.onerror=()=>{if(active)setSource('');};
+    image.src=OPTIONAL_HEADER_TEXT;
     return ()=>{active=false;image.onload=null;image.onerror=null;};
   },[]);
-  if(!available)return null;
-  return <img className="ref-unit-subtext-image" src="/background/text.png"
+  if(!source)return null;
+  return <img className="ref-unit-subtext-image" src={source}
+    data-source={OPTIONAL_HEADER_TEXT}
     alt="" aria-hidden="true" draggable={false}/>;
 }
 
