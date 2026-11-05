@@ -40,6 +40,33 @@ const toDataURL = file => new Promise((resolve, reject) => {
   const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file);
 });
 
+// Normalize oversized camera photos once on upload, before saving to IndexedDB.
+// This avoids 12MP/48MP images consuming too much memory on mobile preview.
+// 2400px retains detail for the 1080px poster and preserves transparent PNGs.
+async function readOptimizedPortrait(file) {
+  const source=URL.createObjectURL(file);
+  try {
+    const image=await loadImage(source);
+    const width=image.naturalWidth,height=image.naturalHeight;
+    if(!width||!height)throw new Error('Invalid image dimensions');
+    if(Math.max(width,height)<=2400)return toDataURL(file);
+    const scale=2400/Math.max(width,height);
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(width*scale));
+    canvas.height=Math.max(1,Math.round(height*scale));
+    const context=canvas.getContext('2d');
+    if(!context)throw new Error('Cannot prepare this photo on your device');
+    context.imageSmoothingEnabled=true;
+    context.imageSmoothingQuality='high';
+    context.drawImage(image,0,0,canvas.width,canvas.height);
+    // Keep transparency when uploading background-removed images.
+    const type=file.type==='image/jpeg'?'image/jpeg':'image/png';
+    return canvas.toDataURL(type,.93);
+  } finally {
+    URL.revokeObjectURL(source);
+  }
+}
+
 const splitName = value => {
   const name=String(value||'').trim().replace(/\s+/g,' ');
   if(name.length<=15||!name.includes(' '))return [name,''];
@@ -170,10 +197,12 @@ export default function App() {
       setMessage('Choose an image under 15 MB.');return;
     }
     try {
-      const src=await toDataURL(file);
-      // Upload is immediate. Crop remains an optional action in Adjust photo.
+      setMessage('Preparing photo for live poster preview…');
+      const src=await readOptimizedPortrait(file);
+      // Upload is immediate. Crop remains optional in Adjust photo.
       updateJoint(i,await prepareUploadedPortrait(src));
       setPhotoEdit({role:jointRole,index:i});
+      setMessage('Photo ready in poster preview. Use Fill / Full Photo to adjust the frame.');
     }catch {setMessage('Unable to read photo.');}
   }
   const drag=useRef(null);
@@ -317,14 +346,16 @@ export default function App() {
     if(!file.type.startsWith('image/')){setMessage('Choose an image file.');return;}
     if(file.size>15*1024*1024){setMessage('Maximum photo size is 15 MB.');return;}
     try {
-      const src=await toDataURL(file);
-      // Keep the entire image; do not force a crop step on upload.
+      setMessage('Preparing photo for live poster preview…');
+      const src=await readOptimizedPortrait(file);
+      // Keep the entire image; no forced crop or AI removal on upload.
       update(i,await prepareUploadedPortrait(src));
       setPhotoEdit({role:'leader',index:i});
+      setMessage('Photo ready in poster preview. Use Fill / Full Photo to adjust the frame.');
     } catch {setMessage('Unable to read photo.');}
   }
   async function removeBackgroundSource(source) {
-    return removePortraitBackgroundQuality(source);
+    return removePortraitBackgroundQuality(source, setMessage);
   }
   async function removeBg(i) {
     const member=people[i];
@@ -361,13 +392,19 @@ export default function App() {
   // a deliberate click on one of the 'Remove BG' buttons.
   async function prepareUploadedPortrait(src) {
     const transparent=await imageHasTransparency(src);
+    // Show the full uploaded photo by default, without automatically
+    // cropping faces, shoulders or clothing. Users can select Fill Frame
+    // explicitly after checking the live poster preview.
+    const photoFit='contain';
     return {
       photo:src,
       originalPhoto:src,
       originalCutout:transparent,
       cutout:transparent,
+      photoFit,
       photoMode:'inside',
-      photoZoom:1,photoX:0,photoY:0
+      photoZoom:1,photoX:0,photoY:0,
+      flipHorizontal:false,flipVertical:false
     };
   }
   const portraitGesture=useRef({
@@ -674,6 +711,30 @@ export default function App() {
     const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
     patchPortrait(role,index,{photoY:next});
   }
+  // Move the selected photo left or right in the same 8% increments and
+  // range used by the Raise / Lower controls. The green frame stays put.
+  function shiftSelectedPortrait(role,index,direction) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const current=Number(member.photoX)||0;
+    const next=Math.max(-80,Math.min(80,Math.round((current+direction*8)*100)/100));
+    patchPortrait(role,index,{photoX:next});
+  }
+  // Switch between a full uncropped preview and edge-to-edge framing.
+  // The real poster <img> owns this setting, so the PNG uses the same layout.
+  function fitSelectedPortrait(role,index,mode) {
+    if(!memberForEdit(role,index)?.photo)return;
+    patchPortrait(role,index,{photoFit:mode});
+  }
+  // Flip the selected member photo without modifying the uploaded image bytes.
+  // The saved flags are applied to the actual poster <img>, so PNG export
+  // matches the editor and the original file stays available for reset.
+  function flipSelectedPortrait(role,index,axis) {
+    const member=memberForEdit(role,index);
+    if(!member?.photo)return;
+    const key=axis==='vertical'?'flipVertical':'flipHorizontal';
+    patchPortrait(role,index,{[key]:!member[key]});
+  }
   async function removeSelectedPortraitBackground() {
     if(!photoEdit||busy!==-1)return;
     const {role,index}=photoEdit;
@@ -708,6 +769,7 @@ export default function App() {
       cutout:member.originalCutout??false,
       photoMode:'inside',
       photoZoom:1,photoX:0,photoY:0,
+      flipHorizontal:false,flipVertical:false,
     });
     setMessage('');
   }
@@ -970,6 +1032,34 @@ export default function App() {
           <button type="button" onClick={()=>raiseSelectedPortrait(role,index,1)}
             disabled={(Number(person.photoY)||0)>=80} aria-label="Lower photo downwards">↓ Lower</button>
         </div>
+        <div className="inline-photo-height inline-photo-horizontal" role="group" aria-label="Move the photo horizontally">
+          <button type="button" onClick={()=>shiftSelectedPortrait(role,index,-1)}
+            disabled={(Number(person.photoX)||0)<=-80} aria-label="Move photo left">← Left</button>
+          <button type="button" onClick={()=>shiftSelectedPortrait(role,index,1)}
+            disabled={(Number(person.photoX)||0)>=80} aria-label="Move photo right">→ Right</button>
+        </div>
+        <div className="inline-photo-fit" role="group" aria-label="Photo framing">
+          <button type="button" className={(person.photoFit||'cover')==='cover'?'is-active':''}
+            aria-pressed={(person.photoFit||'cover')==='cover'} disabled={!!person.cutout}
+            onClick={()=>fitSelectedPortrait(role,index,'cover')}>Fill Frame</button>
+          <button type="button" className={person.photoFit==='contain'?'is-active':''}
+            aria-pressed={person.photoFit==='contain'} disabled={!!person.cutout}
+            onClick={()=>fitSelectedPortrait(role,index,'contain')}>Show Full Photo</button>
+        </div>
+        <div className="inline-photo-flip" role="group" aria-label="Flip selected photo">
+          <button type="button" aria-label="Flip photo horizontally"
+            aria-pressed={!!person.flipHorizontal}
+            className={person.flipHorizontal?'is-active':''}
+            onClick={()=>flipSelectedPortrait(role,index,'horizontal')}>
+            ↔ Flip Horizontal
+          </button>
+          <button type="button" aria-label="Flip photo vertically"
+            aria-pressed={!!person.flipVertical}
+            className={person.flipVertical?'is-active':''}
+            onClick={()=>flipSelectedPortrait(role,index,'vertical')}>
+            ↕ Flip Vertical
+          </button>
+        </div>
         {showPhotoTools&&<div className="inline-photo-toolbar-buttons">
           <button type="button" className={person.photoMode!=='popout'?'is-active':''}
             onClick={()=>patchPortrait(role,index,{photoMode:'inside'})}>Inside</button>
@@ -1024,7 +1114,8 @@ export default function App() {
           ? {
               photo:src,
               cutout:await imageHasTransparency(src),
-              photoMode:'inside',photoZoom:1,photoX:0,photoY:0
+              photoMode:'inside',photoZoom:1,photoX:0,photoY:0,
+              photoFit:'cover'
             }
           : await prepareUploadedPortrait(src);
         if(currentCrop.role){

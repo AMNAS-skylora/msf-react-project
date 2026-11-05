@@ -312,9 +312,9 @@
   object-fit: contain;
   object-position: top left;
 }
-/* Keep chokkad.png at its original 21cqw (227px) on the right.
-   Scale both images with the poster artboard, without stretching. */
-.frame .ref-poster .ref-unit-corner-image {
+/* Fixed top-right artwork stack: chokkad.png keeps its original 227px
+   width; optional text.png is fully opaque and shown directly beneath it. */
+.frame .ref-poster .ref-right-header-artwork {
   position: absolute;
   z-index: 7;
   top: .8cqw;
@@ -322,11 +322,38 @@
   left: auto;
   width: 21cqw;
   max-width: 21cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .55cqw;
+  pointer-events: none;
+  user-select: none;
+}
+.frame .ref-poster .ref-unit-corner-image {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  display: block;
+  width: 100%;
+  max-width: 100%;
   height: auto;
   max-height: 20cqw;
   object-fit: contain;
   object-position: top right;
   background: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+.frame .ref-poster .ref-unit-subtext-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 8cqw;
+  object-fit: contain;
+  object-position: top right;
+  opacity: 1;
   pointer-events: none;
   user-select: none;
 }
@@ -360,4 +387,13 @@
   max-width: 100%;
   flex: 0 0 76%;
   height: 76%;
+}
+
+/* Uploaded portraits must retain original photo colors/clarity.
+   The olive-green arch stays behind the photo, never tinted over it. */
+.frame .ref-poster .ref-portrait img {
+  opacity: 1;
+  filter: none;
+  mix-blend-mode: normal;
+  image-rendering: auto;
 }

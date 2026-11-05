@@ -144,6 +144,12 @@ try{
     });
     return {title:sel('.ref-title'),logo:sel('.ref-brand'),
       chokkad:sel('.ref-unit-corner-image'),
+      optionalSubtext:(()=>{
+        const image=poster.querySelector('.ref-unit-subtext-image');
+        if(!image)return null; // text.png has not yet been uploaded
+        return {src:image.getAttribute('src'),opacity:Number(getComputedStyle(image).opacity),
+          loaded:image.complete&&image.naturalWidth>0,bounds:sel('.ref-unit-subtext-image')};
+      })(),
       leaders:sel('.ref-primary-leadership'),
       officers:sel('.ref-officer-eight'),executives:sel('.ref-main-executives'),
       footer:sel('.ref-footer'),
@@ -205,6 +211,17 @@ try{
     'Right campaign artwork extends into the central title');
   assert(geometry.chokkad.bottom<=geometry.leaders.top+1,
     'Right campaign artwork overlaps the leadership portraits');
+  if(geometry.optionalSubtext){
+    assert.equal(geometry.optionalSubtext.src,'/background/text.png',
+      'Optional text artwork has an unexpected source');
+    assert(geometry.optionalSubtext.loaded,'Optional text artwork did not load');
+    assert(geometry.optionalSubtext.opacity>=.99,
+      'Optional text artwork should be fully opaque');
+    assert(geometry.optionalSubtext.bounds.top>=geometry.chokkad.bottom,
+      'Optional text artwork is not placed beneath Chokkad');
+    assert(geometry.optionalSubtext.bounds.right<=geometry.posterWidth+1,
+      'Optional text artwork extends outside the poster');
+  }
   assert(geometry.mainTitle?.includes('ഇനി ഇവർ'),'Malayalam title missing');
   assert(geometry.committee?.includes('യൂണിറ്റ് കമ്മിറ്റി'),'Unit committee title missing');
   assert(geometry.topRightTextRemoved,'Old top-right text remains');
@@ -344,6 +361,79 @@ try{
   const populatedExport=await makeExport(page);
   assert.equal(populatedExport.width,1080);
   assert.equal(populatedExport.height,1350);
+  // Upload regression: a wide committee photo should be visible instantly,
+  // without an AI network call, cropped by user choice instead of silently.
+  const widePng=await page.evaluate(()=>{
+    const canvas=document.createElement('canvas');
+    canvas.width=1200;canvas.height=600;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#bc8c55';ctx.fillRect(0,0,1200,600);
+    ctx.fillStyle='#244b39';ctx.fillRect(0,250,1200,350);
+    return canvas.toDataURL('image/png');
+  });
+  await page.locator('.person-editor input[type="file"]').first().setInputFiles({
+    name:'preview-landscape.png',
+    mimeType:'image/png',
+    buffer:Buffer.from(widePng.split(',')[1],'base64'),
+  });
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('.ref-primary-leadership .ref-portrait img');
+    return !!img && img.complete && img.naturalWidth===1200;
+  });
+  const selectedImage=page.locator('.ref-primary-leadership .ref-portrait img').first();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'contain',
+    'Uploaded photo should initially fit completely in the poster frame');
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).opacity),'1',
+    'Uploaded photo must be fully opaque');
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).filter),'none',
+    'Uploaded photo must not have a color filter');
+  await page.getByRole('button',{name:'Fill Frame'}).click();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'cover',
+    'Fill Frame did not update the live poster');
+  await page.getByRole('button',{name:'Show Full Photo'}).click();
+  assert.equal(await selectedImage.evaluate(img=>getComputedStyle(img).objectFit),'contain',
+    'Show Full Photo did not update the live poster');
+  await page.getByRole('button',{name:'Flip photo horizontally'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('scaleX(-1)'),
+    'Flipping the photo did not update the live poster');
+  await page.getByRole('button',{name:'Move photo left'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(-8%, 0%)'),
+    'Left control did not shift the image in the preview');
+  await page.getByRole('button',{name:'Move photo right'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(0%, 0%)'),
+    'Right control did not restore the horizontal position');
+  await page.getByRole('button',{name:'Move photo right'}).click();
+  assert((await selectedImage.getAttribute('style')).includes('translate(8%, 0%)'),
+    'Right control did not shift the image in the preview');
+  await page.getByRole('button',{name:'Done'}).click();
+  const fittedExport=await makeExport(page);
+  assert.equal(fittedExport.width,1080);
+  assert.equal(fittedExport.height,1350);
+  // Enlarge the preview artboard for a pixel-level export comparison after
+  // upload, flipping and moving the photo. This catches green/blurred/faded
+  // photos or a snapshot that differs from the visible editor.
+  await page.setViewportSize({width:1920,height:1800});
+  await page.evaluate(()=>{
+    const stage=document.querySelector('.workspace .poster-edit-stage');
+    const workspace=document.querySelector('.workspace');
+    workspace.style.setProperty('max-width','2000px','important');
+    stage.style.setProperty('width','1080px','important');
+    stage.style.setProperty('max-width','1080px','important');
+  });
+  const postUploadBounds=await frame.boundingBox();
+  const postUploadScreenshot=PNG.sync.read(await frame.screenshot({animations:'disabled'}));
+  const postUploadExport=await makeExport(page);
+  const postUploadImage=await selectedImage.boundingBox();
+  const uploadedRegion={
+    x:Math.max(0,Math.floor(postUploadImage.x-postUploadBounds.x)-2),
+    y:Math.max(0,Math.floor(postUploadImage.y-postUploadBounds.y)-2),
+    right:Math.min(1080,Math.ceil(postUploadImage.x-postUploadBounds.x+postUploadImage.width)+2),
+    bottom:Math.min(1350,Math.ceil(postUploadImage.y-postUploadBounds.y+postUploadImage.height)+2)
+  };
+  const parity=compareImages(postUploadScreenshot,postUploadExport,uploadedRegion);
+  assert(parity.averageRGBDiff<32,
+    'Uploaded photo colors/position in exported PNG differ from preview.');
+  console.log('Live upload, full opacity, fit, flip, horizontal movement and PNG parity passed.');
   console.log('Poster preview/export smoke test passed (empty + populated committees)');
 }catch(error){
   testFailure=error;

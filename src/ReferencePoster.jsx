@@ -1,5 +1,24 @@
+import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { EXECUTIVE_MEMBERS_PER_PAGE, splitExecutiveRows } from './executiveLayout.js';
+
+// The optional text artwork is kept off the canvas until its PNG loads.
+// This prevents a broken image or failed poster export while text.png exists
+// only on the user's computer and has not yet been committed to /public.
+function OptionalChokkadTextArtwork() {
+  const [available,setAvailable] = useState(false);
+  useEffect(()=>{
+    let active=true;
+    const image=new Image();
+    image.onload=()=>{if(active&&image.naturalWidth>0)setAvailable(true);};
+    image.onerror=()=>{if(active)setAvailable(false);};
+    image.src='/background/text.png';
+    return ()=>{active=false;image.onload=null;image.onerror=null;};
+  },[]);
+  if(!available)return null;
+  return <img className="ref-unit-subtext-image" src="/background/text.png"
+    alt="" aria-hidden="true" draggable={false}/>;
+}
 
 function splitName(person = {}) {
   if (person.nameLayout === 'manual') {
@@ -46,7 +65,10 @@ function Portrait({ person, onClick, role, type = 'member', selectionRole, selec
             src={person.photo}
             alt={person.name || role}
             draggable={false}
-            style={{transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1})`}}
+            style={{
+              transform:`translate(${Number(person.photoX)||0}%, ${Number(person.photoY)||0}%) scale(${Number(person.photoZoom)||1}) scaleX(${person.flipHorizontal ? -1 : 1}) scaleY(${person.flipVertical ? -1 : 1})`,
+              objectFit:isCutout?'contain':(person.photoFit==='contain'?'contain':'cover'),
+            }}
           />
           : <Camera className="ref-camera-placeholder" size={22} aria-hidden="true" />}
         {person.photo && editingPhoto?.role===selectionRole && editingPhoto?.index===selectionIndex &&
@@ -91,12 +113,15 @@ export default function ReferencePoster({
       <div className="ref-brand" aria-label="MSF logo">
         <img className="ref-brand-strength-logo" src="/background/logo.png" alt="MSF committee logo" draggable={false} />
       </div>
-      <img
-        className="ref-unit-corner-image"
-        src="/background/chokkad.png"
-        alt="ചോക്കാട്"
-        draggable={false}
-      />
+      <div className="ref-right-header-artwork">
+        <img
+          className="ref-unit-corner-image"
+          src="/background/chokkad.png"
+          alt="ചോക്കാട്"
+          draggable={false}
+        />
+        <OptionalChokkadTextArtwork />
+      </div>
       <span className="ref-background-corner ref-corner-top" aria-hidden="true" />
       <span className="ref-background-corner ref-corner-bottom" aria-hidden="true" />
 
