@@ -391,11 +391,11 @@ export default function App() {
   // Upload/Crop only stores the image. AI removal is never started without
   // a deliberate click on one of the 'Remove BG' buttons.
   async function prepareUploadedPortrait(src) {
-    const [transparent,image]=await Promise.all([imageHasTransparency(src),loadImage(src)]);
-    // Landscape photos would otherwise crop most of the subject out of the
-    // square portrait frame. Start by showing the whole image in that case.
-    const photoFit=!transparent && image.naturalWidth>image.naturalHeight*1.12
-      ? 'contain' : 'cover';
+    const transparent=await imageHasTransparency(src);
+    // Show the full uploaded photo by default, without automatically
+    // cropping faces, shoulders or clothing. Users can select Fill Frame
+    // explicitly after checking the live poster preview.
+    const photoFit='contain';
     return {
       photo:src,
       originalPhoto:src,
